@@ -1,0 +1,468 @@
+<title>No-Calculator Drill</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one centred column; the question is the page, stats sit beneath it. */
+:root{
+  --bg:#EEF1F3; --surface:#FDFDFC; --sunk:#E3E8EB;
+  --ink:#141E27; --muted:#5A6B78; --faint:#8A9AA6; --line:#D2DAE0;
+  --accent:#9E5410; --accent-soft:#F0E2D2;
+  --ok:#1C7049; --bad:#A8271E;
+  --font-display:"Newsreader",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
+  --ink:#E4ECF2; --muted:#93A5B3; --faint:#6B7D8B; --line:#25313D;
+  --accent:#D98B3E; --accent-soft:#2C2317;
+  --ok:#4FA97A; --bad:#DE6A60; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
+  --ink:#E4ECF2; --muted:#93A5B3; --faint:#6B7D8B; --line:#25313D;
+  --accent:#D98B3E; --accent-soft:#2C2317;
+  --ok:#4FA97A; --bad:#DE6A60; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-display);
+  padding-inline:18px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-size:1.15rem;font-weight:600;margin:0;letter-spacing:.01em}
+.sub{font-family:var(--font-mono);font-size:.7rem;color:var(--faint);
+  text-transform:uppercase;letter-spacing:.11em;margin:2px 0 0}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.streak{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);text-align:right;min-width:0}
+.streak b{color:var(--accent);font-size:1.5rem;font-weight:600;display:block;line-height:1.1}
+
+/* ---- drill card ---- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  display:flex;flex-direction:column;min-height:270px}
+.bar{display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
+  font-family:var(--font-mono);font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar .t{font-size:1rem;color:var(--ink);font-weight:600;letter-spacing:.02em}
+.bar .sp{margin-left:auto}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:26px 18px;text-align:center}
+.qtext{font-size:clamp(1.6rem,6vw,2.5rem);line-height:1.25;font-weight:400;text-wrap:balance;
+  font-variant-numeric:lining-nums}
+.qtext sup{font-size:.55em;vertical-align:super}
+.qhint{font-family:var(--font-mono);font-size:.78rem;color:var(--muted)}
+.ansrow{display:flex;gap:8px;align-items:center}
+input[type=text]{font-family:var(--font-mono);font-size:1.5rem;width:9ch;text-align:center;
+  padding:8px 10px;border:1px solid var(--line);border-radius:3px;background:var(--sunk);
+  color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.enter{font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
+.tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:2px}
+.verdict{font-family:var(--font-mono);font-size:.86rem;min-height:1.4em}
+.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.flash-ok{animation:fok .3s ease} .flash-bad{animation:fbad .3s ease}
+@keyframes fok{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--ok) 13%,var(--surface))}}
+@keyframes fbad{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--bad) 13%,var(--surface))}}
+@media (prefers-reduced-motion:reduce){.flash-ok,.flash-bad{animation:none}}
+
+/* ---- controls ---- */
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.04em;padding:8px 14px;
+  border:1px solid var(--line);border-radius:3px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{filter:brightness(1.08)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:var(--font-mono);font-size:.68rem;padding:5px 9px;border:1px solid var(--line);
+  border-radius:99px;background:transparent;color:var(--muted);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* ---- stats ---- */
+section h2{font-size:.72rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.11em;
+  color:var(--faint);font-weight:500;margin:0 0 9px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--font-mono);font-size:.78rem;
+  font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;color:var(--faint);font-size:.66rem;text-transform:uppercase;
+  letter-spacing:.08em;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.name{font-family:var(--font-display);font-size:.92rem;white-space:normal;min-width:11ch}
+.lv{display:inline-block;width:1.6em;text-align:center;color:var(--accent);font-weight:600}
+.weak td{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.weak td.name::after{content:" ← slowest";color:var(--accent);font-family:var(--font-mono);font-size:.64rem}
+.empty{padding:22px 18px;color:var(--muted);font-size:.9rem;text-align:center;white-space:normal;text-wrap:pretty}
+.boxed{border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+footer code{font-family:var(--font-mono);font-size:.9em;color:var(--accent)}
+.note{font-size:.76rem;color:var(--faint);font-family:var(--font-mono)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>No-Calculator Drill</h1>
+      <p class="sub">TMUA · nine operations · five minutes</p>
+    </div>
+    <div class="streak"><b id="streakN">—</b><span id="streakL">no sessions yet</span></div>
+  </header>
+
+  <div class="card" id="card">
+    <div class="bar">
+      <span class="t" id="clock">5:00</span>
+      <span id="qn">Q 0</span>
+      <span class="sp" id="score">0 / 0</span>
+    </div>
+    <div class="stage">
+      <div class="tag" id="cat">ready</div>
+      <div class="qtext" id="q">Press Start</div>
+      <div class="qhint" id="hint">Answers are always whole numbers. Keyboard only — type, then Enter.</div>
+      <div class="ansrow">
+        <input type="text" id="ans" inputmode="numeric" autocomplete="off" spellcheck="false"
+               aria-label="Your answer" disabled>
+        <span class="enter">⏎</span>
+      </div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="start">Start 5:00</button>
+    <button id="endless">Endless</button>
+    <button id="stop" hidden>Stop</button>
+    <span class="note" id="mode"></span>
+  </div>
+
+  <section>
+    <h2>Focus</h2>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section>
+    <h2>Per-operation</h2>
+    <div class="empty boxed" id="statsEmpty">No sessions yet. Finish one and your per-operation
+      accuracy and median time appear here — including which operation is costing you the most seconds.</div>
+    <div class="tblwrap" id="tblwrap" hidden>
+      <table>
+        <thead><tr><th>Operation</th><th>Lvl</th><th>Seen</th><th>Accuracy</th><th>Median</th></tr></thead>
+        <tbody id="stats"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Five minutes at the front of the daily Anki hour. The level rises when you are both accurate and
+    quick, and drops back when you are not — so it keeps finding the edge of what you can do.
+    <span id="sync" class="note"></span>
+  </footer>
+</div>
+
+<script>
+"use strict";
+const R=(n)=>Math.floor(Math.random()*n), pick=(a)=>a[R(a.length)], ri=(lo,hi)=>lo+R(hi-lo+1);
+const sup=(n)=>`<sup>${n}</sup>`;
+
+/* ---------- question generators : every answer is an integer ---------- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a;}
+function nCr(n,r){let v=1;for(let i=1;i<=r;i++)v=v*(n-r+i)/i;return Math.round(v);}
+function ndiv(n){let c=0;for(let i=1;i*i<=n;i++)if(n%i===0)c+=(i*i===n?1:2);return c;}
+function sqfree(n){let a=1,b=n;for(let k=Math.floor(Math.sqrt(n));k>=2;k--){if(b%(k*k)===0){a*=k;b/=k*k;k=Math.floor(Math.sqrt(b))+1;}}return[a,b];}
+
+const GEN={
+ mental:{name:"Mental arithmetic",f:[
+  ()=>{const a=ri(12,29),b=ri(3,9);return{q:`${a} × ${b}`,a:a*b};},
+  ()=>{const a=ri(11,25);return{q:`${a}<sup>2</sup>`,a:a*a};},
+  ()=>{const p=pick([10,20,25,50]),n=ri(2,25)*20;return{q:`${p}% of ${n}`,a:n*p/100};},
+ ],f2:[
+  ()=>{const a=ri(13,49),b=ri(12,29);return{q:`${a} × ${b}`,a:a*b};},
+  ()=>{const a=ri(26,49);return{q:`${a}<sup>2</sup>`,a:a*a};},
+  ()=>{const p=pick([15,35,45,65,75]),n=ri(4,30)*20;return{q:`${p}% of ${n}`,a:n*p/100};},
+  ()=>{const a=ri(5,15);return{q:`${a} × ${a+1} × 2`,a:2*a*(a+1)};},
+ ],f3:[
+  ()=>{const a=ri(102,399),b=ri(6,19);return{q:`${a} × ${b}`,a:a*b};},
+  ()=>{const a=ri(51,99);return{q:`${a}<sup>2</sup>`,a:a*a};},
+  ()=>{const a=ri(7,24);return{q:`${a+1}<sup>2</sup> − ${a}<sup>2</sup>`,a:2*a+1};},
+ ]},
+
+ surds:{name:"Surds",f:[
+  ()=>{const b=pick([2,3,5,6,7]),k=ri(2,6);const n=k*k*b;return{q:`√${n} = k√${b}`,hint:"Find k",a:k};},
+ ],f2:[
+  ()=>{const b=pick([2,3,5,6,7,10]),k=ri(4,9);const n=k*k*b;return{q:`√${n} = k√${b}`,hint:"Find k",a:k};},
+  ()=>{const a=ri(2,9),b=pick([2,3,5,6,7,11]);return{q:`(${a} + √${b})(${a} − √${b})`,a:a*a-b};},
+  ()=>{const p=ri(2,9),b=pick([2,3,5,7]);return{q:`<span style="white-space:nowrap">${p*b} / √${b}</span> = k√${b}`,hint:"Find k",a:p};},
+ ],f3:[
+  ()=>{const b=pick([2,3,5,7]),x=ri(2,5),y=ri(2,6);
+       return{q:`√${x*x*b} + √${y*y*b} = k√${b}`,hint:"Find k",a:x+y};},
+  ()=>{const b=pick([2,3,5,6]),k=ri(3,8);return{q:`(${k}√${b})<sup>2</sup>`,a:k*k*b};},
+  ()=>{const n=pick([48,72,98,128,162,200,242,288]);const[a,b]=sqfree(n);
+       return{q:`√${n} = a√${b}`,hint:"Find a",a:a};},
+ ]},
+
+ indices:{name:"Indices",f:[
+  ()=>{const b=pick([2,3,5]),e=ri(2,5);return{q:`${b}<sup>${e}</sup>`,a:Math.pow(b,e)};},
+ ],f2:[
+  ()=>{const[b,r,lbl]=pick([[4,2,"1/2"],[9,2,"1/2"],[16,2,"1/2"],[8,3,"1/3"],[27,3,"1/3"],[64,3,"1/3"]]);
+       const p=ri(1,3);return{q:`${b*1}<sup>${p}/${r}</sup>`,a:Math.round(Math.pow(Math.round(Math.pow(b,1/r)),p))};},
+  ()=>{const b=pick([2,3,4,5]),e=ri(2,4);return{q:`${b}<sup>−${e}</sup> = 1/k`,hint:"Find k",a:Math.pow(b,e)};},
+ ],f3:[
+  ()=>{const[n,r]=pick([[16,4],[81,4],[32,5],[64,6],[243,5],[125,3],[216,3]]);
+       const root=Math.round(Math.pow(n,1/r)),p=ri(2,3);
+       return{q:`${n}<sup>${p}/${r}</sup>`,a:Math.pow(root,p)};},
+  ()=>{const b=pick([2,3,5]),m=ri(5,9),n=ri(2,4),p=ri(1,3);
+       return{q:`(${b}<sup>${m}</sup> × ${b}<sup>${n}</sup>) ÷ ${b}<sup>${m+n-p}</sup>`,a:Math.pow(b,p)};},
+ ]},
+
+ ncr:{name:"Binomials nCr",f:[
+  ()=>{const n=ri(4,9);return{q:`<span style="white-space:nowrap">C(${n}, 2)</span>`,a:nCr(n,2)};},
+ ],f2:[
+  ()=>{const n=ri(6,10),r=ri(2,3);return{q:`<span style="white-space:nowrap">C(${n}, ${r})</span>`,a:nCr(n,r)};},
+ ],f3:[
+  ()=>{const n=ri(9,13),r=ri(3,5);return{q:`<span style="white-space:nowrap">C(${n}, ${r})</span>`,a:nCr(n,r)};},
+  ()=>{const n=ri(5,9);return{q:`Coefficient of x<sup>2</sup> in (1 + x)<sup>${n}</sup>`,a:nCr(n,2)};},
+ ]},
+
+ logs:{name:"Logarithms",f:[
+  ()=>{const b=pick([2,3,5,10]),e=ri(2,4);return{q:`log<sub>${b}</sub> ${Math.pow(b,e)}`,a:e};},
+ ],f2:[
+  ()=>{const b=pick([2,3,5]),e=ri(3,6);return{q:`Solve ${b}<sup>x</sup> = ${Math.pow(b,e)}`,hint:"Find x",a:e};},
+  ()=>{const b=pick([2,3]),x=ri(2,4),y=ri(2,4);
+       return{q:`log<sub>${b}</sub> ${Math.pow(b,x)} + log<sub>${b}</sub> ${Math.pow(b,y)}`,a:x+y};},
+ ],f3:[
+  ()=>{const b=pick([2,3,5]),x=ri(4,7),y=ri(1,3);
+       return{q:`log<sub>${b}</sub> ${Math.pow(b,x)} − log<sub>${b}</sub> ${Math.pow(b,y)}`,a:x-y};},
+  ()=>{const b=pick([2,3]),k=ri(2,3),e=ri(2,4);
+       return{q:`${k} log<sub>${b}</sub> ${Math.pow(b,e)}`,a:k*e};},
+ ]},
+
+ trig:{name:"Exact trig",f:[
+  ()=>pick([
+    {q:"sin 30° = 1/k",hint:"Find k",a:2},{q:"cos 60° = 1/k",hint:"Find k",a:2},
+    {q:"tan 45°",a:1},{q:"sin 90°",a:1},{q:"cos 0°",a:1},
+  ]),
+ ],f2:[
+  ()=>pick([
+    {q:"tan 60° = √k",hint:"Find k",a:3},{q:"sin 60° = √k / 2",hint:"Find k",a:3},
+    {q:"cos 30° = √k / 2",hint:"Find k",a:3},{q:"cos 45° = 1/√k",hint:"Find k",a:2},
+    {q:"4 sin 30°",a:2},{q:"6 cos 60°",a:3},
+  ]),
+ ],f3:[
+  ()=>pick([
+    {q:"tan 45° + 2 cos 60°",a:2},{q:"4 sin 30° + 2 tan 45°",a:4},
+    {q:"8 sin 30° cos 60°",a:2},{q:"tan<sup>2</sup> 60°",a:3},
+    {q:"4 cos<sup>2</sup> 30°",a:3},{q:"2 sin 30° + 2 cos 0°",a:3},
+  ]),
+ ]},
+
+ number:{name:"Number theory",f:[
+  ()=>{const a=ri(6,30),b=ri(6,30);return{q:`HCF(${a}, ${b})`,a:gcd(a,b)};},
+ ],f2:[
+  ()=>{const n=pick([24,36,48,60,72,90,96]);return{q:`Divisors of ${n}`,hint:"How many?",a:ndiv(n)};},
+  ()=>{const a=ri(8,24),b=ri(8,24);return{q:`LCM(${a}, ${b})`,a:a*b/gcd(a,b)};},
+ ],f3:[
+  ()=>{const n=pick([120,144,180,210,240,360,420,504]);return{q:`Divisors of ${n}`,hint:"How many?",a:ndiv(n)};},
+  ()=>{const n=pick([84,90,126,198,350,462]);let m=n,s=0;
+       for(let p=2;p*p<=m;p++)while(m%p===0){s+=p;m/=p;} if(m>1)s+=m;
+       return{q:`Sum of the prime factors of ${n}`,hint:"With repeats",a:s};},
+ ]},
+
+ quadratics:{name:"Quadratics",f:[
+  ()=>{const b=ri(2,9),c=ri(1,9);return{q:`Discriminant of x<sup>2</sup> + ${b}x + ${c}`,a:b*b-4*c};},
+ ],f2:[
+  ()=>{const a=ri(2,4),b=ri(3,9),c=ri(1,6);
+       return{q:`Discriminant of ${a}x<sup>2</sup> + ${b}x + ${c}`,a:b*b-4*a*c};},
+  ()=>{const p=ri(2,9);return{q:`x<sup>2</sup> + ${2*p}x + c is a perfect square`,hint:"Find c",a:p*p};},
+ ],f3:[
+  ()=>{const p=ri(2,8),qv=ri(-9,9),c=p*p+qv;
+       const ct=c<0?`− ${-c}`:`+ ${c}`;
+       return{q:`x<sup>2</sup> + ${2*p}x ${ct} ≡ (x + ${p})<sup>2</sup> + q`,hint:"Find q",a:qv};},
+  ()=>{const a=ri(2,5),r1=ri(1,6),r2=ri(1,6);
+       return{q:`Product of the roots of ${a}x<sup>2</sup> − ${a*(r1+r2)}x + ${a*r1*r2}`,a:r1*r2};},
+ ]},
+
+ stdform:{name:"Standard form",f:[
+  ()=>{const a=ri(2,4),b=ri(2,4),m=ri(2,6),n=ri(2,5);const prod=a*b;
+       const k=m+n+(prod>=10?1:0);
+       return{q:`(${a}×10<sup>${m}</sup>)(${b}×10<sup>${n}</sup>) = c×10<sup>k</sup>`,hint:"Find k",a:k};},
+ ],f2:[
+  ()=>{const a=ri(2,9),b=ri(2,9),m=ri(3,8),n=ri(1,4);const k=m-n-(a<b?1:0);
+       return{q:`(${a}×10<sup>${m}</sup>) ÷ (${b}×10<sup>${n}</sup>) = c×10<sup>k</sup>`,hint:"Find k",a:k};},
+  ()=>{const d=pick([0.00042,0.0073,0.000091,0.0000506,0.00000812]);
+       const k=Math.floor(Math.log10(d)+1e-9);
+       return{q:`${d} = a×10<sup>k</sup>`,hint:"Find k",a:k};},
+ ],f3:[
+  ()=>{const a=ri(2,9),m=ri(2,5),p=ri(2,3);const base=a*a*(p===3?a:1);
+       const k=m*p+(base>=10?(base>=100?2:1):0);
+       return{q:`(${a}×10<sup>${m}</sup>)<sup>${p}</sup> = c×10<sup>k</sup>`,hint:"Find k",a:k};},
+  ()=>{const t=ri(2,9)*100+ri(1,9)*10;const r=Math.round(t/1000)*1000;
+       const u=ri(41,59);const est=Math.round(t*u/1000)*1000;
+       return{q:`Estimate ${t} × ${u}`,hint:"To the nearest 1000",a:est};},
+ ]}
+};
+const CATS=Object.keys(GEN);
+function make(cat,lv){const g=GEN[cat];const bank=lv>=3?g.f3:lv===2?g.f2:g.f;
+  const o=pick(bank)();return{cat,lv,q:o.q,hint:o.hint||"",a:o.a};}
+
+/* ---------- state ---------- */
+const BLANK=()=>({lv:1,seen:0,right:0,times:[],recent:[]});
+let S={cats:Object.fromEntries(CATS.map(c=>[c,BLANK()])),sessions:[],streak:{last:null,count:0}};
+let focus=new Set(CATS), run=null, cur=null, shownAt=0, db=null, uid=null;
+
+const $=(id)=>document.getElementById(id);
+const med=(a)=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;
+  return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
+
+function nextQ(){
+  const pool=CATS.filter(c=>focus.has(c));
+  if(!pool.length)return;
+  // weight toward low accuracy and few attempts
+  const w=pool.map(c=>{const s=S.cats[c];const acc=s.seen?s.right/s.seen:0.5;
+    return Math.max(0.35,1.25-acc)+(s.seen<6?0.5:0);});
+  let t=w.reduce((a,b)=>a+b,0),r=Math.random()*t,cat=pool[0];
+  for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0){cat=pool[i];break;}}
+  cur=make(cat,S.cats[cat].lv);
+  $("cat").textContent=`${GEN[cat].name} · level ${cur.lv}`;
+  $("q").innerHTML=cur.q;
+  $("hint").textContent=cur.hint||"Whole-number answer";
+  $("ans").value="";$("ans").disabled=false;$("ans").focus();
+  shownAt=performance.now();
+}
+
+function submit(){
+  if(!run||!cur)return;
+  const raw=$("ans").value.trim();
+  if(raw===""||!/^-?\d+$/.test(raw))return;
+  const given=parseInt(raw,10), ok=given===cur.a, ms=performance.now()-shownAt;
+  const s=S.cats[cur.cat];
+  s.seen++; if(ok)s.right++; s.times.push(ms); if(s.times.length>40)s.times.shift();
+  s.recent.push(ok?1:0); if(s.recent.length>6)s.recent.shift();
+  run.n++; if(ok)run.right++;
+  // adapt
+  if(s.recent.length>=5){
+    const hit=s.recent.reduce((a,b)=>a+b,0)/s.recent.length, m=med(s.times.slice(-6))||9999;
+    if(hit>=0.8&&m<14000&&s.lv<3){s.lv++;s.recent=[];}
+    else if(hit<0.5&&s.lv>1){s.lv--;s.recent=[];}
+  }
+  const v=$("verdict");
+  v.textContent=ok?`correct · ${(ms/1000).toFixed(1)}s`:`${cur.a} · ${(ms/1000).toFixed(1)}s`;
+  v.className="verdict "+(ok?"ok":"bad");
+  const c=$("card"); c.classList.remove("flash-ok","flash-bad");
+  void c.offsetWidth; c.classList.add(ok?"flash-ok":"flash-bad");
+  $("score").textContent=`${run.right} / ${run.n}`;
+  $("qn").textContent=`Q ${run.n+1}`;
+  renderStats(); nextQ();
+}
+
+function tick(){
+  if(!run)return;
+  if(run.endless){$("clock").textContent="∞";return;}
+  const left=Math.max(0,run.until-Date.now());
+  $("clock").textContent=`${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,"0")}`;
+  if(left<=0)stop();
+}
+
+function start(endless){
+  run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250)};
+  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;
+  $("score").textContent="0 / 0";$("qn").textContent="Q 1";$("verdict").textContent="";
+  $("mode").textContent=endless?"endless — stop when you like":"five minutes";
+  tick(); nextQ();
+}
+
+async function stop(){
+  if(!run)return;
+  clearInterval(run.t);
+  const done=run; run=null;
+  $("start").hidden=false;$("endless").hidden=false;$("stop").hidden=true;
+  $("ans").disabled=true;$("clock").textContent="5:00";$("cat").textContent="done";
+  $("q").innerHTML=`${done.right} / ${done.n}`;
+  $("hint").textContent=done.n?`${Math.round(100*done.right/Math.max(1,done.n))}% this session`:"No questions answered";
+  $("verdict").textContent="";$("mode").textContent="";
+  if(done.n){
+    const d=today();
+    S.sessions.push({d,n:done.n,right:done.right});
+    if(S.sessions.length>160)S.sessions.shift();
+    if(S.streak.last!==d){
+      const y=new Date(Date.now()-86400000);
+      const yd=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,"0")}-${String(y.getDate()).padStart(2,"0")}`;
+      S.streak={last:d,count:S.streak.last===yd?S.streak.count+1:1};
+    }
+    renderStreak(); await save();
+  }
+}
+
+/* ---------- render ---------- */
+function renderStats(){
+  const rows=CATS.map(c=>({c,s:S.cats[c]})).filter(x=>x.s.seen>0);
+  const body=$("stats");
+  $("statsEmpty").hidden=rows.length>0; $("tblwrap").hidden=rows.length===0;
+  if(!rows.length){body.innerHTML="";return;}
+  let slow=null,slowM=-1;
+  rows.forEach(x=>{const m=med(x.s.times);if(m!==null&&x.s.seen>=4&&m>slowM){slowM=m;slow=x.c;}});
+  body.innerHTML=rows.map(({c,s})=>{
+    const m=med(s.times), acc=Math.round(100*s.right/s.seen);
+    return `<tr class="${c===slow?"weak":""}"><td class="name">${GEN[c].name}</td>
+      <td><span class="lv">${s.lv}</span></td><td>${s.seen}</td><td>${acc}%</td>
+      <td>${m===null?"—":(m/1000).toFixed(1)+"s"}</td></tr>`;}).join("");
+}
+function renderStreak(){
+  const n=S.streak.count||0;
+  $("streakN").textContent=n||"—";
+  $("streakL").textContent=n?(n===1?"day streak":"day streak"):"no sessions yet";
+}
+function renderChips(){
+  $("chips").innerHTML=CATS.map(c=>
+    `<button class="chip" data-c="${c}" aria-pressed="${focus.has(c)}">${GEN[c].name}</button>`).join("")
+    +`<button class="chip" data-c="__all" aria-pressed="false">All</button>`;
+  $("chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    const c=b.dataset.c;
+    if(c==="__all")focus=new Set(CATS);
+    else{focus.has(c)?focus.delete(c):focus.add(c);if(!focus.size)focus=new Set(CATS);}
+    renderChips();
+  });
+}
+
+/* ---------- persistence ---------- */
+function pack(){return{v:1,updated:new Date().toISOString(),streak:S.streak,
+  sessions:S.sessions.slice(-160),
+  cats:Object.fromEntries(CATS.map(c=>{const s=S.cats[c];
+    return[c,{lv:s.lv,seen:s.seen,right:s.right,times:s.times.slice(-40).map(Math.round),recent:s.recent}];}))};}
+function unpack(d){
+  if(!d||typeof d!=="object")return;
+  if(d.streak&&typeof d.streak==="object")S.streak={last:d.streak.last??null,count:+d.streak.count||0};
+  if(Array.isArray(d.sessions))S.sessions=d.sessions.slice(-160);
+  if(d.cats&&typeof d.cats==="object")CATS.forEach(c=>{const o=d.cats[c];if(!o)return;
+    S.cats[c]={lv:Math.min(3,Math.max(1,+o.lv||1)),seen:+o.seen||0,right:+o.right||0,
+      times:Array.isArray(o.times)?o.times.slice(-40).map(Number).filter(Number.isFinite):[],
+      recent:Array.isArray(o.recent)?o.recent.slice(-6).map(Number):[]};});
+}
+let saving=false;
+async function save(){
+  if(!db||!uid||saving)return;
+  saving=true;
+  try{await db.doc(`data/users/${uid}/drill`).set(pack());$("sync").textContent=" · saved";}
+  catch(e){$("sync").textContent=" · not saved ("+(e&&e.code?e.code:"error")+")";}
+  finally{saving=false;}
+}
+
+/* ---------- boot ---------- */
+renderChips(); renderStats(); renderStreak();
+$("start").onclick=()=>start(false);
+$("endless").onclick=()=>start(true);
+$("stop").onclick=stop;
+$("ans").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();submit();}});
+document.addEventListener("keydown",e=>{
+  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!$("start").hidden){e.preventDefault();start(false);}
+});
+
+(async()=>{
+  if(!window.claude||!window.claude.use){$("sync").textContent=" · local only";return;}
+  try{
+    const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!d||!u){$("sync").textContent=" · not signed in, nothing saved";return;}
+    db=d; uid=await u.id();
+    if(!uid){$("sync").textContent=" · no private store, nothing saved";db=null;return;}
+    const snap=await db.doc(`data/users/${uid}/drill`).get();
+    if(snap.exists){unpack(snap.data());renderStats();renderStreak();$("sync").textContent=" · synced";}
+    else $("sync").textContent=" · ready to save";
+  }catch(e){$("sync").textContent=" · store unavailable";}
+})();
+</script>
