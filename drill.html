@@ -7,25 +7,26 @@
   --bg:#EEF1F3; --surface:#FDFDFC; --sunk:#E3E8EB;
   --ink:#141E27; --muted:#5A6B78; --faint:#8A9AA6; --line:#D2DAE0;
   --accent:#9E5410; --accent-soft:#F0E2D2;
-  --ok:#1C7049; --bad:#A8271E;
+  --ok:#1C7049; --bad:#A8271E; --bad-soft:#F6E1DE;
   --font-display:"Newsreader",Georgia,"Times New Roman",serif;
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --font-math:"STIX Two Math","Cambria Math","Latin Modern Math",math;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
   --ink:#E4ECF2; --muted:#93A5B3; --faint:#6B7D8B; --line:#25313D;
   --accent:#D98B3E; --accent-soft:#2C2317;
-  --ok:#4FA97A; --bad:#DE6A60; color-scheme:dark;
+  --ok:#4FA97A; --bad:#DE6A60; --bad-soft:#341C1B; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
   --ink:#E4ECF2; --muted:#93A5B3; --faint:#6B7D8B; --line:#25313D;
   --accent:#D98B3E; --accent-soft:#2C2317;
-  --ok:#4FA97A; --bad:#DE6A60; color-scheme:dark;
+  --ok:#4FA97A; --bad:#DE6A60; --bad-soft:#341C1B; color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-display);
-  padding-inline:18px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  padding-inline:16px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 h1{font-size:1.15rem;font-weight:600;margin:0;letter-spacing:.01em}
 .sub{font-family:var(--font-mono);font-size:.7rem;color:var(--faint);
@@ -36,16 +37,19 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:14p
 
 /* ---- drill card ---- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:4px;
-  display:flex;flex-direction:column;min-height:270px}
+  display:flex;flex-direction:column;min-height:300px}
 .bar{display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
-  font-family:var(--font-mono);font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+  font-family:var(--font-mono);font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums;flex-wrap:wrap}
 .bar .t{font-size:1rem;color:var(--ink);font-weight:600;letter-spacing:.02em}
 .bar .sp{margin-left:auto}
+.bar .aside{color:var(--bad)}
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;padding:26px 18px;text-align:center}
-.qtext{font-size:clamp(1.6rem,6vw,2.5rem);line-height:1.25;font-weight:400;text-wrap:balance;
-  font-variant-numeric:lining-nums}
-.qtext sup{font-size:.55em;vertical-align:super}
+.qtext{font-size:clamp(1.5rem,6vw,2.3rem);line-height:1.35;font-weight:400;text-wrap:balance;
+  font-variant-numeric:lining-nums;max-width:100%;overflow-wrap:anywhere}
+.qtext.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
+.qtext math{font-family:var(--font-math);font-size:1.06em}
+.qtext math mfrac mfrac, .qtext math msup mfrac{font-size:.9em}
 .qhint{font-family:var(--font-mono);font-size:.78rem;color:var(--muted)}
 .ansrow{display:flex;gap:8px;align-items:center}
 input[type=text]{font-family:var(--font-mono);font-size:1.5rem;width:9ch;text-align:center;
@@ -53,10 +57,14 @@ input[type=text]{font-family:var(--font-mono);font-size:1.5rem;width:9ch;text-al
   color:var(--ink);font-variant-numeric:tabular-nums}
 input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .enter{font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;
   color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:2px}
-.verdict{font-family:var(--font-mono);font-size:.86rem;min-height:1.4em}
+.tag.retry{color:var(--bad);background:var(--bad-soft)}
+.verdict{font-family:var(--font-mono);font-size:.86rem;min-height:1.4em;text-wrap:balance}
 .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.card.second{border-color:var(--bad)}
+.card.second input[type=text]{border-color:var(--bad)}
 .flash-ok{animation:fok .3s ease} .flash-bad{animation:fbad .3s ease}
 @keyframes fok{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--ok) 13%,var(--surface))}}
 @keyframes fbad{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--bad) 13%,var(--surface))}}
@@ -72,7 +80,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff;fo
 button.primary:hover{filter:brightness(1.08)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-family:var(--font-mono);font-size:.68rem;padding:5px 9px;border:1px solid var(--line);
-  border-radius:99px;background:transparent;color:var(--muted);cursor:pointer}
+  border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
 .chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
 
 /* ---- stats ---- */
@@ -92,7 +100,7 @@ td.name{font-family:var(--font-display);font-size:.92rem;white-space:normal;min-
 .empty{padding:22px 18px;color:var(--muted);font-size:.9rem;text-align:center;white-space:normal;text-wrap:pretty}
 .boxed{border:1px solid var(--line);border-radius:4px;background:var(--surface)}
 footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
-footer code{font-family:var(--font-mono);font-size:.9em;color:var(--accent)}
+footer p{margin:0 0 6px}
 .note{font-size:.76rem;color:var(--faint);font-family:var(--font-mono)}
 </style>
 
@@ -100,7 +108,7 @@ footer code{font-family:var(--font-mono);font-size:.9em;color:var(--accent)}
   <header>
     <div>
       <h1>No-Calculator Drill</h1>
-      <p class="sub">TMUA · nine operations · five minutes</p>
+      <p class="sub" id="subtitle">TMUA · five minutes</p>
     </div>
     <div class="streak"><b id="streakN">—</b><span id="streakL">no sessions yet</span></div>
   </header>
@@ -109,10 +117,11 @@ footer code{font-family:var(--font-mono);font-size:.9em;color:var(--accent)}
     <div class="bar">
       <span class="t" id="clock">5:00</span>
       <span id="qn">Q 0</span>
+      <span class="aside" id="aside"></span>
       <span class="sp" id="score">0 / 0</span>
     </div>
     <div class="stage">
-      <div class="tag" id="cat">ready</div>
+      <div class="tags"><span class="tag" id="cat">ready</span><span class="tag retry" id="retryTag" hidden>second try</span></div>
       <div class="qtext" id="q">Press Start</div>
       <div class="qhint" id="hint">Answers are always whole numbers. Keyboard only — type, then Enter.</div>
       <div class="ansrow">
@@ -120,7 +129,7 @@ footer code{font-family:var(--font-mono);font-size:.9em;color:var(--accent)}
                aria-label="Your answer" disabled>
         <span class="enter">⏎</span>
       </div>
-      <div class="verdict" id="verdict"></div>
+      <div class="verdict" id="verdict" aria-live="polite"></div>
     </div>
   </div>
 
@@ -149,245 +158,628 @@ footer code{font-family:var(--font-mono);font-size:.9em;color:var(--accent)}
   </section>
 
   <footer>
-    Five minutes at the front of the daily Anki hour. The level rises when you are both accurate and
-    quick, and drops back when you are not — so it keeps finding the edge of what you can do.
-    <span id="sync" class="note"></span>
+    <p>Five minutes at the front of the daily Anki hour. The level rises when you are both accurate and
+    quick, and drops back when you are not — so it keeps finding the edge of what you can do.</p>
+    <p>Wrong once: try again. Wrong twice: the question is set aside and comes back, untimed, when the
+    five minutes are up. Only first attempts count towards your stats.<span id="sync" class="note"></span></p>
   </footer>
 </div>
 
 <script>
 "use strict";
+/*GEN-START*/
 const R=(n)=>Math.floor(Math.random()*n), pick=(a)=>a[R(a.length)], ri=(lo,hi)=>lo+R(hi-lo+1);
-const sup=(n)=>`<sup>${n}</sup>`;
+const nz=(lo,hi)=>{let v;do v=ri(lo,hi);while(v===0);return v;};
+const coin=()=>R(2)===0;
+function retry(f){for(let i=0;i<5000;i++){const o=f();if(o)return o;}throw new Error("generator exhausted");}
 
-/* ---------- question generators : every answer is an integer ---------- */
+/* ---------- number helpers ---------- */
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a;}
+const lcm=(a,b)=>a/gcd(a,b)*b;
 function nCr(n,r){let v=1;for(let i=1;i<=r;i++)v=v*(n-r+i)/i;return Math.round(v);}
+const fact=(n)=>n<=1?1:n*fact(n-1);
 function ndiv(n){let c=0;for(let i=1;i*i<=n;i++)if(n%i===0)c+=(i*i===n?1:2);return c;}
-function sqfree(n){let a=1,b=n;for(let k=Math.floor(Math.sqrt(n));k>=2;k--){if(b%(k*k)===0){a*=k;b/=k*k;k=Math.floor(Math.sqrt(b))+1;}}return[a,b];}
+const isSq=(n)=>n>=0&&Number.isInteger(Math.sqrt(n));
+function isPowOf(d,b){while(d>1&&d%b===0)d/=b;return d===1;}
+const evalP=(c,t)=>c.reduce((s,a)=>s*t+a,0);
+/* floor(log10(num/den)) for positive integers, exactly */
+function flog(num,den){let t=0;while(num>=den*10){den*=10;t++;}while(num<den){num*=10;t--;}return t;}
+const SQF=[2,3,5,6,7,10,11,13,14,15,17,19,21,22,23,26,29,30], SQF_S=[2,3,5,6,7,10,11];
+const PRIMES=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+const ORD=(n)=>n+(n%100>=11&&n%100<=13?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th"));
 
+/* ---------- MathML builders : questions render the way the paper prints them ---------- */
+const grp=(s)=>/^\d{5,}$/.test(s)?s.replace(/\B(?=(\d{3})+(?!\d))/g," "):s;
+const mnum=(v)=>{const t=grp(String(Math.abs(v)));return v<0?`<mrow><mo>−</mo><mn>${t}</mn></mrow>`:`<mn>${t}</mn>`;};
+const X=(x)=>typeof x==="number"?mnum(x):x;
+const mi=(s)=>`<mi>${s}</mi>`, mo=(s)=>`<mo>${s}</mo>`, mn=(s)=>`<mn>${s}</mn>`;
+const row=(...a)=>`<mrow>${a.map(X).join("")}</mrow>`;
+const fr=(a,b)=>`<mfrac>${row(a)}${row(b)}</mfrac>`;
+const sq=(x)=>`<msqrt>${row(x)}</msqrt>`;
+const pw=(b,e)=>`<msup>${row(b)}${row(e)}</msup>`;
+const sb=(b,s)=>`<msub>${row(b)}${row(s)}</msub>`;
+const par=(...a)=>row(mo("("),...a,mo(")"));
+const bn=(n,r)=>row(mo("("),`<mfrac linethickness="0">${row(n)}${row(r)}</mfrac>`,mo(")"));
+const fac=(n)=>row(n,mo("!"));
+const SP=`<mspace width="0.17em"></mspace>`;
+const M=(...a)=>`<math displaystyle="true">${a.map(X).join("")}</math>`;
+const x_=mi("x"), y_=mi("y"), k_=mi("k"), EQ=mo("="), PL=mo("+"), MI=mo("−"), TM=mo("×"), DV=mo("÷");
+const xp=(k)=>k===1?x_:pw(x_,k);
+const mixed=(w,r,q)=>`<mrow class="mixed">${mnum(w)}${fr(r,q)}</mrow>`;
+const pt=(a,b)=>row(mo("("),a,mo(","),b,mo(")"));
+const lg=(b,x)=>row(sb(mi("log"),b),SP,X(x));
+const DEG=(d)=>mn(d+"°");
+const tf=(fn,d,p)=>row(p===2?pw(mi(fn),2):mi(fn),SP,DEG(d));
+const dydx=fr(row(mi("d"),y_),row(mi("d"),x_));
+const fx=row(mi("f"),par(x_)), fp=(t)=>row(pw(mi("f"),mo("′")),par(t)), fpp=(t)=>row(pw(mi("f"),mo("″")),par(t));
+const intg=(lo,hi)=>`<msubsup><mo>∫</mo>${row(lo)}${row(hi)}</msubsup>`;
+const dx=row(SP,mi("d"),x_);
+const SFR=row(mi("c"),TM,pw(10,k_)), SFH="Standard form, 1 ≤ c < 10 — find k";
+const tenth=(A)=>A%10===0?String(A/10):(A/10).toFixed(1);
+const sfm=(A,m)=>row(mn(tenth(A)),TM,pw(10,m));
+/* a run of signed terms: [{c:coefficient, t:mathml or ""}] -> "3x² − x + 2"; zero terms dropped */
+function terms(list){const out=[];for(const {c,t} of list){if(c===0)continue;const m=Math.abs(c);
+  if(out.length)out.push(mo(c<0?"−":"+"));else if(c<0)out.push(mo("−"));
+  out.push((m===1&&t?"":mnum(m))+(t||""));}
+  return out.length?row(...out):mnum(0);}
+/* one term that always carries its sign, for tails like "x³ + kx² − 4x + 12" */
+const signed=(c,t)=>c===0?"":row(mo(c<0?"−":"+"),(Math.abs(c)===1&&t?"":mnum(Math.abs(c)))+(t||""));
+const poly=(c,v=x_)=>terms(c.map((a,i)=>{const p=c.length-1-i;return{c:a,t:p===0?"":p===1?v:pw(v,p)};}));
+const lin=(a)=>par(poly([1,-a]));            // (x − a)
+const coefx=(c,t)=>c===1?t:row(mnum(c),t);
+/* recurring decimal, dots over the first and last digit of the repeating block */
+function rec(pre,rep){const dot=(d)=>`<mover accent="true"><mn>${d}</mn><mo>˙</mo></mover>`;
+  return row(mn("0."+pre),...rep.split("").map((d,i)=>(i===0||i===rep.length-1)?dot(d):mn(d)));}
+
+/* ---------- exact trig values: n/d · √r ---------- */
+const SINT={0:[0,1,1],30:[1,2,1],45:[1,2,2],60:[1,2,3],90:[1,1,1]}, TANT={0:[0,1,1],30:[1,3,3],45:[1,1,1],60:[1,1,3]};
+const ANG=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
+function tv(fn,deg){deg=((deg%360)+360)%360;let a,ss,cs;
+  if(deg<=90){a=deg;ss=1;cs=1;}else if(deg<=180){a=180-deg;ss=1;cs=-1;}
+  else if(deg<=270){a=deg-180;ss=-1;cs=-1;}else{a=360-deg;ss=-1;cs=1;}
+  let t,s;
+  if(fn==="sin"){t=SINT[a];s=ss;}else if(fn==="cos"){t=SINT[90-a];s=cs;}
+  else{if(a===90)return null;t=TANT[a];s=ss*cs;}
+  return{n:t[0]===0?0:s*t[0],d:t[1],r:t[2]};}
+/* c·f(θ)^p as a rational [num,den], or null when it is irrational */
+function tvq(fn,deg,p){const v=tv(fn,deg);if(!v)return null;
+  if(p===2)return[v.n*v.n*v.r,v.d*v.d];if(v.r!==1&&v.n!==0)return null;return[v.n,v.d];}
+function valML(v,alt){const n=Math.abs(v.n);let body;if(n===0)return mnum(0);
+  if(v.r===1)body=v.d===1?mnum(n):fr(n,v.d);
+  else if(alt&&n===1&&v.d===v.r)body=fr(1,sq(v.r));
+  else body=v.d===1?row(n===1?"":mnum(n),sq(v.r)):fr(row(n===1?"":mnum(n),sq(v.r)),v.d);
+  return v.n<0?row(MI,body):body;}
+function trigInv(angles){return retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(angles),v=tv(fn,d);if(!v)return null;
+  const lo=Math.ceil(d/90)*90-90,hi=lo+90;
+  return{q:`${M(mi(fn),SP,mi("θ"),EQ,valML(v,coin()))} and ${M(DEG(lo),mo("&lt;"),mi("θ"),mo("≤"),DEG(hi))}`,hint:"Find θ in degrees",a:d};});}
+
+/* ---------- question generators : every answer is an integer ----------
+   GEN[family].L[level-1] is a bank of zero-argument generators returning {q, hint?, a}. */
 const GEN={
- mental:{name:"Mental arithmetic",f:[
-  ()=>{const a=ri(12,29),b=ri(3,9);return{q:`${a} × ${b}`,a:a*b};},
-  ()=>{const a=ri(11,25);return{q:`${a}<sup>2</sup>`,a:a*a};},
-  ()=>{const p=pick([10,20,25,50]),n=ri(2,25)*20;return{q:`${p}% of ${n}`,a:n*p/100};},
- ],f2:[
-  ()=>{const a=ri(13,49),b=ri(12,29);return{q:`${a} × ${b}`,a:a*b};},
-  ()=>{const a=ri(26,49);return{q:`${a}<sup>2</sup>`,a:a*a};},
-  ()=>{const p=pick([15,35,45,65,75]),n=ri(4,30)*20;return{q:`${p}% of ${n}`,a:n*p/100};},
-  ()=>{const a=ri(5,15);return{q:`${a} × ${a+1} × 2`,a:2*a*(a+1)};},
- ],f3:[
-  ()=>{const a=ri(102,399),b=ri(6,19);return{q:`${a} × ${b}`,a:a*b};},
-  ()=>{const a=ri(51,99);return{q:`${a}<sup>2</sup>`,a:a*a};},
-  ()=>{const a=ri(7,24);return{q:`${a+1}<sup>2</sup> − ${a}<sup>2</sup>`,a:2*a+1};},
- ]},
+ mental:{name:"Mental arithmetic",L:[[
+  ()=>{const a=ri(13,99),b=ri(3,9);return{q:M(a,TM,b),a:a*b};},
+  ()=>{const a=ri(11,32);return{q:M(pw(a,2)),a:a*a};},
+  ()=>{const p=pick([5,10,15,20,25,30,40,60,75]),u=100/gcd(p,100),n=u*ri(Math.ceil(40/u),Math.floor(900/u));
+       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:n*p/100};},
+  ()=>{const b=ri(3,19),q=ri(12,99);return{q:M(b*q,DV,b),a:q};},
+  ()=>retry(()=>{const d=ri(3,12),n=ri(1,d-1);if(gcd(n,d)!==1)return null;const amt=d*ri(3,40);
+       return{q:`${M(fr(n,d))} of ${M(amt)}`,a:n*amt/d};}),
+ ],[
+  ()=>{const a=ri(13,99),b=ri(13,99);return{q:M(a,TM,b),a:a*b};},
+  ()=>{let a;do a=ri(31,99);while(a%10===0);return{q:M(pw(a,2)),a:a*a};},
+  ()=>{const m=pick([20,30,40,50,60,70,80,90,25,35,45,55,65,75]),d=ri(1,9);return{q:M(m-d,TM,m+d),a:m*m-d*d};},
+  ()=>{const p=pick([2.5,12.5,17.5,35,45,65,85,120,150,175,250]),P=Math.round(p*10),u=1000/gcd(P,1000),
+         n=u*ri(Math.max(1,Math.ceil(40/u)),Math.floor(2000/u));
+       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:Math.round(n*P/1000)};},
+  ()=>{const b=ri(20,95),a=b+ri(2,30);return{q:M(pw(a,2),MI,pw(b,2)),a:a*a-b*b};},
+  ()=>{const b=ri(3,9),q=ri(120,999);return{q:M(b*q,DV,b),a:q};},
+ ],[
+  ()=>{const a=ri(101,999),b=ri(11,99);return{q:M(a,TM,b),a:a*b};},
+  ()=>{const m=ri(1,19);return{q:M(pw(10*m+5,2)),a:(10*m+5)**2};},
+  ()=>{let a;do a=ri(5,19);while(a===10);return{q:M(pw(a,3)),a:a**3};},
+  ()=>{const d=ri(12,49),q=ri(21,99);return{q:M(d*q,DV,d),a:q};},
+  ()=>{const [s,t]=pick([[25,4],[125,8],[50,2],[250,4]]),a=ri(3,19),b=ri(2,9);return{q:M(s,TM,a,TM,t*b),a:s*a*t*b};},
+  ()=>retry(()=>{const P=[10,20,25,30,40,50,60,75,80],p=pick(P),q=pick(P),n=ri(4,80)*50;if((n*p*q)%10000!==0)return null;
+       return{q:`${M(p,mo("%"))} of ${M(q,mo("%"))} of ${M(n)}`,a:n*p*q/10000};}),
+ ]]},
 
- surds:{name:"Surds",f:[
-  ()=>{const b=pick([2,3,5,6,7]),k=ri(2,6);const n=k*k*b;return{q:`√${n} = k√${b}`,hint:"Find k",a:k};},
- ],f2:[
-  ()=>{const b=pick([2,3,5,6,7,10]),k=ri(4,9);const n=k*k*b;return{q:`√${n} = k√${b}`,hint:"Find k",a:k};},
-  ()=>{const a=ri(2,9),b=pick([2,3,5,6,7,11]);return{q:`(${a} + √${b})(${a} − √${b})`,a:a*a-b};},
-  ()=>{const p=ri(2,9),b=pick([2,3,5,7]);return{q:`<span style="white-space:nowrap">${p*b} / √${b}</span> = k√${b}`,hint:"Find k",a:p};},
- ],f3:[
-  ()=>{const b=pick([2,3,5,7]),x=ri(2,5),y=ri(2,6);
-       return{q:`√${x*x*b} + √${y*y*b} = k√${b}`,hint:"Find k",a:x+y};},
-  ()=>{const b=pick([2,3,5,6]),k=ri(3,8);return{q:`(${k}√${b})<sup>2</sup>`,a:k*k*b};},
-  ()=>{const n=pick([48,72,98,128,162,200,242,288]);const[a,b]=sqfree(n);
-       return{q:`√${n} = a√${b}`,hint:"Find a",a:a};},
- ]},
+ surds:{name:"Surds",L:[[
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k};},
+  ()=>{const b=pick(SQF_S);let s,t;do{s=ri(1,5);t=ri(1,5);}while(s===t);return{q:M(sq(b*s*s),TM,sq(b*t*t)),a:b*s*t};},
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(pw(par(k,sq(b)),2)),a:k*k*b};},
+  ()=>{const b=pick(SQF_S),s=ri(2,9);return{q:M(sq(b*s*s),DV,sq(b)),a:s};},
+ ],[
+  ()=>{const b=pick(SQF),k=ri(5,15);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k};},
+  ()=>{const a=ri(2,12);let b;do b=ri(2,40);while(isSq(b));return{q:M(par(a,PL,sq(b)),par(a,MI,sq(b))),a:a*a-b};},
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(fr(k*b,sq(b)),EQ,k_,sq(b)),hint:"Find k",a:k};},
+  ()=>{const b=pick(SQF_S);let s,t;do{s=ri(1,7);t=ri(1,7);}while(s===t);
+       return{q:M(sq(b*s*s),PL,sq(b*t*t),EQ,k_,sq(b)),hint:"Find k",a:s+t};},
+  ()=>{const b=pick(SQF_S),a=ri(2,9),wantP=coin();
+       return{q:M(pw(par(a,PL,sq(b)),2),EQ,mi("p"),PL,mi("q"),sq(b)),hint:wantP?"Find p":"Find q",a:wantP?a*a+b:2*a};},
+ ],[
+  ()=>{const b=pick(SQF_S);let s,t,u;do{s=ri(1,7);t=ri(1,7);u=ri(1,7);}while(s-t+u<=0||s===t||t===u||s===u);
+       return{q:M(sq(b*s*s),MI,sq(b*t*t),PL,sq(b*u*u),EQ,k_,sq(b)),hint:"Find k",a:s-t+u};},
+  ()=>{let a,b;do{a=pick(SQF_S);b=pick(SQF_S);}while(a<=b||a-b>6);const k=ri(1,6),c=k*(a-b);
+       return{q:M(fr(c,row(sq(a),MI,sq(b))),EQ,k_,par(sq(a),PL,sq(b))),hint:"Find k",a:k};},
+  ()=>{const b=pick(SQF_S),a=ri(2,6),c=ri(1,12);return{q:M(par(a,sq(b),PL,c),par(a,sq(b),MI,c)),a:a*a*b-c*c};},
+  ()=>{const b=pick([2,3,5,7]),p=nz(-5,5),q=nz(-4,4),r=nz(-5,5),s=nz(-4,4),wantX=coin();
+       const st=(u,v)=>row(u,mo(v<0?"−":"+"),Math.abs(v)===1?"":mnum(Math.abs(v)),sq(b));
+       return{q:M(par(st(p,q)),par(st(r,s)),EQ,mi("X"),PL,mi("Y"),sq(b)),hint:wantX?"Find X":"Find Y",a:wantX?p*r+q*s*b:p*s+q*r};},
+  ()=>retry(()=>{const a=ri(2,12),b=pick(SQF),n=a*a*b;if(n>3000)return null;return{q:M(sq(n),EQ,mi("a"),sq(b)),hint:"Find a",a};}),
+ ]]},
 
- indices:{name:"Indices",f:[
-  ()=>{const b=pick([2,3,5]),e=ri(2,5);return{q:`${b}<sup>${e}</sup>`,a:Math.pow(b,e)};},
- ],f2:[
-  ()=>{const[b,r,lbl]=pick([[4,2,"1/2"],[9,2,"1/2"],[16,2,"1/2"],[8,3,"1/3"],[27,3,"1/3"],[64,3,"1/3"]]);
-       const p=ri(1,3);return{q:`${b*1}<sup>${p}/${r}</sup>`,a:Math.round(Math.pow(Math.round(Math.pow(b,1/r)),p))};},
-  ()=>{const b=pick([2,3,4,5]),e=ri(2,4);return{q:`${b}<sup>−${e}</sup> = 1/k`,hint:"Find k",a:Math.pow(b,e)};},
- ],f3:[
-  ()=>{const[n,r]=pick([[16,4],[81,4],[32,5],[64,6],[243,5],[125,3],[216,3]]);
-       const root=Math.round(Math.pow(n,1/r)),p=ri(2,3);
-       return{q:`${n}<sup>${p}/${r}</sup>`,a:Math.pow(root,p)};},
-  ()=>{const b=pick([2,3,5]),m=ri(5,9),n=ri(2,4),p=ri(1,3);
-       return{q:`(${b}<sup>${m}</sup> × ${b}<sup>${n}</sup>) ÷ ${b}<sup>${m+n-p}</sup>`,a:Math.pow(b,p)};},
- ]},
+ indices:{name:"Indices",L:[[
+  ()=>{const b=ri(2,12);let mx=2;while(b**(mx+1)<=5000)mx++;const e=ri(2,mx);return{q:M(pw(b,e)),a:b**e};},
+  ()=>{if(coin()){const r=ri(2,25);return{q:M(pw(r*r,fr(1,2))),a:r};}const r=ri(2,10);return{q:M(pw(r**3,fr(1,3))),a:r};},
+  ()=>{const b=ri(2,9),m=ri(2,15),n=ri(2,15);
+       return coin()?{q:M(pw(b,m),TM,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m+n}
+                    :{q:M(pw(b,m+n),DV,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m};},
+  ()=>{const b=ri(2,20);return{q:M(pw(b,-1),EQ,fr(1,k_)),hint:"Find k",a:b};},
+ ],[
+  ()=>retry(()=>{const q=pick([2,3,4,5]),r=ri(2,{2:15,3:6,4:4,5:3}[q]),p=ri(1,q+3);if(gcd(p,q)!==1||r**p>10000)return null;
+       return{q:M(pw(r**q,fr(p,q))),a:r**p};}),
+  ()=>{const b=ri(2,10);let mx=2;while(b**(mx+1)<=10000)mx++;const e=ri(2,mx);return{q:M(pw(b,-e),EQ,fr(1,k_)),hint:"Find k",a:b**e};},
+  ()=>retry(()=>{const q=pick([2,3]),r=ri(2,q===2?12:5),p=ri(1,4);if(gcd(p,q)!==1||r**p>5000)return null;
+       return{q:M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,k_)),hint:"Find k",a:r**p};}),
+  ()=>{const r=ri(2,9);let mx=2;while(r**(mx+1)<=10000)mx++;const e=ri(2,mx);return{q:M(pw(par(fr(1,r)),-e)),a:r**e};},
+  ()=>{const b=ri(2,7),m=ri(2,6),n=ri(2,5),j=ri(1,m*n+6);
+       return{q:M(pw(par(pw(b,m)),n),DV,pw(b,j),EQ,pw(b,k_)),hint:"Find k",a:m*n-j};},
+ ],[
+  ()=>retry(()=>{const p=pick([2,3,5]),pows=[1,2,3,4].filter(i=>p**i<=625),i=pick(pows),j=pick(pows);if(i===j)return null;
+       const m=ri(2,6),n=ri(2,6),div=coin();
+       return{q:M(pw(p**i,m),div?DV:TM,pw(p**j,n),EQ,pw(p,k_)),hint:"Find k",a:div?i*m-j*n:i*m+j*n};}),
+  ()=>retry(()=>{const p=pick([2,3]),top=p===2?5:3,i=ri(1,top),j=ri(1,top),x=ri(2,9),y=i*x/j;
+       if(i===j||!Number.isInteger(y)||y<2)return null;return{q:M(pw(p**i,x_),EQ,pw(p**j,y)),hint:"Find x",a:x};}),
+  ()=>retry(()=>{const T=[[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[2,5]];
+       const A=pick(T),B=pick(T),pa=ri(1,3),pb=ri(1,3);
+       if(gcd(pa,A[1])!==1||gcd(pb,B[1])!==1||A[0]**A[1]===B[0]**B[1])return null;const v=A[0]**pa*B[0]**pb;if(v>5000)return null;
+       return{q:M(pw(A[0]**A[1],fr(pa,A[1])),TM,pw(B[0]**B[1],fr(pb,B[1]))),a:v};}),
+  ()=>retry(()=>{const [a,b]=pick([[2,3],[3,2],[2,5],[5,2],[3,5],[5,3],[4,5],[5,4],[3,4],[4,3],[2,7]]),q=pick([2,3]),p=pick([1,2]);
+       if(gcd(p,q)!==1||b**p>2000)return null;
+       return{q:M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,fr(k_,a**p)),hint:"Find k",a:b**p};}),
+  ()=>{const p=pick([2,3]),a=ri(3,12),b=ri(1,6),c=ri(1,4);
+       return{q:M(fr(row(pw(p,a),TM,pw(p*p,b)),pw(p**3,c)),EQ,pw(p,k_)),hint:"Find k",a:a+2*b-3*c};},
+ ]]},
 
- ncr:{name:"Binomials nCr",f:[
-  ()=>{const n=ri(4,9);return{q:`<span style="white-space:nowrap">C(${n}, 2)</span>`,a:nCr(n,2)};},
- ],f2:[
-  ()=>{const n=ri(6,10),r=ri(2,3);return{q:`<span style="white-space:nowrap">C(${n}, ${r})</span>`,a:nCr(n,r)};},
- ],f3:[
-  ()=>{const n=ri(9,13),r=ri(3,5);return{q:`<span style="white-space:nowrap">C(${n}, ${r})</span>`,a:nCr(n,r)};},
-  ()=>{const n=ri(5,9);return{q:`Coefficient of x<sup>2</sup> in (1 + x)<sup>${n}</sup>`,a:nCr(n,2)};},
- ]},
+ ncr:{name:"Binomials & counting",L:[[
+  ()=>{const n=ri(4,25);return{q:M(bn(n,2)),a:nCr(n,2)};},
+  ()=>{const n=ri(3,8);return{q:M(fac(n)),a:fact(n)};},
+  ()=>{const n=ri(5,12);return{q:M(bn(n,3)),a:nCr(n,3)};},
+  ()=>{const n=ri(5,16);return{q:M(bn(n,n-2)),a:nCr(n,2)};},
+  ()=>{const n=ri(5,20);return{q:M(fr(fac(n),fac(n-2))),a:n*(n-1)};},
+ ],[
+  ()=>{const n=ri(7,12),r=ri(3,4);return{q:M(bn(n,r)),a:nCr(n,r)};},
+  ()=>{const n=ri(6,15),r=ri(2,3);return{q:M(fr(fac(n),fac(n-r))),a:fact(n)/fact(n-r)};},
+  ()=>{const n=ri(5,12),k=ri(2,Math.min(4,n-1));return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(1,PL,x_),n))}`,a:nCr(n,k)};},
+  ()=>retry(()=>{const L=ri(4,7),kinds=ri(2,3),c=Array(kinds).fill(1);for(let i=kinds;i<L;i++)c[R(kinds)]++;
+       if(Math.max(...c)<2)return null;const letters=c.flatMap((m,i)=>Array(m).fill("ABC"[i])).join(" ");
+       return{q:`Arrangements of the letters <span class="letters">${letters}</span>`,a:fact(L)/c.reduce((s,m)=>s*fact(m),1)};}),
+  ()=>{const n=ri(8,20);let a;do a=ri(2,n-2);while(2*a===n);return{q:M(bn(n,a),EQ,bn(n,k_)),hint:`Find k ≠ ${a}`,a:n-a};},
+ ],[
+  ()=>{const c=pick([2,3,-2]),n=ri(4,8),k=ri(2,3);
+       return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(1,c<0?MI:PL,Math.abs(c),x_),n))}`,a:nCr(n,k)*c**k};},
+  ()=>retry(()=>{const a=ri(2,3),b=pick([1,-1,2,-2]),n=ri(3,6),k=ri(1,n-1),v=nCr(n,k)*a**(n-k)*b**k;if(Math.abs(v)>5000)return null;
+       return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(a,b<0?MI:PL,Math.abs(b)===1?"":mnum(Math.abs(b)),x_),n))}`,a:v};}),
+  ()=>{const n=ri(4,12);return{q:M(bn(n,0),PL,bn(n,1),PL,bn(n,2),PL,mo("⋯"),PL,bn(n,n)),a:2**n};},
+  ()=>{const n=ri(5,30);return{q:M(bn(mi("n"),2),EQ,nCr(n,2)),hint:"Find n",a:n};},
+  ()=>{const n=ri(10,16),r=ri(3,4);return{q:M(bn(n,r)),a:nCr(n,r)};},
+ ]]},
 
- logs:{name:"Logarithms",f:[
-  ()=>{const b=pick([2,3,5,10]),e=ri(2,4);return{q:`log<sub>${b}</sub> ${Math.pow(b,e)}`,a:e};},
- ],f2:[
-  ()=>{const b=pick([2,3,5]),e=ri(3,6);return{q:`Solve ${b}<sup>x</sup> = ${Math.pow(b,e)}`,hint:"Find x",a:e};},
-  ()=>{const b=pick([2,3]),x=ri(2,4),y=ri(2,4);
-       return{q:`log<sub>${b}</sub> ${Math.pow(b,x)} + log<sub>${b}</sub> ${Math.pow(b,y)}`,a:x+y};},
- ],f3:[
-  ()=>{const b=pick([2,3,5]),x=ri(4,7),y=ri(1,3);
-       return{q:`log<sub>${b}</sub> ${Math.pow(b,x)} − log<sub>${b}</sub> ${Math.pow(b,y)}`,a:x-y};},
-  ()=>{const b=pick([2,3]),k=ri(2,3),e=ri(2,4);
-       return{q:`${k} log<sub>${b}</sub> ${Math.pow(b,e)}`,a:k*e};},
- ]},
+ logs:{name:"Logarithms",L:[[
+  ()=>{const b=ri(2,10);let mx=1;while(b**(mx+1)<=100000)mx++;const e=ri(0,Math.min(mx,6));return{q:M(lg(b,b**e)),a:e};},
+  ()=>{const b=ri(2,10);let mx=2;while(b**(mx+1)<=100000)mx++;const e=ri(2,Math.min(mx,7));return{q:M(pw(b,x_),EQ,b**e),hint:"Find x",a:e};},
+  ()=>{const b=ri(2,10);let mx=1;while(b**(mx+1)<=10000)mx++;const e=ri(1,mx);return{q:M(lg(b,fr(1,b**e))),a:-e};},
+ ],[
+  ()=>retry(()=>{const b=pick([6,10,12,15,20]),k=ri(2,3),N=b**k;if(N>10000)return null;const divs=[];
+       for(let d=2;d<N;d++)if(N%d===0&&!isPowOf(d,b)&&!isPowOf(N/d,b))divs.push(d);if(!divs.length)return null;const x=pick(divs);
+       return{q:M(lg(b,x),PL,lg(b,N/x)),a:k};}),
+  ()=>retry(()=>{const b=ri(2,10),k=ri(1,3),y=ri(2,9),x=y*b**k;if(x>20000||isPowOf(y,b))return null;return{q:M(lg(b,x),MI,lg(b,y)),a:k};}),
+  ()=>{const b=ri(2,5),c=ri(2,5);let mx=1;while(b**(mx+1)<=1000)mx++;const e=ri(1,mx);return{q:M(c,lg(b,b**e)),a:c*e};},
+  ()=>retry(()=>{const b=pick([2,3,5]),p=ri(2,3),m=ri(1,4);if(b**(p*m)>100000)return null;return{q:M(lg(b**p,b**(p*m))),a:m};}),
+  ()=>retry(()=>{const b=ri(2,10),m=ri(1,4);if(b**(2*m)>100000)return null;return{q:M(lg(b,sq(b**(2*m)))),a:m};}),
+ ],[
+  ()=>retry(()=>{const b=ri(2,6),k=ri(1,3),x=ri(2,15),y=x*x/b**k;if(!Number.isInteger(y)||y<2)return null;
+       return{q:M(2,lg(b,x),MI,lg(b,y)),a:k};}),
+  ()=>retry(()=>{const p=pick([2,3,5,7]),q=pick([2,3,5,7]);if(p===q)return null;const m=ri(1,4),n=ri(1,4);
+       if(q**m>3000||p**n>3000)return null;return{q:M(lg(p,q**m),TM,lg(q,p**n)),a:m*n};}),
+  ()=>{const b=ri(2,10),n=ri(2,9),c=ri(1,3);return{q:M(pw(b,row(c===1?"":mnum(c),lg(b,n)))),a:n**c};},
+  ()=>retry(()=>{const b=ri(2,5),e=ri(1,4),c=nz(-9,9),v=b**e-c;if(v<=0)return null;
+       return{q:M(lg(b,par(x_,c<0?MI:PL,Math.abs(c))),EQ,e),hint:"Find x",a:v};}),
+  ()=>retry(()=>{const B=ri(2,9),k=ri(2,4),N=B**k;if(N>100000)return null;
+       return{q:M(fr(row(mi("log"),SP,mnum(N)),row(mi("log"),SP,mnum(B)))),a:k};}),
+ ]]},
 
- trig:{name:"Exact trig",f:[
-  ()=>pick([
-    {q:"sin 30° = 1/k",hint:"Find k",a:2},{q:"cos 60° = 1/k",hint:"Find k",a:2},
-    {q:"tan 45°",a:1},{q:"sin 90°",a:1},{q:"cos 0°",a:1},
-  ]),
- ],f2:[
-  ()=>pick([
-    {q:"tan 60° = √k",hint:"Find k",a:3},{q:"sin 60° = √k / 2",hint:"Find k",a:3},
-    {q:"cos 30° = √k / 2",hint:"Find k",a:3},{q:"cos 45° = 1/√k",hint:"Find k",a:2},
-    {q:"4 sin 30°",a:2},{q:"6 cos 60°",a:3},
-  ]),
- ],f3:[
-  ()=>pick([
-    {q:"tan 45° + 2 cos 60°",a:2},{q:"4 sin 30° + 2 tan 45°",a:4},
-    {q:"8 sin 30° cos 60°",a:2},{q:"tan<sup>2</sup> 60°",a:3},
-    {q:"4 cos<sup>2</sup> 30°",a:3},{q:"2 sin 30° + 2 cos 0°",a:3},
-  ]),
- ]},
+ trig:{name:"Exact trig",L:[[
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick([0,30,45,60,90]),q=tvq(fn,d,1);if(!q)return null;const c=q[1]*ri(1,6);
+       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1]};}),
+  ()=>trigInv([30,45,60,90]),
+  ()=>{const fn=pick(["sin","cos","tan"]),d=pick([30,45,60]),q=tvq(fn,d,2),c=q[1]*ri(1,4);
+       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1]};},
+ ],[
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG.filter(a=>a>90)),q=tvq(fn,d,1);if(!q)return null;const c=q[1]*ri(1,6);
+       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1]};}),
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG),q=tvq(fn,d,2);if(!q||q[0]===0)return null;const c=q[1]*ri(1,4);
+       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1]};}),
+  ()=>trigInv(ANG.filter(a=>a>0)),
+ ],[
+  ()=>retry(()=>{const t1=[pick(["sin","cos","tan"]),pick(ANG),pick([1,2])],t2=[pick(["sin","cos","tan"]),pick(ANG),pick([1,2])];
+       const q1=tvq(...t1),q2=tvq(...t2);if(!q1||!q2||q1[0]===0||q2[0]===0)return null;
+       const c1=q1[1]*ri(1,3),c2=q2[1]*ri(1,3)*pick([1,-1]);
+       return{q:M(c1===1?"":mnum(c1),tf(...t1),c2<0?MI:PL,Math.abs(c2)===1?"":mnum(Math.abs(c2)),tf(...t2)),
+              a:c1*q1[0]/q1[1]+c2*q2[0]/q2[1]};}),
+  ()=>retry(()=>{const A=[pick(["sin","cos","tan"]),pick(ANG)],B=[pick(["sin","cos","tan"]),pick(ANG)],u=tv(...A),w=tv(...B);
+       if(!u||!w||u.n===0||w.n===0||u.r!==w.r)return null;const num=u.n*w.n*u.r,den=u.d*w.d,c=den/gcd(Math.abs(num),den);if(c>12)return null;
+       return{q:M(c===1?"":mnum(c),tf(...A),SP,tf(...B)),a:c*num/den};}),
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG),v=tv(fn,d);if(!v)return null;const top=pick([180,360,540,720]);
+       let n=0;for(let e=0;e<top;e+=15){if(e%30&&e%45)continue;const w=tv(fn,e);if(w&&w.n===v.n&&(v.n===0||(w.d===v.d&&w.r===v.r)))n++;}
+       return{q:`Number of solutions of ${M(mi(fn),SP,x_,EQ,valML(v,coin()))} for ${M(DEG(0),mo("≤"),x_,mo("&lt;"),DEG(top))}`,a:n};}),
+  ()=>{const a=ri(2,12),b=ri(2,12),C=pick([60,90,120]);
+       return{q:`Triangle with ${M(mi("a"),EQ,a)}, ${M(mi("b"),EQ,b)} and angle ${M(mi("C"),EQ,DEG(C))} between them`,hint:"Find c² (c is the third side)",
+              a:a*a+b*b-{60:a*b,90:0,120:-a*b}[C]};},
+  ()=>retry(()=>{const a=ri(2,16),b=ri(2,16),C=pick([30,150,90]),A=C===90?a*b/2:a*b/4;if(!Number.isInteger(A))return null;
+       return{q:`Area of a triangle with sides ${M(a)} and ${M(b)} and included angle ${M(DEG(C))}`,a:A};}),
+ ]]},
 
- number:{name:"Number theory",f:[
-  ()=>{const a=ri(6,30),b=ri(6,30);return{q:`HCF(${a}, ${b})`,a:gcd(a,b)};},
- ],f2:[
-  ()=>{const n=pick([24,36,48,60,72,90,96]);return{q:`Divisors of ${n}`,hint:"How many?",a:ndiv(n)};},
-  ()=>{const a=ri(8,24),b=ri(8,24);return{q:`LCM(${a}, ${b})`,a:a*b/gcd(a,b)};},
- ],f3:[
-  ()=>{const n=pick([120,144,180,210,240,360,420,504]);return{q:`Divisors of ${n}`,hint:"How many?",a:ndiv(n)};},
-  ()=>{const n=pick([84,90,126,198,350,462]);let m=n,s=0;
-       for(let p=2;p*p<=m;p++)while(m%p===0){s+=p;m/=p;} if(m>1)s+=m;
-       return{q:`Sum of the prime factors of ${n}`,hint:"With repeats",a:s};},
- ]},
+ number:{name:"Number theory",L:[[
+  ()=>retry(()=>{const g=ri(2,15),x=ri(2,12),y=ri(2,12);if(x===y||gcd(x,y)!==1)return null;return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g};}),
+  ()=>retry(()=>{const a=ri(4,30),b=ri(4,30);if(a===b||a%b===0||b%a===0)return null;const l=lcm(a,b);if(l>500)return null;
+       return{q:M(mi("LCM"),par(a,mo(","),b)),a:l};}),
+  ()=>{const n=ri(12,100);return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n)};},
+  ()=>retry(()=>{const p=pick([3,5,7,11,13,17,19,23,29,31]),q=pick(PRIMES.filter(v=>v>=p)),n=p*q;if(n>999)return null;
+       return{q:`Smallest prime factor of ${M(n)}`,a:p};}),
+ ],[
+  ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11])n*=p**ri(0,p<=3?4:p===5?2:1);if(n<30||n>3000||ndiv(n)<6)return null;
+       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n)};}),
+  ()=>retry(()=>{const a=ri(2,20),b=ri(2,20),c=ri(2,20);if(new Set([a,b,c]).size<3)return null;const l=lcm(lcm(a,b),c);
+       if(l>1000||l===Math.max(a,b,c))return null;return{q:M(mi("LCM"),par(a,mo(","),b,mo(","),c)),a:l};}),
+  ()=>retry(()=>{const k=ri(3,5),ps=Array.from({length:k},()=>pick([2,3,5,7,11,13])),n=ps.reduce((s,p)=>s*p,1);if(n>2000)return null;
+       return{q:`Sum of the prime factors of ${M(n)}, counted with repeats`,a:ps.reduce((s,p)=>s+p,0)};}),
+  ()=>{const b=ri(6,13),a=ri(200,9999);return{q:`Remainder when ${M(a)} is divided by ${M(b)}`,a:a%b};},
+  ()=>retry(()=>{const g=ri(6,40),x=ri(3,25),y=ri(3,25);if(x===y||gcd(x,y)!==1||g*x>999||g*y>999||g*x<100||g*y<100)return null;
+       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g};}),
+ ],[
+  ()=>retry(()=>{const ps=[2,3,5,7,11].filter(()=>R(3)!==0);if(ps.length<2)return null;const es=ps.map(()=>ri(1,5)),parts=[];
+       ps.forEach((p,i)=>{if(parts.length)parts.push(TM);parts.push(es[i]===1?mnum(p):pw(p,es[i]));});
+       return{q:`Number of positive divisors of ${M(...parts)}`,a:es.reduce((s,e)=>s*(e+1),1)};}),
+  ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11,13])n*=p**ri(0,p<=3?5:p<=7?2:1);if(n<500||n>10000||ndiv(n)<12)return null;
+       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n)};}),
+  ()=>{const n=ri(20,200);let z=0;for(let p=5;p<=n;p*=5)z+=Math.floor(n/p);return{q:`Number of zeros at the end of ${M(fac(n))}`,a:z};},
+  ()=>{const p=pick([2,3,5,7]),n=ri(10,60);let e=0;for(let q=p;q<=n;q*=p)e+=Math.floor(n/q);
+       return{q:`Largest ${M(k_)} such that ${M(pw(p,k_))} divides ${M(fac(n))}`,a:e};},
+  ()=>{const a=ri(2,9),n=ri(11,99);let d=1;for(let i=0;i<n;i++)d=d*a%10;return{q:`Last digit of ${M(pw(a,n))}`,a:d};},
+  ()=>retry(()=>{const a=ri(2,9),b=ri(2,9),N=ri(50,500);if(a===b||a%b===0||b%a===0)return null;
+       return{q:`How many of ${M(1,mo(","),2,mo(","),3,mo(","),mo("…"),mo(","),N)} are divisible by ${M(a)} or ${M(b)}?`,
+              a:Math.floor(N/a)+Math.floor(N/b)-Math.floor(N/lcm(a,b))};}),
+ ]]},
 
- quadratics:{name:"Quadratics",f:[
-  ()=>{const b=ri(2,9),c=ri(1,9);return{q:`Discriminant of x<sup>2</sup> + ${b}x + ${c}`,a:b*b-4*c};},
- ],f2:[
-  ()=>{const a=ri(2,4),b=ri(3,9),c=ri(1,6);
-       return{q:`Discriminant of ${a}x<sup>2</sup> + ${b}x + ${c}`,a:b*b-4*a*c};},
-  ()=>{const p=ri(2,9);return{q:`x<sup>2</sup> + ${2*p}x + c is a perfect square`,hint:"Find c",a:p*p};},
- ],f3:[
-  ()=>{const p=ri(2,8),qv=ri(-9,9),c=p*p+qv;
-       const ct=c<0?`− ${-c}`:`+ ${c}`;
-       return{q:`x<sup>2</sup> + ${2*p}x ${ct} ≡ (x + ${p})<sup>2</sup> + q`,hint:"Find q",a:qv};},
-  ()=>{const a=ri(2,5),r1=ri(1,6),r2=ri(1,6);
-       return{q:`Product of the roots of ${a}x<sup>2</sup> − ${a*(r1+r2)}x + ${a*r1*r2}`,a:r1*r2};},
- ]},
+ quadratics:{name:"Quadratics",L:[[
+  ()=>{const b=nz(-12,12),c=nz(-20,20);return{q:`Discriminant of ${M(poly([1,b,c]))}`,a:b*b-4*c};},
+  ()=>{const p=nz(-12,12);return{q:`${M(poly([1,2*p,0]),PL,mi("c"))} is a perfect square`,hint:"Find c",a:p*p};},
+  ()=>retry(()=>{const b=nz(-12,12),c=nz(-20,20);if(b*b-4*c<0)return null;return{q:`Sum of the roots of ${M(poly([1,b,c]),EQ,0)}`,a:-b};}),
+  ()=>retry(()=>{const r=ri(-9,9),s=ri(-9,9);if(r===s)return null;return{q:`Larger root of ${M(poly([1,-(r+s),r*s]),EQ,0)}`,a:Math.max(r,s)};}),
+ ],[
+  ()=>{const a=pick([-5,-4,-3,-2,2,3,4,5]),b=ri(-12,12),c=nz(-12,12);return{q:`Discriminant of ${M(poly([a,b,c]))}`,a:b*b-4*a*c};},
+  ()=>{const p=nz(-12,12),c=ri(-30,30);return{q:M(poly([1,2*p,c]),mo("≡"),pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-p*p};},
+  ()=>{const p=nz(-12,12),c=ri(-30,40);return{q:`Minimum value of ${M(poly([1,2*p,c]))}`,a:c-p*p};},
+  ()=>retry(()=>{const a=ri(2,6),r=ri(-6,6),s=ri(-6,6);if(r===s)return null;const wantP=coin();
+       return{q:`${wantP?"Product":"Sum"} of the roots of ${M(poly([a,-a*(r+s),a*r*s]),EQ,0)}`,a:wantP?r*s:r+s};}),
+ ],[
+  ()=>{const m=ri(2,20),pos=coin();return{q:`${M(pw(x_,2),PL,k_,x_,PL,m*m,EQ,0)} has a repeated root and ${M(k_,mo(pos?"&gt;":"&lt;"),0)}`,hint:"Find k",a:pos?2*m:-2*m};},
+  ()=>{const c=nz(-6,6),s=ri(1,4),b=2*c*s*pick([1,-1]);
+       return{q:`${M(k_,pw(x_,2),signed(b,x_),signed(c,""),EQ,0)} has a repeated root`,hint:"Find k",a:c*s*s};},
+  ()=>{const a=ri(2,5),p=nz(-6,6),c=ri(-20,30);
+       return{q:M(poly([a,2*a*p,c]),mo("≡"),a,pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-a*p*p};},
+  ()=>retry(()=>{const S=ri(-9,9),P=ri(-20,20);if(S*S-4*P<0)return null;
+       return{q:`${M(mi("α"),mo(","),mi("β"))} are the roots of ${M(poly([1,-S,P]),EQ,0)}. Find ${M(pw(mi("α"),2),PL,pw(mi("β"),2))}`,a:S*S-2*P};}),
+  ()=>{const r=ri(-10,10),s=r+ri(2,9);return{q:`How many integers ${M(x_)} satisfy ${M(poly([1,-(r+s),r*s]),mo("&lt;"),0)}?`,a:s-r-1};},
+  ()=>{const a=pick([-4,-3,-2,-1,1,2,3,4]),h=nz(-8,8),c=ri(-20,20);
+       return{q:`${M(x_)}-coordinate of the turning point of ${M(y_,EQ,poly([a,-2*a*h,c]))}`,a:h};},
+ ]]},
 
- stdform:{name:"Standard form",f:[
-  ()=>{const a=ri(2,4),b=ri(2,4),m=ri(2,6),n=ri(2,5);const prod=a*b;
-       const k=m+n+(prod>=10?1:0);
-       return{q:`(${a}×10<sup>${m}</sup>)(${b}×10<sup>${n}</sup>) = c×10<sup>k</sup>`,hint:"Find k",a:k};},
- ],f2:[
-  ()=>{const a=ri(2,9),b=ri(2,9),m=ri(3,8),n=ri(1,4);const k=m-n-(a<b?1:0);
-       return{q:`(${a}×10<sup>${m}</sup>) ÷ (${b}×10<sup>${n}</sup>) = c×10<sup>k</sup>`,hint:"Find k",a:k};},
-  ()=>{const d=pick([0.00042,0.0073,0.000091,0.0000506,0.00000812]);
-       const k=Math.floor(Math.log10(d)+1e-9);
-       return{q:`${d} = a×10<sup>k</sup>`,hint:"Find k",a:k};},
- ],f3:[
-  ()=>{const a=ri(2,9),m=ri(2,5),p=ri(2,3);const base=a*a*(p===3?a:1);
-       const k=m*p+(base>=10?(base>=100?2:1):0);
-       return{q:`(${a}×10<sup>${m}</sup>)<sup>${p}</sup> = c×10<sup>k</sup>`,hint:"Find k",a:k};},
-  ()=>{const t=ri(2,9)*100+ri(1,9)*10;const r=Math.round(t/1000)*1000;
-       const u=ri(41,59);const est=Math.round(t*u/1000)*1000;
-       return{q:`Estimate ${t} × ${u}`,hint:"To the nearest 1000",a:est};},
- ]}
+ stdform:{name:"Standard form",L:[[
+  ()=>retry(()=>{const d=ri(11,999);if(d%10===0)return null;
+       if(coin()){const s=String(d)+"0".repeat(ri(2,7));return{q:M(mnum(Number(s)),EQ,SFR),hint:SFH,a:s.length-1};}
+       const z=ri(1,6);return{q:M(mn("0."+"0".repeat(z)+d),EQ,SFR),hint:SFH,a:-(z+1)};}),
+  ()=>{const A=ri(11,99),B=ri(11,99),m=nz(-6,9),n=nz(-6,9);
+       return{q:M(par(sfm(A,m)),par(sfm(B,n)),EQ,SFR),hint:SFH,a:m+n+(A*B>=1000?1:0)};},
+ ],[
+  ()=>{const A=ri(11,99),B=ri(11,99),m=nz(-6,9),n=nz(-6,9);
+       return{q:M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,SFR),hint:SFH,a:m-n-(A<B?1:0)};},
+  ()=>{const A=ri(11,99),B=ri(11,99),m=ri(2,8),n=m-ri(0,2),V=A*10**(m-n)+B;
+       return{q:M(sfm(A,m),PL,sfm(B,n),EQ,SFR),hint:SFH,a:flog(V,1)+n-1};},
+  ()=>{const s=ri(2,9),j=nz(-5,8),V=s*s;
+       const inner=V>=10?row(mn(String(V/10)),TM,pw(10,2*j+1)):row(mn(String(V)),TM,pw(10,2*j));
+       return{q:M(sq(inner),EQ,SFR),hint:SFH,a:j};},
+  ()=>{const A=ri(11,99),m=nz(-4,6),p=pick([2,3]),P=A**p;
+       return{q:M(pw(par(sfm(A,m)),p),EQ,SFR),hint:SFH,a:m*p+String(P).length-1-p};},
+ ],[
+  ()=>{const A=pick([12,15,16,20,25,32,40,50,64,80]),m=nz(-6,9);return{q:M(fr(1,sfm(A,m)),EQ,SFR),hint:SFH,a:-m-1};},
+  ()=>{const b=ri(3,15),j=ri(0,10),twoHeavy=coin(),extra=twoHeavy?2**j:5**j;
+       return{q:`Number of digits in ${M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j))}`,a:b+String(extra).length};},
+  ()=>{const A=ri(11,99),B=ri(11,99),C=ri(11,99),m=nz(-5,8),n=nz(-5,8),p=nz(-5,8);
+       return{q:M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,SFR),hint:SFH,a:m+n-p+flog(A*B,10*C)};},
+  ()=>retry(()=>{const A=ri(11,99),B=ri(11,99),m=ri(2,8),n=m-ri(0,1),V=A*10**(m-n)-B;if(V<=0)return null;
+       return{q:M(sfm(A,m),MI,sfm(B,n),EQ,SFR),hint:SFH,a:flog(V,1)+n-1};}),
+ ]]},
+
+ series:{name:"Sequences & series",L:[[
+  ()=>{const n=ri(10,100);return{q:M(1,PL,2,PL,3,PL,mo("⋯"),PL,n),a:n*(n+1)/2};},
+  ()=>{const a=ri(-10,20),d=nz(-7,9),n=ri(10,40);
+       return{q:`The ${ORD(n)} term of ${M(a,mo(","),a+d,mo(","),a+2*d,mo(","),mo("…"))}`,a:a+(n-1)*d};},
+  ()=>{const n=ri(5,30);return{q:M(1,PL,3,PL,5,PL,mo("⋯"),PL,2*n-1),a:n*n};},
+ ],[
+  ()=>{const a=ri(1,20),d=ri(2,9),n=ri(6,30),l=a+(n-1)*d;return{q:M(a,PL,a+d,PL,a+2*d,PL,mo("⋯"),PL,l),a:n*(a+l)/2};},
+  ()=>retry(()=>{const a=ri(1,5)*pick([1,-1]),r=pick([2,3,-2,-3,4,5]),n=ri(4,8),v=a*r**(n-1);if(Math.abs(v)>50000)return null;
+       return{q:`The ${ORD(n)} term of ${M(a,mo(","),a*r,mo(","),a*r*r,mo(","),mo("…"))}`,a:v};}),
+  ()=>retry(()=>{const p=nz(-3,3),q=ri(-5,5),c=ri(-4,6),N=pick([4,5]);let v=c;for(let i=1;i<N;i++)v=p*v+q;if(Math.abs(v)>5000)return null;
+       return{q:`${M(sb(x_,row(mi("n"),PL,1)),EQ,terms([{c:p,t:sb(x_,mi("n"))},{c:q,t:""}]))} and ${M(sb(x_,1),EQ,c)}. Find ${M(sb(x_,N))}`,a:v};}),
+  ()=>{const k=ri(3,9),N=ri(50,200),m=Math.floor((N-1)/k);return{q:`Sum of the positive multiples of ${M(k)} less than ${M(N)}`,a:k*m*(m+1)/2};},
+ ],[
+  ()=>retry(()=>{const a=ri(1,5),r=pick([2,3]),n=ri(4,8),v=a*(r**n-1)/(r-1);if(v>20000)return null;
+       return{q:M(a,PL,a*r,PL,a*r*r,PL,mo("⋯"),PL,a*r**(n-1)),a:v};}),
+  ()=>retry(()=>{const [nu,de]=pick([[1,2],[1,3],[1,4],[-1,2],[2,3],[3,4],[-1,3],[-2,3]]),a=de*de*ri(1,4),S=a*de/(de-nu);
+       if(!Number.isInteger(S))return null;const t=[a,a*nu/de,a*nu*nu/(de*de)],next=nu<0?-1:1;
+       return{q:`Sum to infinity of ${M(t[0],signed(t[1],""),signed(t[2],""),mo(next<0?"−":"+"),mo("⋯"))}`,a:S};}),
+  ()=>{const p=ri(1,6),q=ri(-5,9),n=ri(5,30);
+       return{q:M(`<munderover><mo>∑</mo>${row(mi("r"),EQ,1)}${row(n)}</munderover>`,par(terms([{c:p,t:mi("r")},{c:q,t:""}]))),a:p*n*(n+1)/2+q*n};},
+  ()=>{const a=ri(-10,20),d=nz(-6,8),i=ri(2,5),j=i+ri(2,6),n=ri(12,30);
+       return{q:`Arithmetic sequence with ${M(sb(mi("u"),i),EQ,a+(i-1)*d)} and ${M(sb(mi("u"),j),EQ,a+(j-1)*d)}. Find ${M(sb(mi("u"),n))}`,a:a+(n-1)*d};},
+ ]]},
+
+ poly:{name:"Polynomials",L:[[
+  ()=>{const deg=pick([2,3]),c=Array.from({length:deg+1},(_,i)=>i===0?nz(-3,4):ri(-6,6)),t=nz(-3,3);
+       return{q:`${M(fx,EQ,poly(c))}. Find ${M(mi("f"),par(t))}`,a:evalP(c,t)};},
+  ()=>{const b=ri(-6,6),c=ri(-9,9),a=nz(-4,4);return{q:`Remainder when ${M(poly([1,b,c]))} is divided by ${M(lin(a))}`,a:a*a+b*a+c};},
+ ],[
+  ()=>{const c=[nz(-3,3),ri(-6,6),ri(-6,6),ri(-9,9)],a=nz(-3,4);return{q:`Remainder when ${M(poly(c))} is divided by ${M(lin(a))}`,a:evalP(c,a)};},
+  ()=>{const b=ri(-6,6),c=ri(-9,9),a=nz(-3,3);
+       return{q:`${M(lin(a))} is a factor of ${M(pw(x_,3),signed(b,pw(x_,2)),signed(c,x_),PL,k_)}`,hint:"Find k",a:-(a**3+b*a*a+c*a)};},
+  ()=>{const n=ri(3,9),a=pick([-2,-1,1,2]),c=nz(-9,9);
+       return{q:`Remainder when ${M(pw(x_,n),signed(c,""))} is divided by ${M(lin(a))}`,a:a**n+c};},
+ ],[
+  ()=>retry(()=>{const c=[nz(-4,4),ri(-6,6),ri(-6,6),ri(-9,9)],s=pick([1,-1]),v=(c[0]*s**3+2*c[1]*s*s+4*c[2]*s+8*c[3])/8;
+       if(!Number.isInteger(v))return null;return{q:`Remainder when ${M(poly(c))} is divided by ${M(par(poly([2,-s])))}`,a:v};}),
+  ()=>{const k=nz(-6,6),c=ri(-9,9),a=nz(-3,3),d=-(a**3+k*a*a+c*a);
+       return{q:`${M(lin(a))} is a factor of ${M(pw(x_,3),PL,k_,pw(x_,2),signed(c,x_),signed(d,""))}`,hint:"Find k",a:k};},
+  ()=>{const p=ri(-8,8),q=ri(-10,10);
+       return{q:`${M(fx,EQ,pw(x_,2),PL,mi("p"),x_,PL,mi("q"))}, with ${M(mi("f"),par(1),EQ,1+p+q)} and ${M(mi("f"),par(2),EQ,4+2*p+q)}`,hint:"Find p",a:p};},
+ ]]},
+
+ calculus:{name:"Calculus",L:[[
+  ()=>{const c=ri(1,6),n=ri(2,4),t=nz(-3,3);return{q:`${M(y_,EQ,coefx(c,pw(x_,n)))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:c*n*t**(n-1)};},
+  ()=>{const c=[nz(-5,5),ri(-9,9),ri(-9,9)],t=ri(-4,4);return{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:2*c[0]*t+c[1]};},
+  ()=>retry(()=>{const a=nz(-6,6),b=ri(-6,6),t=ri(1,6),v=a*t*t/2+b*t;if(!Number.isInteger(v))return null;
+       return{q:M(intg(0,t),par(poly([a,b])),dx),a:v};}),
+ ],[
+  ()=>{const c=[nz(-4,4),ri(-6,6),ri(-6,6),ri(-9,9)],t=nz(-3,3);
+       return R(3)===0?{q:`${M(fx,EQ,poly(c))}. Find ${M(fpp(t))}`,a:6*c[0]*t+2*c[1]}
+                      :{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:3*c[0]*t*t+2*c[1]*t+c[2]};},
+  ()=>retry(()=>{const q=pick([2,3]),p=pick([1,2,3,4,5,7]),r=ri(2,4);if(gcd(p,q)!==1||p===q||r**q>100)return null;
+       let num=p,den=q;if(p>=q)num*=r**(p-q);else den*=r**(q-p);const g=gcd(num,den);num/=g;den/=g;const c=den*ri(1,3);
+       return{q:`${M(y_,EQ,coefx(c,pw(x_,fr(p,q))))}. Find ${M(dydx)} at ${M(x_,EQ,r**q)}`,a:c*num/den};}),
+  ()=>retry(()=>{const k=ri(1,6),a=ri(0,3),b=a+ri(1,3),v=k*(b**3-a**3)/3;if(!Number.isInteger(v))return null;
+       return{q:M(intg(a,b),coefx(k,pw(x_,2)),dx),a:v};}),
+  ()=>retry(()=>{const c=ri(1,8),t=ri(1,4),v=c*t**4/4;if(!Number.isInteger(v))return null;return{q:M(intg(0,t),coefx(c,pw(x_,3)),dx),a:v};}),
+ ],[
+  ()=>retry(()=>{const c=[ri(-4,4),ri(-6,6),ri(-6,6)],t=ri(2,4),v6=2*c[0]*(t**3-1)+3*c[1]*(t*t-1)+6*c[2]*(t-1);
+       if(v6%6!==0||c[0]===0)return null;return{q:M(intg(1,t),par(poly(c)),dx),a:v6/6};}),
+  ()=>{const s=ri(2,6),k=ri(1,6);return{q:M(intg(1,s*s),fr(k,sq(x_)),dx),a:2*k*(s-1)};},
+  ()=>{if(coin()){const m=ri(1,6),c=ri(-9,9);
+         return{q:`Positive ${M(x_)}-coordinate of a stationary point of ${M(y_,EQ,poly([1,0,-3*m*m,c]))}`,a:m};}
+       const p=ri(-4,4),q=p+ri(1,5),c=ri(-9,9);
+       return{q:`Larger ${M(x_)}-coordinate of the stationary points of ${M(y_,EQ,poly([2,-3*(p+q),6*p*q,c]))}`,a:q};},
+  ()=>{const t=nz(-4,4),m=nz(-3,3),a=m*t*t;return{q:`${M(y_,EQ,fr(poly([1,0,a]),x_))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:1-m};},
+ ]]},
+
+ fractions:{name:"Fractions & ratio",L:[[
+  ()=>retry(()=>{const d=ri(3,12),n=ri(1,2*d);if(gcd(n,d)!==1||n===d)return null;const amt=d*ri(2,30);return{q:M(fr(n,d),TM,amt),a:n*amt/d};}),
+  ()=>retry(()=>{const v=ri(2,12),c=ri(1,9),d=ri(2,9);if(gcd(c,d)!==1)return null;let a=v*c,b=d;const g=gcd(a,b);a/=g;b/=g;if(b===1)return null;
+       return{q:M(fr(a,b),DV,fr(c,d)),a:v};}),
+  ()=>retry(()=>{const q=pick([2,4,5,10,20,25,50]),p=ri(1,2*q);if(gcd(p,q)!==1)return null;
+       return{q:M(fr(p,q),EQ,k_,mo("%")),hint:"Find k",a:100*p/q};}),
+  ()=>{const parts=[ri(1,5),ri(1,5),ri(1,5)].slice(0,pick([2,3])),s=parts.reduce((a,b)=>a+b,0),N=s*ri(3,40);
+       return{q:`Share ${M(N)} in the ratio ${M(...parts.flatMap((v,i)=>i?[mo(":"),v]:[v]))}. The largest share?`,a:Math.max(...parts)*N/s};},
+ ],[
+  ()=>retry(()=>{const b=ri(2,12),d=ri(2,12),a=ri(1,b*2),c=ri(1,d*2);if(gcd(a,b)!==1||gcd(c,d)!==1||b===d)return null;
+       const sub=R(3)===0;let n=sub?a*d-c*b:a*d+c*b,m=b*d;if(n<=0)return null;const g=gcd(n,m);n/=g;m/=g;if(m===1)return null;const wantQ=coin();
+       return{q:`${M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n};}),
+  ()=>retry(()=>{const a=ri(0,9),b=ri(0,9);if(a===b)return null;let n=10*a+b,m=99;const g=gcd(n,m);n/=g;m/=g;const wantQ=R(3)!==0;
+       return{q:`${M(rec("",`${a}${b}`),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n};}),
+  ()=>retry(()=>{const q1=ri(2,5),q2=ri(2,5),w1=ri(1,3),w2=ri(1,3),r1=ri(1,q1-1),r2=ri(1,q2-1);if(gcd(r1,q1)!==1||gcd(r2,q2)!==1)return null;
+       const prod=(w1*q1+r1)*(w2*q2+r2)/(q1*q2);if(!Number.isInteger(prod))return null;return{q:M(mixed(w1,r1,q1),TM,mixed(w2,r2,q2)),a:prod};}),
+  ()=>retry(()=>{const a=ri(2,12),b=a+ri(1,8),v=a*b/(b-a);if(!Number.isInteger(v))return null;return{q:M(fr(1,row(fr(1,a),MI,fr(1,b)))),a:v};}),
+ ],[
+  ()=>retry(()=>{let pre,rep,n,m;if(coin()){pre=String(ri(1,9));rep=String(ri(10,99));if(rep[0]===rep[1]||pre===rep[1])return null;
+         const all=Number(pre+rep);n=all-Number(pre);m=990;}
+       else{pre=String(ri(10,99));rep=String(ri(1,8));if(pre[1]===rep)return null;n=Number(pre+rep)-Number(pre);m=900;}
+       const g=gcd(n,m);n/=g;m/=g;const wantQ=coin();
+       return{q:`${M(rec(pre,rep),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n};}),
+  ()=>{const k=ri(2,12),divs=[];for(let d=1;d<=k;d++)if((k*k)%d===0)divs.push(d);const d=pick(divs),a=k+d,b=k+k*k/d;
+       return coin()?{q:M(fr(1,a),PL,fr(1,b),EQ,fr(1,k_)),hint:"Find k",a:k}:{q:M(fr(1,a),PL,fr(1,k_),EQ,fr(1,k)),hint:"Find k",a:b};},
+  ()=>retry(()=>{const a=ri(1,5),b=ri(1,5),c=ri(2,6);let n=a*(b*c+1)+c,m=b*c+1;const g=gcd(n,m);n/=g;m/=g;if(m===1)return null;const wantP=coin();
+       return{q:`${M(a,PL,fr(1,row(b,PL,fr(1,c))),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantP?"Find p":"Find q",a:wantP?n:m};}),
+ ]]},
+
+ coord:{name:"Coordinate geometry",L:[[
+  ()=>{const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[6,8,10],[9,12,15],[9,40,41]]),s=pick([1,1,2]),
+         x1=ri(-9,9),y1=ri(-9,9),sw=coin(),ddx=(sw?a:b)*s*pick([1,-1]),ddy=(sw?b:a)*s*pick([1,-1]);
+       return{q:`Distance from ${M(pt(x1,y1))} to ${M(pt(x1+ddx,y1+ddy))}`,a:c*s};},
+  ()=>{const m=nz(-6,6),d=nz(-5,5),x1=ri(-9,9),y1=ri(-9,9);return{q:`Gradient of the line through ${M(pt(x1,y1))} and ${M(pt(x1+d,y1+m*d))}`,a:m};},
+  ()=>retry(()=>{const x1=ri(-12,12),y1=ri(-12,12),x2=ri(-12,12),y2=ri(-12,12),wantX=coin(),v=wantX?(x1+x2)/2:(y1+y2)/2;
+       if(!Number.isInteger(v)||(x1===x2&&y1===y2))return null;
+       return{q:`${M(wantX?x_:y_)}-coordinate of the midpoint of ${M(pt(x1,y1))} and ${M(pt(x2,y2))}`,a:v};}),
+ ],[
+  ()=>{const a=ri(-8,8),b=ri(-8,8),r=ri(1,12);
+       return{q:`Radius of the circle ${M(pw(x_,2),PL,pw(y_,2),signed(-2*a,x_),signed(-2*b,y_),signed(a*a+b*b-r*r,""),EQ,0)}`,a:r};},
+  ()=>{const m=nz(-5,5),t=nz(-4,4),x1=ri(-8,8),y1=ri(-8,8);
+       return{q:`Gradient of a line perpendicular to the line through ${M(pt(x1,y1))} and ${M(pt(x1+m*t,y1-t))}`,a:m};},
+  ()=>{const m=nz(-5,5),p=ri(-6,6),q=ri(-9,9);return{q:`${M(y_)}-intercept of the line through ${M(pt(p,q))} with gradient ${M(m)}`,a:q-m*p};},
+  ()=>{const a=nz(-6,6),b=nz(-6,6),k=nz(-9,9);
+       return{q:`The line ${M(terms([{c:a,t:x_},{c:b,t:y_}]),EQ,a*k)} meets the ${M(x_)}-axis at ${M(pt(k_,0))}`,hint:"Find k",a:k};},
+ ],[
+  ()=>{const a=nz(-8,8),b=nz(-8,8),r=ri(1,10),wantA=coin();
+       return{q:`The circle ${M(pw(x_,2),PL,pw(y_,2),signed(-2*a,x_),signed(-2*b,y_),signed(a*a+b*b-r*r,""),EQ,0)} has centre ${M(pt(mi("p"),mi("q")))}`,
+              hint:wantA?"Find p":"Find q",a:wantA?a:b};},
+  ()=>retry(()=>{const m1=nz(-5,5),m2=nz(-5,5),x0=ri(-6,6),c1=ri(-9,9);if(m1===m2)return null;const c2=m1*x0+c1-m2*x0;if(Math.abs(c2)>20)return null;
+       return{q:`${M(x_)}-coordinate where ${M(y_,EQ,terms([{c:m1,t:x_},{c:c1,t:""}]))} meets ${M(y_,EQ,terms([{c:m2,t:x_},{c:c2,t:""}]))}`,a:x0};}),
+  ()=>retry(()=>{const P=[0,1,2].map(()=>[ri(-6,6),ri(-6,6)]),det=(P[1][0]-P[0][0])*(P[2][1]-P[0][1])-(P[2][0]-P[0][0])*(P[1][1]-P[0][1]);
+       if(det===0||det%2!==0)return null;
+       return{q:`Area of the triangle with vertices ${M(pt(...P[0]))}, ${M(pt(...P[1]))} and ${M(pt(...P[2]))}`,a:Math.abs(det)/2};}),
+  ()=>retry(()=>{const a=nz(-6,6),b=nz(-6,6),r=ri(1,9);if(b-r>0||b+r<=0)return null;
+       return{q:`The line ${M(y_,EQ,k_)} is a tangent to ${M(pw(lin(a),2),PL,pw(par(terms([{c:1,t:y_},{c:-b,t:""}])),2),EQ,r*r)} and ${M(k_,mo("&gt;"),0)}`,
+              hint:"Find k",a:b+r};}),
+ ]]},
 };
 const CATS=Object.keys(GEN);
-function make(cat,lv){const g=GEN[cat];const bank=lv>=3?g.f3:lv===2?g.f2:g.f;
-  const o=pick(bank)();return{cat,lv,q:o.q,hint:o.hint||"",a:o.a};}
+function make(cat,lv,avoid){const bank=GEN[cat].L[Math.min(3,Math.max(1,lv))-1];let idx=R(bank.length);
+  if(bank.length>1&&idx===avoid)idx=(idx+1+R(bank.length-1))%bank.length;
+  const o=bank[idx]();return{cat,lv,idx,q:o.q,hint:o.hint||"",a:o.a};}
+/*GEN-END*/
 
 /* ---------- state ---------- */
 const BLANK=()=>({lv:1,seen:0,right:0,times:[],recent:[]});
 let S={cats:Object.fromEntries(CATS.map(c=>[c,BLANK()])),sessions:[],streak:{last:null,count:0}};
 let focus=new Set(CATS), run=null, cur=null, shownAt=0, db=null, uid=null;
+let lastCat=null; const lastIdx={}, recentQ=[];
 
 const $=(id)=>document.getElementById(id);
 const med=(a)=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;
   return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
+const ymd=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const secs=(ms)=>`${(ms/1000).toFixed(1)}s`;
+
+function show(q,tag){
+  cur={...q,tries:0,revealed:false};
+  $("cat").textContent=tag;
+  const el=$("q");el.innerHTML=cur.q;
+  el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
+  $("hint").textContent=cur.hint||"Whole-number answer";
+  setSecond(false);
+  $("ans").value="";$("ans").disabled=false;$("ans").focus();
+  shownAt=performance.now();
+}
+function setSecond(on){$("card").classList.toggle("second",on);$("retryTag").hidden=!on;}
+function say(text,kind){const v=$("verdict");v.textContent=text;v.className="verdict "+(kind||"");}
+function flash(kind){const c=$("card");c.classList.remove("flash-ok","flash-bad");void c.offsetWidth;c.classList.add(kind==="ok"?"flash-ok":"flash-bad");}
+function updateBar(){
+  if(!run)return;
+  $("score").textContent=`${run.right} / ${run.n}`;
+  $("qn").textContent=run.phase==="review"?`R ${run.ri+1} / ${run.shelf.length}`:`Q ${run.n+1}`;
+  $("aside").textContent=run.phase==="main"&&run.shelf.length?`${run.shelf.length} set aside`:"";
+}
 
 function nextQ(){
   const pool=CATS.filter(c=>focus.has(c));
   if(!pool.length)return;
+  const cand=pool.length>1&&lastCat&&pool.includes(lastCat)?pool.filter(c=>c!==lastCat):pool;
   // weight toward low accuracy and few attempts
-  const w=pool.map(c=>{const s=S.cats[c];const acc=s.seen?s.right/s.seen:0.5;
+  const w=cand.map(c=>{const s=S.cats[c];const acc=s.seen?s.right/s.seen:0.5;
     return Math.max(0.35,1.25-acc)+(s.seen<6?0.5:0);});
-  let t=w.reduce((a,b)=>a+b,0),r=Math.random()*t,cat=pool[0];
-  for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0){cat=pool[i];break;}}
-  cur=make(cat,S.cats[cat].lv);
-  $("cat").textContent=`${GEN[cat].name} · level ${cur.lv}`;
-  $("q").innerHTML=cur.q;
-  $("hint").textContent=cur.hint||"Whole-number answer";
-  $("ans").value="";$("ans").disabled=false;$("ans").focus();
-  shownAt=performance.now();
+  let t=w.reduce((a,b)=>a+b,0),r=Math.random()*t,cat=cand[0];
+  for(let i=0;i<cand.length;i++){r-=w[i];if(r<=0){cat=cand[i];break;}}
+  let q=null;
+  for(let i=0;i<15;i++){let o;try{o=make(cat,S.cats[cat].lv,lastIdx[cat]);}catch(e){continue;}
+    q=o;if(!recentQ.includes(o.q))break;}
+  if(!q)q=make("mental",1);
+  lastCat=q.cat;lastIdx[q.cat]=q.idx;recentQ.push(q.q);if(recentQ.length>80)recentQ.shift();
+  show(q,`${GEN[q.cat].name} · level ${q.lv}`);
 }
 
-function submit(){
-  if(!run||!cur)return;
-  const raw=$("ans").value.trim();
-  if(raw===""||!/^-?\d+$/.test(raw))return;
-  const given=parseInt(raw,10), ok=given===cur.a, ms=performance.now()-shownAt;
-  const s=S.cats[cur.cat];
+function record(q,ok,ms){
+  const s=S.cats[q.cat];
   s.seen++; if(ok)s.right++; s.times.push(ms); if(s.times.length>40)s.times.shift();
   s.recent.push(ok?1:0); if(s.recent.length>6)s.recent.shift();
-  run.n++; if(ok)run.right++;
-  // adapt
   if(s.recent.length>=5){
     const hit=s.recent.reduce((a,b)=>a+b,0)/s.recent.length, m=med(s.times.slice(-6))||9999;
     if(hit>=0.8&&m<14000&&s.lv<3){s.lv++;s.recent=[];}
     else if(hit<0.5&&s.lv>1){s.lv--;s.recent=[];}
   }
-  const v=$("verdict");
-  v.textContent=ok?`correct · ${(ms/1000).toFixed(1)}s`:`${cur.a} · ${(ms/1000).toFixed(1)}s`;
-  v.className="verdict "+(ok?"ok":"bad");
-  const c=$("card"); c.classList.remove("flash-ok","flash-bad");
-  void c.offsetWidth; c.classList.add(ok?"flash-ok":"flash-bad");
-  $("score").textContent=`${run.right} / ${run.n}`;
-  $("qn").textContent=`Q ${run.n+1}`;
-  renderStats(); nextQ();
+}
+
+function submit(){
+  if(!run||!cur)return;
+  if(run.phase==="review"&&cur.revealed){advanceReview();return;}
+  const raw=$("ans").value.trim().replace(/^[−–]/,"-");
+  if(!/^-?\d+$/.test(raw))return;
+  const ok=parseInt(raw,10)===cur.a, ms=performance.now()-shownAt;
+  if(run.phase==="review"){reviewAnswer(ok);return;}
+  if(cur.tries===0){record(cur,ok,ms);run.n++;if(ok)run.right++;}
+  cur.tries++;
+  if(ok){say(cur.tries===1?`correct · ${secs(ms)}`:"correct on the second try","ok");flash("ok");
+    updateBar();renderStats();nextQ();return;}
+  if(cur.tries===1){
+    say("Not quite — think more carefully and try again","bad");flash("bad");setSecond(true);
+    $("ans").value="";$("ans").focus();updateBar();renderStats();return;}
+  run.shelf.push(cur);
+  say("Wrong twice — set aside, it comes back at the end","bad");flash("bad");
+  updateBar();renderStats();nextQ();
 }
 
 function tick(){
-  if(!run)return;
+  if(!run||run.phase!=="main")return;
   if(run.endless){$("clock").textContent="∞";return;}
   const left=Math.max(0,run.until-Date.now());
   $("clock").textContent=`${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,"0")}`;
-  if(left<=0)stop();
+  if(left<=0)endMain();
 }
 
 function start(endless){
-  run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250)};
-  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;
-  $("score").textContent="0 / 0";$("qn").textContent="Q 1";$("verdict").textContent="";
-  $("mode").textContent=endless?"endless — stop when you like":"five minutes";
-  tick(); nextQ();
+  run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250),shelf:[],phase:"main",ri:0,fixed:0};
+  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;$("stop").textContent="Stop";
+  say("");$("mode").textContent=endless?"endless — stop when you like":"five minutes";
+  tick(); nextQ(); updateBar();
 }
 
-async function stop(){
+/* timed part over: bank the session, then replay what was set aside */
+function endMain(){
+  if(!run||run.phase!=="main")return;
+  clearInterval(run.t);
+  if(cur&&cur.tries===1&&!run.shelf.includes(cur))run.shelf.push(cur);
+  commitSession(run);
+  if(!run.shelf.length){finish();return;}
+  run.phase="review";run.ri=0;
+  $("clock").textContent="review";$("mode").textContent="review — untimed, not scored";
+  $("stop").textContent="Skip review";
+  say("Time. Now the ones you set aside.","");showReview();
+}
+function showReview(){
+  const q=run.shelf[run.ri];
+  show(q,`Review ${run.ri+1} of ${run.shelf.length} · ${GEN[q.cat].name}`);
+  updateBar();
+}
+function reviewAnswer(ok){
+  if(ok){run.fixed++;say("correct","ok");flash("ok");advanceReview();return;}
+  cur.revealed=true;flash("bad");setSecond(false);
+  say(`The answer is ${cur.a} — press Enter to continue`,"bad");$("ans").value="";
+}
+function advanceReview(){run.ri++;if(run.ri<run.shelf.length)showReview();else finish();}
+
+function commitSession(done){
+  if(!done.n)return;
+  const d=ymd(new Date());
+  S.sessions.push({d,n:done.n,right:done.right,aside:done.shelf.length});
+  if(S.sessions.length>160)S.sessions.shift();
+  if(S.streak.last!==d){
+    const yd=ymd(new Date(Date.now()-86400000));
+    S.streak={last:d,count:S.streak.last===yd?S.streak.count+1:1};
+  }
+  renderStreak(); save();
+}
+
+function finish(){
   if(!run)return;
   clearInterval(run.t);
-  const done=run; run=null;
+  const done=run; run=null; cur=null;
   $("start").hidden=false;$("endless").hidden=false;$("stop").hidden=true;
-  $("ans").disabled=true;$("clock").textContent="5:00";$("cat").textContent="done";
-  $("q").innerHTML=`${done.right} / ${done.n}`;
-  $("hint").textContent=done.n?`${Math.round(100*done.right/Math.max(1,done.n))}% this session`:"No questions answered";
-  $("verdict").textContent="";$("mode").textContent="";
-  if(done.n){
-    const d=today();
-    S.sessions.push({d,n:done.n,right:done.right});
-    if(S.sessions.length>160)S.sessions.shift();
-    if(S.streak.last!==d){
-      const y=new Date(Date.now()-86400000);
-      const yd=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,"0")}-${String(y.getDate()).padStart(2,"0")}`;
-      S.streak={last:d,count:S.streak.last===yd?S.streak.count+1:1};
-    }
-    renderStreak(); await save();
-  }
+  $("ans").disabled=true;$("ans").value="";$("clock").textContent="5:00";$("cat").textContent="done";setSecond(false);
+  $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
+  let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
+  if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
+  $("hint").textContent=h;
+  say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q ${done.n}`;
 }
+
+function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
 
 /* ---------- render ---------- */
 function renderStats(){
@@ -401,12 +793,12 @@ function renderStats(){
     const m=med(s.times), acc=Math.round(100*s.right/s.seen);
     return `<tr class="${c===slow?"weak":""}"><td class="name">${GEN[c].name}</td>
       <td><span class="lv">${s.lv}</span></td><td>${s.seen}</td><td>${acc}%</td>
-      <td>${m===null?"—":(m/1000).toFixed(1)+"s"}</td></tr>`;}).join("");
+      <td>${m===null?"—":secs(m)}</td></tr>`;}).join("");
 }
 function renderStreak(){
   const n=S.streak.count||0;
   $("streakN").textContent=n||"—";
-  $("streakL").textContent=n?(n===1?"day streak":"day streak"):"no sessions yet";
+  $("streakL").textContent=n?"day streak":"no sessions yet";
 }
 function renderChips(){
   $("chips").innerHTML=CATS.map(c=>
@@ -421,7 +813,7 @@ function renderChips(){
 }
 
 /* ---------- persistence ---------- */
-function pack(){return{v:1,updated:new Date().toISOString(),streak:S.streak,
+function pack(){return{v:2,updated:new Date().toISOString(),streak:S.streak,
   sessions:S.sessions.slice(-160),
   cats:Object.fromEntries(CATS.map(c=>{const s=S.cats[c];
     return[c,{lv:s.lv,seen:s.seen,right:s.right,times:s.times.slice(-40).map(Math.round),recent:s.recent}];}))};}
@@ -444,10 +836,11 @@ async function save(){
 }
 
 /* ---------- boot ---------- */
+$("subtitle").textContent=`TMUA · ${CATS.length} operation families · five minutes`;
 renderChips(); renderStats(); renderStreak();
 $("start").onclick=()=>start(false);
 $("endless").onclick=()=>start(true);
-$("stop").onclick=stop;
+$("stop").onclick=stopPressed;
 $("ans").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();submit();}});
 document.addEventListener("keydown",e=>{
   if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!$("start").hidden){e.preventDefault();start(false);}
