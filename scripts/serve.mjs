@@ -15,6 +15,13 @@ const HEAD = '<!doctype html><html><head><meta charset="utf-8">'
 
 createServer(async (req, res) => {
   const path = (req.url || '/').split('?')[0];
+  // /raw = the file exactly as on disk with no charset anywhere, which is what a browser gets when
+  // drill.html is opened by double-clicking it. Use it to check the page survives that.
+  if (path === '/raw') {
+    const bytes = await readFile(join(ROOT, 'drill.html'));
+    res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' });
+    res.end(bytes); return;
+  }
   if (path !== '/' && path !== '/drill.html') { res.writeHead(404); res.end('not found'); return; }
   try {
     const body = await readFile(join(ROOT, 'drill.html'), 'utf8');

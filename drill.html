@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>No-Calculator Drill</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -10,6 +12,9 @@
   --ok:#1C7049; --bad:#A8271E; --bad-soft:#F6E1DE;
   --font-display:"Newsreader",Georgia,"Times New Roman",serif;
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* STIX Two Math has an OpenType MATH table, which is what lets brackets stretch round a binomial or a
+     fraction; the generic "math" fallback here has none. Its one flaw, a gap after every root, is trimmed
+     in fixRadicals(). */
   --font-math:"STIX Two Math","Cambria Math","Latin Modern Math",math;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -49,7 +54,7 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:14p
   font-variant-numeric:lining-nums;max-width:100%;overflow-wrap:anywhere}
 .qtext.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
 .qtext math{font-family:var(--font-math);font-size:1.06em}
-.qtext math mfrac mfrac, .qtext math msup mfrac{font-size:.9em}
+.qtext math mfrac mfrac{font-size:.9em}
 .qhint{font-family:var(--font-mono);font-size:.78rem;color:var(--muted)}
 .ansrow{display:flex;gap:8px;align-items:center}
 input[type=text]{font-family:var(--font-mono);font-size:1.5rem;width:9ch;text-align:center;
@@ -127,7 +132,7 @@ footer p{margin:0 0 6px}
       <div class="ansrow">
         <input type="text" id="ans" inputmode="numeric" autocomplete="off" spellcheck="false"
                aria-label="Your answer" disabled>
-        <span class="enter">⏎</span>
+        <span class="enter">⏎ answer · esc skip</span>
       </div>
       <div class="verdict" id="verdict" aria-live="polite"></div>
     </div>
@@ -136,6 +141,7 @@ footer p{margin:0 0 6px}
   <div class="controls">
     <button class="primary" id="start">Start 5:00</button>
     <button id="endless">Endless</button>
+    <button id="skip" hidden>Skip</button>
     <button id="stop" hidden>Stop</button>
     <span class="note" id="mode"></span>
   </div>
@@ -160,8 +166,9 @@ footer p{margin:0 0 6px}
   <footer>
     <p>Five minutes at the front of the daily Anki hour. The level rises when you are both accurate and
     quick, and drops back when you are not — so it keeps finding the edge of what you can do.</p>
-    <p>Wrong once: try again. Wrong twice: the question is set aside and comes back, untimed, when the
-    five minutes are up. Only first attempts count towards your stats.<span id="sync" class="note"></span></p>
+    <p>Wrong once: try again. Wrong twice, or skipped (Esc): the question is set aside and comes back,
+    untimed, when the five minutes are up. Only first attempts count towards your stats, and a skip counts
+    as a miss.<span id="sync" class="note"></span></p>
   </footer>
 </div>
 
@@ -205,13 +212,14 @@ const SP=`<mspace width="0.17em"></mspace>`;
 const M=(...a)=>`<math displaystyle="true">${a.map(X).join("")}</math>`;
 const x_=mi("x"), y_=mi("y"), k_=mi("k"), EQ=mo("="), PL=mo("+"), MI=mo("−"), TM=mo("×"), DV=mo("÷");
 const xp=(k)=>k===1?x_:pw(x_,k);
+const pw1=(b,e)=>e===1?X(b):pw(b,e);   // a power, printed bare when the exponent is 1
 const mixed=(w,r,q)=>`<mrow class="mixed">${mnum(w)}${fr(r,q)}</mrow>`;
 const pt=(a,b)=>row(mo("("),a,mo(","),b,mo(")"));
 const lg=(b,x)=>row(sb(mi("log"),b),SP,X(x));
 const DEG=(d)=>mn(d+"°");
-const tf=(fn,d,p)=>row(p===2?pw(mi(fn),2):mi(fn),SP,DEG(d));
+const tf=(fn,d,p)=>row(SP,p===2?pw(mi(fn),2):mi(fn),SP,DEG(d));
 const dydx=fr(row(mi("d"),y_),row(mi("d"),x_));
-const fx=row(mi("f"),par(x_)), fp=(t)=>row(pw(mi("f"),mo("′")),par(t)), fpp=(t)=>row(pw(mi("f"),mo("″")),par(t));
+const fx=row(mi("f"),par(x_)), prime=(m)=>`<mo lspace="0" rspace="0">${m}</mo>`, fp=(t)=>row(mi("f"),prime("′"),par(t)), fpp=(t)=>row(mi("f"),prime("″"),par(t));
 const intg=(lo,hi)=>`<msubsup><mo>∫</mo>${row(lo)}${row(hi)}</msubsup>`;
 const dx=row(SP,mi("d"),x_);
 const SFR=row(mi("c"),TM,pw(10,k_)), SFH="Standard form, 1 ≤ c < 10 — find k";
@@ -223,12 +231,13 @@ function terms(list){const out=[];for(const {c,t} of list){if(c===0)continue;con
   out.push((m===1&&t?"":mnum(m))+(t||""));}
   return out.length?row(...out):mnum(0);}
 /* one term that always carries its sign, for tails like "x³ + kx² − 4x + 12" */
-const signed=(c,t)=>c===0?"":row(mo(c<0?"−":"+"),(Math.abs(c)===1&&t?"":mnum(Math.abs(c)))+(t||""));
+// sign and term are left loose (no <mrow>) so the sign sits between operands and gets binary-operator spacing
+const signed=(c,t)=>c===0?"":mo(c<0?"−":"+")+(Math.abs(c)===1&&t?"":mnum(Math.abs(c)))+(t||"");
 const poly=(c,v=x_)=>terms(c.map((a,i)=>{const p=c.length-1-i;return{c:a,t:p===0?"":p===1?v:pw(v,p)};}));
 const lin=(a)=>par(poly([1,-a]));            // (x − a)
 const coefx=(c,t)=>c===1?t:row(mnum(c),t);
 /* recurring decimal, dots over the first and last digit of the repeating block */
-function rec(pre,rep){const dot=(d)=>`<mover accent="true"><mn>${d}</mn><mo>˙</mo></mover>`;
+function rec(pre,rep){const dot=(d)=>`<mover accent="false"><mn>${d}</mn><mo>·</mo></mover>`;   // over-script, not accent: an accent dot sits on the digit
   return row(mn("0."+pre),...rep.split("").map((d,i)=>(i===0||i===rep.length-1)?dot(d):mn(d)));}
 
 /* ---------- exact trig values: n/d · √r ---------- */
@@ -323,7 +332,7 @@ const GEN={
        return{q:M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,k_)),hint:"Find k",a:r**p};}),
   ()=>{const r=ri(2,9);let mx=2;while(r**(mx+1)<=10000)mx++;const e=ri(2,mx);return{q:M(pw(par(fr(1,r)),-e)),a:r**e};},
   ()=>{const b=ri(2,7),m=ri(2,6),n=ri(2,5),j=ri(1,m*n+6);
-       return{q:M(pw(par(pw(b,m)),n),DV,pw(b,j),EQ,pw(b,k_)),hint:"Find k",a:m*n-j};},
+       return{q:M(pw(par(pw(b,m)),n),DV,pw1(b,j),EQ,pw(b,k_)),hint:"Find k",a:m*n-j};},
  ],[
   ()=>retry(()=>{const p=pick([2,3,5]),pows=[1,2,3,4].filter(i=>p**i<=625),i=pick(pows),j=pick(pows);if(i===j)return null;
        const m=ri(2,6),n=ri(2,6),div=coin();
@@ -338,7 +347,7 @@ const GEN={
        if(gcd(p,q)!==1||b**p>2000)return null;
        return{q:M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,fr(k_,a**p)),hint:"Find k",a:b**p};}),
   ()=>{const p=pick([2,3]),a=ri(3,12),b=ri(1,6),c=ri(1,4);
-       return{q:M(fr(row(pw(p,a),TM,pw(p*p,b)),pw(p**3,c)),EQ,pw(p,k_)),hint:"Find k",a:a+2*b-3*c};},
+       return{q:M(fr(row(pw(p,a),TM,pw1(p*p,b)),pw1(p**3,c)),EQ,pw(p,k_)),hint:"Find k",a:a+2*b-3*c};},
  ]]},
 
  ncr:{name:"Binomials & counting",L:[[
@@ -439,6 +448,7 @@ const GEN={
        return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g};}),
  ],[
   ()=>retry(()=>{const ps=[2,3,5,7,11].filter(()=>R(3)!==0);if(ps.length<2)return null;const es=ps.map(()=>ri(1,5)),parts=[];
+       if(es.reduce((s,e)=>s*(e+1),1)<8)return null;
        ps.forEach((p,i)=>{if(parts.length)parts.push(TM);parts.push(es[i]===1?mnum(p):pw(p,es[i]));});
        return{q:`Number of positive divisors of ${M(...parts)}`,a:es.reduce((s,e)=>s*(e+1),1)};}),
   ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11,13])n*=p**ri(0,p<=3?5:p<=7?2:1);if(n<500||n>10000||ndiv(n)<12)return null;
@@ -653,11 +663,18 @@ function show(q,tag){
   $("cat").textContent=tag;
   const el=$("q");el.innerHTML=cur.q;
   el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
+  fixRadicals(el);
   $("hint").textContent=cur.hint||"Whole-number answer";
   setSecond(false);
   $("ans").value="";$("ans").disabled=false;$("ans").focus();
   shownAt=performance.now();
 }
+/* Chrome + STIX Two Math leave ~0.43em of empty box after every square root. Measure and trim it, rather
+   than hard-code a margin that would overlap on a device whose math font has no such gap. */
+function fixRadicals(root){
+  root.querySelectorAll("msqrt").forEach(s=>{s.style.marginInlineEnd="";
+    const c=s.firstElementChild;if(!c)return;const gap=s.getBoundingClientRect().right-c.getBoundingClientRect().right;
+    if(gap>1)s.style.marginInlineEnd=`${-(gap-1)}px`;});}
 function setSecond(on){$("card").classList.toggle("second",on);$("retryTag").hidden=!on;}
 function say(text,kind){const v=$("verdict");v.textContent=text;v.className="verdict "+(kind||"");}
 function flash(kind){const c=$("card");c.classList.remove("flash-ok","flash-bad");void c.offsetWidth;c.classList.add(kind==="ok"?"flash-ok":"flash-bad");}
@@ -715,6 +732,16 @@ function submit(){
   updateBar();renderStats();nextQ();
 }
 
+function skip(){
+  if(!run||!cur)return;
+  if(run.phase==="review"){if(cur.revealed)advanceReview();else{cur.revealed=true;setSecond(false);
+    say(`The answer is ${cur.a} — press Enter to continue`,"bad");$("ans").value="";$("ans").focus();}return;}
+  if(cur.tries===0){record(cur,false,performance.now()-shownAt);run.n++;}
+  run.shelf.push(cur);
+  say("Skipped — it comes back at the end","");
+  updateBar();renderStats();nextQ();
+}
+
 function tick(){
   if(!run||run.phase!=="main")return;
   if(run.endless){$("clock").textContent="∞";return;}
@@ -725,7 +752,7 @@ function tick(){
 
 function start(endless){
   run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250),shelf:[],phase:"main",ri:0,fixed:0};
-  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;$("stop").textContent="Stop";
+  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;$("skip").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless — stop when you like":"five minutes";
   tick(); nextQ(); updateBar();
 }
@@ -770,7 +797,7 @@ function finish(){
   if(!run)return;
   clearInterval(run.t);
   const done=run; run=null; cur=null;
-  $("start").hidden=false;$("endless").hidden=false;$("stop").hidden=true;
+  $("start").hidden=false;$("endless").hidden=false;$("stop").hidden=true;$("skip").hidden=true;
   $("ans").disabled=true;$("ans").value="";$("clock").textContent="5:00";$("cat").textContent="done";setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
@@ -841,7 +868,9 @@ renderChips(); renderStats(); renderStreak();
 $("start").onclick=()=>start(false);
 $("endless").onclick=()=>start(true);
 $("stop").onclick=stopPressed;
-$("ans").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();submit();}});
+$("skip").onclick=()=>{skip();};
+$("ans").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();submit();}
+  else if(e.key==="Escape"){e.preventDefault();skip();}});
 document.addEventListener("keydown",e=>{
   if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!$("start").hidden){e.preventDefault();start(false);}
 });
