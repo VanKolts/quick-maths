@@ -7,8 +7,11 @@
 const fs=require("fs"),path=require("path");
 const src=fs.readFileSync(process.argv[2]||path.join(__dirname,"..","drill.html"),"utf8");
 const block=src.slice(src.indexOf("/*GEN-START*/"),src.indexOf("/*GEN-END*/"));
-const mod={};new Function("module",block+"\nmodule.exports={GEN,CATS};")(mod);
-const {GEN,CATS}=mod.exports;
+const mod={};new Function("module",block+"\nmodule.exports={GEN,CATS,TIPMAP,TIPS,checkExpr};")(mod);
+const {GEN,CATS,TIPMAP,TIPS,checkExpr}=mod.exports;
+// every shape needs a hint card, and the parallel map must line up with the banks
+for(const c of CATS)GEN[c].L.forEach((bk,i)=>{if(!TIPMAP[c]||bk.length!==TIPMAP[c][i].length){console.log("TIPMAP length mismatch",c,i+1);process.exitCode=1;}
+  (TIPMAP[c]?TIPMAP[c][i]:[]).forEach((t)=>{if(!TIPS[t]){console.log("missing hint card",t);process.exitCode=1;}});});
 const N=+process.argv[3]||400;
 
 /* ---------- MathML -> linear text ---------- */
@@ -229,6 +232,32 @@ function check(o){
   return close(evalExpr(s),A,1e-7);
 }
 
+/* ---------- typed-expression answers ---------- */
+// answer syntax -> this file's evaluator syntax (independent of the page's parser)
+const fromAns=(e)=>e.replace(/√\(/g,"sqrt(").replace(/√(\d+|x)/g,"sqrt($1)");
+const toAns=(l)=>l.replace(/sqrt\(/g,"√(");
+const PTS=[0.6,1.4,2.3,3.7,5.2];
+function checkE(o){
+  const t=render(o.q),e=o.e,E=(x)=>evalExpr(fromAns(e),{x});let m,orig=null,ok;
+  // the page's own checker must accept the answer it expects and refuse a wrong one
+  if(!checkExpr(e,o).ok)return false;
+  if(checkExpr(e+"+1",o).ok&&o.mode!=="anti")return false;
+  if(o.mode==="anti"&&checkExpr(e+"+x",o).ok)return false;
+  if((m=t.match(/^Differentiate \[y = (.+)\]$/))){const f=(x)=>evalExpr(m[1],{x});ok=PTS.every((x)=>close(deriv(f,x,1e-4),E(x),1e-6));}
+  else if((m=t.match(/^Find \[∫ (.+) d x\]$/))){const f=(x)=>evalExpr(m[1],{x});ok=PTS.every((x)=>close(deriv(E,x,1e-4),f(x),1e-6));}
+  else if((m=t.match(/^Simplify \[(.+)\]$/))){orig=m[1];const mm=e.match(/^(\d*)√(\d+)$/);
+    ok=close(E(1),evalExpr(m[1]))&&!!mm&&primeFactors(+mm[2]).every((p,i,a)=>a.indexOf(p)===i);}
+  else if((m=t.match(/^Rationalise the denominator of \[(.+)\]$/))){orig=m[1];const den=e.split("/")[1]||"";
+    ok=close(E(1),evalExpr(m[1]))&&!den.includes("√");}
+  else if((m=t.match(/^Expand \[(.+)\]$/))){orig=m[1];
+    ok=PTS.every((x)=>close(E(x),evalExpr(m[1],{x})))&&!e.includes("(")&&(!e.includes("√")||/^\d+\+\d+√\d+$/.test(e));}
+  else if((m=t.match(/^Factorise \[(.+)\]$/))){orig=m[1];ok=PTS.every((x)=>close(E(x),evalExpr(m[1],{x})))&&/^\(x[+-]\d+\)\(x[+-]\d+\)$/.test(e);}
+  else if((m=t.match(/^Write \[(.+)\] as a single power of \[x\]$/))){orig=m[1];ok=PTS.every((x)=>close(E(x),evalExpr(m[1],{x})))&&/^x\^\(-?\d+\/2\)$/.test(e);}
+  else throw new Error("UNCHECKED");
+  // where a form is asked for, typing the question's own expression back must be refused
+  if(ok&&o.form&&orig!==null){const r=checkExpr(toAns(orig),o);if(r.ok||!r.form)return false;}
+  return ok;}
+
 /* ---------- run ---------- */
 let total=0,fails=0;const failBy={};const unchecked={},failures=[],shapes={},vals={};
 for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
@@ -236,11 +265,11 @@ for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
   for(let i=0;i<N;i++){let o;try{o=g();}catch(e){failures.push([key,"THROW "+e.message]);fails++;continue;}
     total++;const t=render(o.q);vals[key].add(t);
     const bad=[];
-    if(!Number.isInteger(o.a))bad.push("non-integer answer "+o.a);
+    if(o.e===undefined&&!Number.isInteger(o.a))bad.push("non-integer answer "+o.a);
     if(/NaN|undefined|Infinity|null|object/.test(o.q+(o.hint||"")))bad.push("bad token");
     if(/[+\-]\s+-\s*\d/.test(t.replace(/\^\(- /g,"^(")))bad.push("sign collision");
     if(/(^|[\s(\[])1 x\b/.test(t)||/[+\-] 0(\s|\]|$)/.test(t)&&!/[=<>] 0/.test(t.match(/[+\-] 0(\s|\]|$)/)[0]))bad.push("unsimplified 1x / +0");
-    let r;try{r=check(o);}catch(e){if(e.message==="UNCHECKED"){unchecked[key]=(unchecked[key]||0)+1;r=null;}else{r=false;bad.push("check error "+e.message);}}
+    let r;try{r=o.e!==undefined?checkE(o):check(o);}catch(e){if(e.message==="UNCHECKED"){unchecked[key]=(unchecked[key]||0)+1;r=null;}else{r=false;bad.push("check error "+e.message);}}
     if(r===false&&!bad.length)bad.push("WRONG");
     if(r===true)shapes[key]++;
     if(/\((?!10\))[^()]*\)\^\(1\)/.test(t))bad.push("exponent of 1 printed");
