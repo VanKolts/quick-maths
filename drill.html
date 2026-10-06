@@ -60,7 +60,7 @@ h1{font-size:1.9rem;font-weight:600;margin:0;line-height:1.1;letter-spacing:-.01
 .qtext{font-size:clamp(1.5rem,6vw,2.3rem);line-height:1.35;font-weight:400;text-wrap:balance;
   max-width:100%;overflow-wrap:anywhere}
 .qtext.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
-.qtext math,.preview math,.verdict math{font-family:var(--font-math)}
+.qtext math,.ansview math,.verdict math{font-family:var(--font-math)}
 .qtext math{font-size:1.06em}
 .qtext math mfrac mfrac{font-size:.9em}
 .qhint{font-size:.9rem;color:var(--muted)}
@@ -71,10 +71,25 @@ h1{font-size:1.9rem;font-weight:600;margin:0;line-height:1.1;letter-spacing:-.01
 input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-align:center;
   padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--sunk);
   color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
-input[type=text].expr{width:min(22ch,80vw);text-align:left}
+/* typed answers: an invisible text field over a live maths view of what has been typed */
+.ansbox{position:relative}
+/* the iPhone number pad has no minus key: on touch screens a ± button flips the sign of a whole-number answer */
+.sign{display:none;font-size:1.3rem;min-width:44px;min-height:44px;padding:0 12px}
+@media (pointer:coarse){.ansrow:not(.exprmode) .sign{display:inline-block}}
+@media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
+.ansview{display:none}
+.ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
+  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1px solid var(--line);border-radius:4px;background:var(--sunk);overflow-x:auto;overflow-y:hidden}
+.ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
+.ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
+.card.second .ansview{border-color:var(--bad)}
+.ansview .ph{border:1px dashed var(--faint);border-radius:2px}
+.ansview .caret{background:var(--accent);animation:blink 1.05s steps(1) infinite}
+.ansbox.expr:not(:focus-within) .caret{visibility:hidden}
+.ansview .raw{font-size:.8em;color:var(--muted)}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.ansview .caret{animation:none}}
 input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.preview{min-height:2.2em;font-size:1.35rem;color:var(--ink)}
-.preview .why{font-size:.85rem;color:var(--faint)}
 .keys{font-size:.82rem;color:var(--faint)}
 kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;
   padding:0 .35em;background:var(--surface);color:var(--muted)}
@@ -163,10 +178,13 @@ select{font-family:var(--font-text);font-size:.92rem;padding:5px 8px;border:1px 
       <div class="qhint" id="hint">Press Start, or Enter. Instructions are at the bottom of the page.</div>
       <div class="tipbox" id="tip" hidden></div>
       <div class="ansrow" id="ansrow" hidden>
-        <input type="text" id="ans" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false"
-               aria-label="Your answer" disabled>
+        <div class="ansbox" id="ansbox">
+          <div class="ansview" id="ansview" aria-hidden="true"></div>
+          <input type="text" id="ans" inputmode="numeric" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 aria-label="Your answer" disabled>
+        </div>
+        <button type="button" class="sign" id="sign" aria-label="Make the answer negative or positive">±</button>
       </div>
-      <div class="preview" id="preview" aria-live="polite" hidden></div>
       <div class="keys" id="keys" hidden><kbd>^</kbd> power &nbsp;·&nbsp; <kbd>r</kbd> √ &nbsp;·&nbsp; <kbd>/</kbd> fraction &nbsp;·&nbsp; <kbd>(</kbd> <kbd>)</kbd> group &nbsp;·&nbsp; x^(1/2) for a fractional power</div>
       <div class="verdict" id="verdict" aria-live="polite"></div>
     </div>
@@ -215,7 +233,7 @@ select{font-family:var(--font-text);font-size:.92rem;padding:5px 8px;border:1px 
       <li>Type your answer and press <kbd>Enter</kbd>. Most answers are whole numbers; when a question asks you to
         differentiate, integrate, simplify, expand or factorise, type an expression instead — <kbd>^</kbd> for a power,
         <kbd>r</kbd> for √, <kbd>/</kbd> for a fraction, brackets to group, e.g. <code>3x^2 - 4x^(1/2)</code> or
-        <code>6r2</code> for 6√2. A preview shows how your answer is being read. For an integral, “+ c” is optional.</li>
+        <code>6r2</code> for 6√2. Powers, fractions and roots take shape as you type; a dashed box shows where the next part goes. For an integral, “+ c” is optional.</li>
       <li><b>Hint</b> (<kbd>?</kbd>) shows the general method or formula for that kind of question. A hinted answer
         does not count as right first time.</li>
       <li><b>Skip</b> (<kbd>Esc</kbd>) sets a question aside. Get one wrong and it comes back a few questions later,
@@ -705,19 +723,32 @@ const GEN={
 /* ---------- typed-expression answers ----------
    Syntax: numbers, x, + − × ÷ * / ^, √ (typed as r, or "sqrt"), brackets, implicit multiplication.
    √ applies to the next factor: √2, √x, √(x+1). A power takes the next factor: x^2, x^-1, x^(1/2). */
-function lexAns(s){
+const CARET_CH="\u2038";   // marks the cursor in live rendering; never part of a real answer
+function lexAns(s,live){
   s=s.replace(/sqrt/g,"√").replace(/[rR]/g,"√").replace(/[−–]/g,"-").replace(/[×·]/g,"*").replace(/÷/g,"/").replace(/\s+/g,"");
   const t=[];let i=0;
   while(i<s.length){const c=s[i];let m;
     if((m=s.slice(i).match(/^\d+(\.\d+)?/))){t.push({k:"n",v:parseFloat(m[0])});i+=m[0].length;continue;}
     if(c==="x"||c==="X"){t.push({k:"x"});i++;continue;}
     if("+-*/^()√".includes(c)){t.push({k:c});i++;continue;}
+    if(live&&c===CARET_CH){const prev=t[t.length-1];
+      if(prev&&prev.k==="n"&&/\d/.test(s[i-1]||""))prev.caret=true;   // still typing this number
+      else t.push({k:"caret"});i++;continue;}
+    if(live&&c===".")break;   // a decimal point still being typed
     throw new Error(`can't read “${c}”`);}
+  if(live){   // make an unfinished expression drawable
+    const OPS="+-*/^(√",isOp=(x)=>x&&OPS.includes(x.k),startsF=(x)=>x&&(x.k==="n"||x.k==="x"||x.k==="("||x.k==="√");
+    const cj=t.findIndex((x)=>x.k==="caret");   // cursor just before a power: draw it on the base, not raised
+    if(cj>0&&t[cj+1]&&t[cj+1].k==="^"&&(t[cj-1].k==="n"||t[cj-1].k==="x")){t[cj-1].caret=true;t.splice(cj,1);}
+    t.forEach((x,j)=>{if(x.k==="caret")x.need=(j===0||isOp(t[j-1]))&&!startsF(t[j+1]);});
+    for(let j=t.length-1;j>=0;j--){if(isOp(t[j])&&(j===t.length-1||t[j+1].k===")"))t.splice(j+1,0,{k:"ph"});}
+    let open=0;for(const x of t){if(x.k==="(")open++;else if(x.k===")")open--;}
+    while(open-->0)t.push({k:")"});}
   return t;}
-function parseAns(s){
-  const T=lexAns(s);let p=0;const pk=()=>T[p];
+function parseAns(s,live){
+  const T=lexAns(s,live);let p=0;const pk=()=>T[p];
   const need=(k)=>{if(!T[p]||T[p].k!==k)throw new Error(k===")"?"a bracket is not closed":"unfinished");p++;};
-  const startsF=(t)=>t&&(t.k==="n"||t.k==="x"||t.k==="("||t.k==="√");
+  const startsF=(t)=>t&&(t.k==="n"||t.k==="x"||t.k==="("||t.k==="√"||t.k==="caret"||t.k==="ph");
   function E(){let a=Tm();while(pk()&&(pk().k==="+"||pk().k==="-")){const o=T[p++].k;a={t:o==="+"?"add":"sub",a,b:Tm()};}return a;}
   function Tm(){let a=U();for(;;){const t=pk();
       if(t&&(t.k==="*"||t.k==="/")){p++;a={t:t.k==="*"?"mul":"div",a,b:U()};}
@@ -725,10 +756,12 @@ function parseAns(s){
   function U(){if(pk()&&pk().k==="-"){p++;return{t:"neg",a:U()};}if(pk()&&pk().k==="+"){p++;return U();}return Pw();}
   function Pw(){const b=F();if(pk()&&pk().k==="^"){p++;return{t:"pow",a:b,b:U()};}return b;}
   function F(){const t=T[p++];if(!t)throw new Error("unfinished");
-    if(t.k==="n")return{t:"num",v:t.v};
-    if(t.k==="x")return{t:"x"};
+    if(t.k==="n")return{t:"num",v:t.v,caret:t.caret};
+    if(t.k==="x")return{t:"x",caret:t.caret};
     if(t.k==="("){const a=E();need(")");return{t:"par",a};}
     if(t.k==="√")return{t:"sqrt",a:Pw()};
+    if(t.k==="caret")return{t:"ph",caret:true,need:t.need};
+    if(t.k==="ph")return{t:"ph",need:true};
     throw new Error("unfinished");}
   if(!T.length)throw new Error("empty");
   const r=E();if(p!==T.length)throw new Error(T[p].k===")"?"an extra )":"can't read that");return r;}
@@ -738,9 +771,15 @@ function evalA(n,x){switch(n.t){
   case"mul":return evalA(n.a,x)*evalA(n.b,x);case"div":return evalA(n.a,x)/evalA(n.b,x);
   case"pow":return Math.pow(evalA(n.a,x),evalA(n.b,x));case"sqrt":return Math.sqrt(evalA(n.a,x));}}
 const strip=(n)=>n.t==="par"?n.a:n;
+const CARET_ML=`<mspace class="caret" width="0.08em" height="0.9em" depth="0.22em"></mspace>`;
+/* the answer box: what has been typed so far, drawn as maths, with the cursor where the next key goes */
+function liveML(text,caret){
+  const s=text.slice(0,caret)+CARET_CH+text.slice(caret);
+  try{return M(exprML(parseAns(s,true)));}catch(e){return null;}}
 /* typed expression -> MathML, for the live preview and for showing a correct answer */
 function exprML(n){switch(n.t){
-  case"num":return mnum(n.v);case"x":return x_;case"par":return par(exprML(n.a));
+  case"num":return n.caret?row(mnum(n.v),CARET_ML):mnum(n.v);case"x":return n.caret?row(x_,CARET_ML):x_;case"par":return par(exprML(n.a));
+  case"ph":return n.need?`<mrow class="ph">${n.caret?CARET_ML:""}<mspace width="0.5em" height="0.72em" depth="0.12em"></mspace></mrow>`:CARET_ML;
   case"neg":return row(MI,exprML(n.a));
   case"add":return row(exprML(n.a),PL,exprML(n.b));case"sub":return row(exprML(n.a),MI,exprML(n.b));
   case"mul":return n.imp?row(exprML(n.a),exprML(n.b)):row(exprML(n.a),TM,exprML(n.b));
@@ -907,7 +946,7 @@ addShape("calculus",1,"diffPower",()=>{const c=[nz(-5,5),ri(-8,8),ri(-9,9),ri(-9
   return{q:`Differentiate ${M(y_,EQ,poly(c))}`,hint:`${EXH} for dy/dx`,e:polyStr([3*c[0],2*c[1],c[2]]),mode:"expr"};});
 addShape("calculus",2,"diffPower",()=>{const k=nz(-5,5),b=nz(-9,9);   // y = 2k√x + b/x  ->  k x^(-1/2) − b x^(-2)
   return{q:`Differentiate ${M(y_,EQ,coefx(2*k,sq(x_)),b<0?MI:PL,fr(Math.abs(b),x_))}`,hint:`${EXH} for dy/dx`,
-         e:`${k}x^(-1/2)${sgnStr(-b)}x^(-2)`,mode:"expr"};});
+         e:`${k===1?"":k===-1?"-":k}x^(-1/2)${sgnStr(-b)}x^(-2)`,mode:"expr"};});
 addShape("calculus",2,"integratePower",()=>{const a=3*nz(-3,3),b=2*ri(-4,4),c=ri(-9,9);
   return{q:`Find ${M(`<mo>∫</mo>`,par(poly([a,b,c])),row(SP,mi("d"),x_))}`,hint:`${EXH} — + c is optional`,
          e:polyStr([a/3,b/2,c,0]),mode:"anti"};});
@@ -1001,9 +1040,9 @@ function show(q,tag,retry){
   $("tip").hidden=true;
   setSecond(!!retry);
   const ex=isExpr(cur),a=$("ans");
-  a.classList.toggle("expr",ex);a.inputMode=ex?"text":"numeric";
-  $("keys").hidden=!ex;$("preview").hidden=!ex;$("preview").innerHTML="";
-  a.value="";a.disabled=false;a.focus();
+  $("ansbox").classList.toggle("expr",ex);$("ansrow").classList.toggle("exprmode",ex);a.inputMode=ex?"text":"numeric";
+  $("keys").hidden=!ex;
+  a.value="";a.disabled=false;a.focus();updatePreview();
   shownAt=performance.now();
 }
 /* Chrome + STIX Two Math leave ~0.43em of empty box after every square root. Measure and trim it, rather
@@ -1025,13 +1064,15 @@ function updateBar(){
   $("aside").textContent=parts.join(" · ");
 }
 
-/* live preview of a typed expression */
+/* draw what has been typed as maths, in place, with the cursor where the next key goes */
 function updatePreview(){
-  if(!cur||!isExpr(cur))return;const v=$("ans").value,p=$("preview");
-  if(!v.trim()){p.innerHTML="";return;}
-  let s=v;if(cur.mode==="anti")s=s.replace(/\+\s*[cC]\s*$/,"");
-  try{p.innerHTML=M(exprML(parseAns(s)),cur.mode==="anti"&&s!==v?row(PL,mi("c")):"");fixRadicals(p);}
-  catch(e){p.innerHTML=`<span class="why">${e.message}</span>`;}
+  if(!cur||!isExpr(cur))return;const a=$("ans"),view=$("ansview");
+  let v=a.value,c=a.selectionStart??v.length,tail="";
+  const m=cur.mode==="anti"&&v.match(/\+\s*[cC]\s*$/);   // optional constant of integration
+  if(m){v=v.slice(0,m.index);c=Math.min(c,v.length);tail=row(PL,mi("c"));}
+  const ml=liveML(v,c);
+  view.innerHTML=ml?ml.replace(/<\/math>$/,tail+"</math>"):`<span class="raw">${v.replace(/[&<>]/g,(ch)=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[ch])}</span>`;
+  fixRadicals(view);
 }
 
 function showTip(){
@@ -1176,7 +1217,7 @@ function finish(){
   clearInterval(run.t);
   const done=run; run=null; cur=null;
   document.body.classList.remove("running");
-  $("cardctl").hidden=true;$("ansrow").hidden=true;$("preview").hidden=true;$("keys").hidden=true;$("tip").hidden=true;
+  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;
   $("ans").disabled=true;$("ans").value="";$("clock").textContent="5:00";$("cat").textContent="done";setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
@@ -1222,7 +1263,7 @@ function setFont(f){
   if(!["textbook","modern","sans"].includes(f))f="textbook";
   document.documentElement.dataset.font=f;$("fontSel").value=f;
   try{localStorage.setItem("qm-font",f);}catch(e){}
-  document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("preview"));});
+  document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("ansview"));});
 }
 
 /* ---------- persistence ---------- */
@@ -1258,6 +1299,9 @@ $("endless").onclick=()=>start(true);
 $("stop").onclick=stopPressed;
 $("skip").onclick=()=>skip();
 $("hintBtn").onclick=()=>showTip();
+$("sign").addEventListener("pointerdown",(e)=>e.preventDefault());   // keep the keyboard open
+$("sign").onclick=()=>{const a=$("ans");a.value=a.value.startsWith("-")?a.value.slice(1):"-"+a.value;a.focus();
+  a.setSelectionRange(a.value.length,a.value.length);};
 $("ans").addEventListener("keydown",e=>{
   if(e.key==="Enter"){e.preventDefault();submit();return;}
   if(e.key==="Escape"){e.preventDefault();skip();return;}
@@ -1267,6 +1311,8 @@ $("ans").addEventListener("keydown",e=>{
 $("ans").addEventListener("input",(e)=>{const a=e.target;
   if(cur&&isExpr(cur)&&/[rR]/.test(a.value)){const i=a.selectionStart;a.value=a.value.replace(/[rR]/g,"√");a.setSelectionRange(i,i);}
   updatePreview();});
+// the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
+for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
 document.addEventListener("keydown",e=>{
   if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&e.target.tagName!=="SELECT"&&e.target.tagName!=="BUTTON"){e.preventDefault();start(false);}
 });
