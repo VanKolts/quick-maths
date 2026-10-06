@@ -126,7 +126,7 @@ footer p{margin:0 0 6px}
       <span class="sp" id="score">0 / 0</span>
     </div>
     <div class="stage">
-      <div class="tags"><span class="tag" id="cat">ready</span><span class="tag retry" id="retryTag" hidden>second try</span></div>
+      <div class="tags"><span class="tag" id="cat">ready</span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
       <div class="qtext" id="q">Press Start</div>
       <div class="qhint" id="hint">Answers are always whole numbers. Keyboard only — type, then Enter.</div>
       <div class="ansrow">
@@ -166,8 +166,8 @@ footer p{margin:0 0 6px}
   <footer>
     <p>Five minutes at the front of the daily Anki hour. The level rises when you are both accurate and
     quick, and drops back when you are not — so it keeps finding the edge of what you can do.</p>
-    <p>Wrong once: try again. Wrong twice, or skipped (Esc): the question is set aside and comes back,
-    untimed, when the five minutes are up. Only first attempts count towards your stats, and a skip counts
+    <p>Wrong once: the question leaves and comes back a few questions later, marked as one you got wrong.
+    Wrong again, or skipped (Esc): it is set aside and comes back, untimed, when the five minutes are up. Only first attempts count towards your stats, and a skip counts
     as a miss.<span id="sync" class="note"></span></p>
   </footer>
 </div>
@@ -658,14 +658,14 @@ const med=(a)=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);const m
 const ymd=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const secs=(ms)=>`${(ms/1000).toFixed(1)}s`;
 
-function show(q,tag){
-  cur={...q,tries:0,revealed:false};
+function show(q,tag,retry){
+  cur={...q,tries:q.tries||0,revealed:false};
   $("cat").textContent=tag;
   const el=$("q");el.innerHTML=cur.q;
   el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
   fixRadicals(el);
   $("hint").textContent=cur.hint||"Whole-number answer";
-  setSecond(false);
+  setSecond(!!retry);
   $("ans").value="";$("ans").disabled=false;$("ans").focus();
   shownAt=performance.now();
 }
@@ -682,10 +682,17 @@ function updateBar(){
   if(!run)return;
   $("score").textContent=`${run.right} / ${run.n}`;
   $("qn").textContent=run.phase==="review"?`R ${run.ri+1} / ${run.shelf.length}`:`Q ${run.n+1}`;
-  $("aside").textContent=run.phase==="main"&&run.shelf.length?`${run.shelf.length} set aside`:"";
+  const parts=[];if(run.phase==="main"){if(run.later.length)parts.push(`${run.later.length} coming back`);
+    if(run.shelf.length)parts.push(`${run.shelf.length} set aside`);}
+  $("aside").textContent=parts.join(" · ");
 }
 
 function nextQ(){
+  // a question missed once returns after a few new ones, flagged
+  if(run&&run.phase==="main"){const i=run.later.findIndex(x=>x.due<=run.n);
+    if(i>=0){const [x]=run.later.splice(i,1);lastCat=x.q.cat;show(x.q,`${GEN[x.q.cat].name} · level ${x.q.lv}`,true);
+      const v=$("verdict");if(v.textContent)v.textContent="last one: "+v.textContent;   // not about this question
+      updateBar();return;}}
   const pool=CATS.filter(c=>focus.has(c));
   if(!pool.length)return;
   const cand=pool.length>1&&lastCat&&pool.includes(lastCat)?pool.filter(c=>c!==lastCat):pool;
@@ -722,13 +729,14 @@ function submit(){
   if(run.phase==="review"){reviewAnswer(ok);return;}
   if(cur.tries===0){record(cur,ok,ms);run.n++;if(ok)run.right++;}
   cur.tries++;
-  if(ok){say(cur.tries===1?`correct · ${secs(ms)}`:"correct on the second try","ok");flash("ok");
+  if(ok){say(cur.tries===1?`correct · ${secs(ms)}`:"correct this time","ok");flash("ok");
     updateBar();renderStats();nextQ();return;}
   if(cur.tries===1){
-    say("Not quite — think more carefully and try again","bad");flash("bad");setSecond(true);
-    $("ans").value="";$("ans").focus();updateBar();renderStats();return;}
+    run.later.push({q:cur,due:run.n+ri(3,5)});
+    say("Not quite — it comes back in a few questions","bad");flash("bad");
+    updateBar();renderStats();nextQ();return;}
   run.shelf.push(cur);
-  say("Wrong twice — set aside, it comes back at the end","bad");flash("bad");
+  say("Wrong again — set aside, it comes back at the end","bad");flash("bad");
   updateBar();renderStats();nextQ();
 }
 
@@ -751,7 +759,7 @@ function tick(){
 }
 
 function start(endless){
-  run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250),shelf:[],phase:"main",ri:0,fixed:0};
+  run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
   $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;$("skip").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless — stop when you like":"five minutes";
   tick(); nextQ(); updateBar();
@@ -762,6 +770,8 @@ function endMain(){
   if(!run||run.phase!=="main")return;
   clearInterval(run.t);
   if(cur&&cur.tries===1&&!run.shelf.includes(cur))run.shelf.push(cur);
+  for(const x of run.later)run.shelf.push(x.q);   // missed once, never got their second go
+  run.later=[];
   commitSession(run);
   if(!run.shelf.length){finish();return;}
   run.phase="review";run.ri=0;
@@ -779,7 +789,7 @@ function reviewAnswer(ok){
   cur.revealed=true;flash("bad");setSecond(false);
   say(`The answer is ${cur.a} — press Enter to continue`,"bad");$("ans").value="";
 }
-function advanceReview(){run.ri++;if(run.ri<run.shelf.length)showReview();else finish();}
+function advanceReview(){if(cur&&cur.revealed)say("");run.ri++;if(run.ri<run.shelf.length)showReview();else finish();}
 
 function commitSession(done){
   if(!done.n)return;
