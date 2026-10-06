@@ -30,6 +30,7 @@
   --ok:#4FA97A; --bad:#DE6A60; --bad-soft:#341C1B; color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}   /* else .ansrow{display:flex} beats the hidden attribute */
 body{background:var(--bg);color:var(--ink);font-family:var(--font-display);
   padding-inline:16px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
@@ -128,8 +129,8 @@ footer p{margin:0 0 6px}
     <div class="stage">
       <div class="tags"><span class="tag" id="cat">ready</span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
       <div class="qtext" id="q">Press Start</div>
-      <div class="qhint" id="hint">Answers are always whole numbers. Keyboard only — type, then Enter.</div>
-      <div class="ansrow">
+      <div class="qhint" id="hint">Answers are always whole numbers. Type, then Enter; Esc skips.</div>
+      <div class="ansrow" id="ansrow" hidden>
         <input type="text" id="ans" inputmode="numeric" autocomplete="off" spellcheck="false"
                aria-label="Your answer" disabled>
         <span class="enter">⏎ answer · esc skip</span>
@@ -760,7 +761,7 @@ function tick(){
 
 function start(endless){
   run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
-  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;$("skip").hidden=false;$("stop").textContent="Stop";
+  $("start").hidden=true;$("endless").hidden=true;$("stop").hidden=false;$("skip").hidden=false;$("ansrow").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless — stop when you like":"five minutes";
   tick(); nextQ(); updateBar();
 }
@@ -807,7 +808,7 @@ function finish(){
   if(!run)return;
   clearInterval(run.t);
   const done=run; run=null; cur=null;
-  $("start").hidden=false;$("endless").hidden=false;$("stop").hidden=true;$("skip").hidden=true;
+  $("start").hidden=false;$("endless").hidden=false;$("stop").hidden=true;$("skip").hidden=true;$("ansrow").hidden=true;
   $("ans").disabled=true;$("ans").value="";$("clock").textContent="5:00";$("cat").textContent="done";setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
