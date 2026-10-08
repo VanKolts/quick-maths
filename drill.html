@@ -42,13 +42,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-text);margin:0
 header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
 h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;letter-spacing:-.015em;color:var(--accent)}
 .quote{margin:8px 0 0;max-width:52ch}
-.quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:1rem;line-height:1.45;text-wrap:pretty}
-.quote figcaption{margin-top:3px;font-size:.8rem;color:var(--faint)}
+.quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:1.15rem;line-height:1.45;text-wrap:pretty}
+.quote figcaption{margin-top:4px;font-size:.88rem;color:var(--faint)}
 .streak{font-size:.78rem;color:var(--muted);text-align:right;flex:none}
 .streak b{color:var(--accent);font-size:1.7rem;font-weight:600;display:block;line-height:1.1}
 
 /* ---- drill card ---- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;
   display:flex;flex-direction:column;min-height:320px}
 .bar{display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
   font-size:.85rem;color:var(--muted);flex-wrap:wrap}
@@ -65,7 +65,7 @@ h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;
 .qtext math mfrac mfrac{font-size:.9em}
 .qhint{font-size:.9rem;color:var(--muted)}
 .tipbox{max-width:44rem;text-align:left;font-size:1rem;line-height:1.55;background:var(--accent-soft);
-  border-left:3px solid var(--accent);padding:10px 14px;border-radius:3px}
+  border-left:3px solid var(--accent);padding:10px 14px;border-radius:2px}
 .tipbox .label{display:block;margin-bottom:2px;color:var(--accent)}
 .tipbox.worked{background:var(--sunk);border-left-color:var(--ok);font-size:1.12rem;padding:12px 18px}
 .tipbox .step{margin:6px 0;line-height:1.7}
@@ -74,7 +74,7 @@ h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;
 .tipbox math{font-family:var(--font-math)}
 .ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
 input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-align:center;
-  padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--sunk);
+  padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:var(--sunk);
   color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
 /* typed answers: an invisible text field over a live maths view of what has been typed */
 .ansbox{position:relative}
@@ -84,11 +84,11 @@ input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-al
 @media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
-  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1px solid var(--line);border-radius:4px;background:var(--sunk);overflow-x:auto;overflow-y:hidden}
+  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1px solid var(--line);border-radius:2px;background:var(--sunk);overflow-x:auto;overflow-y:hidden}
 .ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
 .ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
 .card.second .ansview{border-color:var(--bad)}
-.ansview .ph{border:1px dashed var(--faint);border-radius:2px}
+.ansview .ph{border:1px dashed var(--faint);border-radius:1px}
 .ansview .caret{background:var(--accent);animation:blink 1.05s steps(1) infinite}
 .ansbox.expr:not(:focus-within) .caret{visibility:hidden}
 .ansview .raw{font-size:.8em;color:var(--muted)}
@@ -96,11 +96,11 @@ input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-al
 @media (prefers-reduced-motion:reduce){.ansview .caret{animation:none}}
 input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .keys{font-size:.82rem;color:var(--faint)}
-kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;
+kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:2px;
   padding:0 .35em;background:var(--surface);color:var(--muted)}
 .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .tag{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
-  color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:3px}
+  color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:2px}
 .tag.retry{color:var(--bad);background:var(--bad-soft)}
 .verdict{font-size:1rem;min-height:1.5em;text-wrap:balance}
 .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
@@ -122,11 +122,11 @@ body.running .qtext.long{font-size:clamp(1.3rem,5vw,2.2rem)}
 
 /* ---- controls ---- */
 button{font-family:var(--font-text);font-size:.92rem;padding:8px 16px;
-  border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+  border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 /* Start: light blue with a dotted outline that runs clockwise — four dashed edges, each sliding along its side */
-button.primary{border:0;padding:18px 48px;font-size:1.45rem;font-weight:800;color:var(--accent);border-radius:6px;
+button.primary{border:0;padding:18px 48px;font-size:1.45rem;font-weight:800;color:var(--accent);border-radius:3px;
   background:
     linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 0/9px 2px,
     linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 100%/9px 2px,
@@ -139,10 +139,10 @@ button.primary:hover{filter:brightness(1.04)}
 @media (prefers-reduced-motion:reduce){button.primary{animation:none}}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-size:.82rem;padding:4px 11px;border:1px solid var(--line);
-  border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
+  border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
 .chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
 .focusbtn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
-dialog{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:18px 20px;
+dialog{border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);padding:18px 20px;
   width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
 dialog::backdrop{background:rgba(16,20,58,.35)}
 dialog h2{margin:0 0 4px;font-size:1.2rem}
@@ -152,7 +152,7 @@ dialog h3{margin:14px 0 6px}
 
 /* ---- stats ---- */
 section h2{margin:0 0 9px}
-.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
 th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -166,13 +166,13 @@ td.few{color:var(--faint)}
 .legend dt{font-weight:600;color:var(--ink);float:left;clear:left;width:5.6em}
 .legend dd{margin:0 0 4px 5.6em}
 .empty{padding:22px 18px;color:var(--muted);font-size:.95rem;text-align:center;white-space:normal;text-wrap:pretty}
-.boxed{border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.boxed{border:1px solid var(--line);border-radius:3px;background:var(--surface)}
 footer{font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 footer h2{margin:0 0 6px}
 footer ol{margin:0 0 12px;padding-left:1.3em}
 footer li{margin-bottom:5px}
 details.info summary{display:inline-block;cursor:pointer;list-style:none;font-size:.92rem;padding:8px 16px;
-  border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink)}
+  border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink)}
 details.info summary::-webkit-details-marker{display:none}
 details.info summary::after{content:" ▾";color:var(--muted)}
 details.info[open] summary::after{content:" ▴"}
