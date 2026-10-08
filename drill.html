@@ -195,17 +195,16 @@ details.info h2{margin:14px 0 6px}
   <div class="card" id="card">
     <div class="bar">
       <span class="t" id="clock">5:00</span>
-      <span id="qn">Q 0</span>
+      <span id="qn">Q0</span>
       <span class="aside" id="aside"></span>
       <span id="mode"></span>
       <span class="sp" id="score">0 / 0</span>
     </div>
     <div class="stage">
-      <div class="tags"><span class="tag" id="cat">ready</span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
+      <div class="tags"><span class="tag" id="cat" hidden></span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
       <div class="qtext" id="q" hidden></div>
       <div class="qhint" id="hint" hidden></div>
       <button class="primary" id="start">Start 5:00</button>
-      <div class="qhint" id="startHint">or press Enter · topics, levels and length under Focus</div>
       <div class="tipbox" id="tip" hidden></div>
       <div class="tipbox worked" id="worked" hidden></div>
       <div class="ansrow" id="ansrow" hidden>
@@ -1282,7 +1281,7 @@ function flash(kind){const c=$("card");c.classList.remove("flash-ok","flash-bad"
 function updateBar(){
   if(!run)return;
   $("score").textContent=`${run.right} / ${run.n}`;
-  $("qn").textContent=run.phase==="review"?`R ${run.ri+1} / ${run.shelf.length}`:`Q ${run.n+1}`;
+  $("qn").textContent=run.phase==="review"?`R${run.ri+1} / ${run.shelf.length}`:`Q${run.n+1}`;
   const parts=[];if(run.phase==="main"){if(run.later.length)parts.push(`${run.later.length} coming back`);
     if(run.shelf.length)parts.push(`${run.shelf.length} set aside`);}
   $("aside").textContent=parts.join(" · ");
@@ -1405,7 +1404,7 @@ function start(){
   const endless=runMin===0;
   run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
   document.body.classList.add("running");window.scrollTo(0,0);
-  $("q").hidden=false;$("hint").hidden=false;$("startHint").hidden=true;
+  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;
   $("cardctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless":"";
   tick(); nextQ(); updateBar();
@@ -1454,12 +1453,12 @@ function finish(){
   const done=run; run=null; cur=null;
   document.body.classList.remove("running");
   $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;
-  $("ans").disabled=true;$("ans").value="";renderLength();$("cat").textContent="done";setSecond(false);
+  $("ans").disabled=true;$("ans").value="";renderLength();$("cat").hidden=true;setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
   $("hint").textContent=h;
-  say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q ${done.n}`;
+  say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q${done.n}`;
   $("start").textContent=`Again · ${runMin?clockText(runMin*60000):"endless"}`;
 }
 
