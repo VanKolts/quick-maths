@@ -60,7 +60,7 @@ function unrecur(s){return s.replace(/0\.(\d*)\s+\{(\d)\}((?:\s+\d)*)(?:\s+\{(\d
   const rep=d1+(mid||"").replace(/\s+/g,"")+(d2||"");return String(parseFloat("0."+pre+rep.repeat(12)));});}
 
 /* ---------- expression evaluator ---------- */
-function tok(s){const t=[];let i=0;s=unrecur(s);
+function tok(s){const t=[];let i=0;s=unrecur(s).replace(/⌊/g," floor(").replace(/⌋/g,") ");
   while(i<s.length){const c=s[i];
     if(/\s/.test(c)){i++;continue;}
     let m;
@@ -90,6 +90,7 @@ function evalExpr(s,env={}){const T=tok(s);let p=0;
     if(t.k!=="id")throw new Error("unexpected "+t.v+" in "+s);
     const id=t.v;
     if(id==="sqrt"){eat("(");const v=expr();eat(")");return Math.sqrt(v);}
+    if(id==="floor"){eat("(");const v=expr();eat(")");return Math.floor(v+1e-9);}
     if(id==="binom"){eat("(");const a=expr();eat(",");const b=expr();eat(")");return binomV(a,b);}
     if(id==="HCF"||id==="LCM"){eat("(");const a=[expr()];while(peek().v===","){p++;a.push(expr());}eat(")");return id==="HCF"?hcfV(...a):lcmV(...a);}
     if(id==="log_"){eat("(");const b=expr();eat(")");const x=power();return Math.log(x)/Math.log(b);}
@@ -258,6 +259,29 @@ function checkE(o){
   if(ok&&o.form&&orig!==null){const r=checkExpr(toAns(orig),o);if(r.ok||!r.form)return false;}
   return ok;}
 
+/* ---------- worked starts ----------
+   M: every evaluable side of an "=" agrees.  class="id": an identity in x, checked at three values.
+   class="ans": evaluates to the answer and is not a bare number.  No plain chunk may be just the answer. */
+const wstats={eq:0,id:0,ans:0,bare:0,samples:[]};
+function checkW(o){
+  if(!o.w||typeof o.w!=="string")return "no worked start";
+  const chunks=[...o.w.matchAll(/<math([^>]*)>[\s\S]*?<\/math>/g)];
+  for(const [html,attrs] of chunks){
+    const kind=(attrs.match(/class="(\w+)"/)||[])[1]||"";
+    const t=lin(parseXML(html)).replace(/\s+/g," ").trim().replace(/f ' '/g,"f''").replace(/f '/g,"f'");
+    const sides=t.split(" = ");
+    if(kind==="ans"){let v;try{v=evalExpr(t);}catch(e){return "answer expression unreadable: "+t;}
+      if(/^-?\d+(\.\d+)?$/.test(t))return "answer expression is a bare number: "+t;
+      if(o.a!==undefined&&!close(v,o.a,1e-9))return `answer expression ${t} = ${v}, answer ${o.a}`;wstats.ans++;continue;}
+    if(kind==="id"){for(const x of [0.7,1.9,3.2]){const vals=[];for(const sd of sides){try{vals.push(evalExpr(sd,{x}));}catch(e){}}
+        if(vals.length>=2&&!vals.every((v)=>close(v,vals[0],1e-9)))return `identity fails at x=${x}: ${t}`;if(vals.length>=2)wstats.id++;}continue;}
+    // a bare number equal to the answer is usually a coincidence ("divide by 20" when the answer is 20): tallied for review, not failed
+    if(o.a!==undefined&&/^-?\d+(\.\d+)?$/.test(t)&&+t===o.a){wstats.bare++;if(wstats.samples.length<12)wstats.samples.push(render(o.q)+"  →  "+t);}
+    if(sides.length>1){const vals=[];for(const sd of sides){try{vals.push(evalExpr(sd));}catch(e){}}
+      if(vals.length>=2){if(!vals.every((v)=>close(v,vals[0],1e-9)))return "equation does not balance: "+t;wstats.eq++;}}
+  }
+  return null;}
+
 /* ---------- run ---------- */
 let total=0,fails=0;const failBy={};const unchecked={},failures=[],shapes={},vals={};
 for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
@@ -269,16 +293,17 @@ for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
     if(/NaN|undefined|Infinity|null|object/.test(o.q+(o.hint||"")))bad.push("bad token");
     if(/[+\-]\s+-\s*\d/.test(t.replace(/\^\(- /g,"^(")))bad.push("sign collision");
     if(/(^|[\s(\[])1 x\b/.test(t)||/[+\-] 0(\s|\]|$)/.test(t)&&!/[=<>] 0/.test(t.match(/[+\-] 0(\s|\]|$)/)[0]))bad.push("unsimplified 1x / +0");
+    const wbad=checkW(o);if(wbad)bad.push("worked start: "+wbad);
     let r;try{r=o.e!==undefined?checkE(o):check(o);}catch(e){if(e.message==="UNCHECKED"){unchecked[key]=(unchecked[key]||0)+1;r=null;}else{r=false;bad.push("check error "+e.message);}}
     if(r===false&&!bad.length)bad.push("WRONG");
     if(r===true)shapes[key]++;
     if(/\((?!10\))[^()]*\)\^\(1\)/.test(t))bad.push("exponent of 1 printed");
-    if(bad.length){fails++;failBy[key]=(failBy[key]||0)+1;if(failures.length<60)failures.push([key,bad.join("; "),t,o.hint||"",o.a]);}
+    if(bad.length){fails++;failBy[key]=(failBy[key]||0)+1;if(failures.length<(+process.env.MAXF||60))failures.push([key,bad.join("; "),t,o.hint||"",o.a]);}
   }}));
 console.log(`questions ${total}, failures ${fails}`);
 const checked=Object.values(shapes).reduce((a,b)=>a+b,0);
 console.log(`independently recomputed: ${checked} / ${total} (${(100*checked/total).toFixed(1)}%)`);
-console.log("unchecked shapes:",unchecked);console.log("failures by shape:",failBy);
+console.log("unchecked shapes:",unchecked);console.log("worked starts checked: equations",wstats.eq,"· identities",wstats.id,"· answer expressions",wstats.ans);console.log("bare number equal to the answer (review):",wstats.bare,wstats.samples);console.log("failures by shape:",failBy);
 for(const f of failures)console.log(JSON.stringify(f));
 // variety: distinct questions per shape out of N
 const low=Object.entries(vals).map(([k,s])=>[k,s.size]).sort((a,b)=>a[1]-b[1]).slice(0,12);
