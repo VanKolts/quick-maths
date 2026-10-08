@@ -80,7 +80,7 @@ input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-al
 .ansbox{position:relative}
 /* the iPhone number pad has no minus key: on touch screens a ± button flips the sign of a whole-number answer */
 .sign{display:none;font-size:1.3rem;min-width:44px;min-height:44px;padding:0 12px}
-@media (pointer:coarse){.ansrow:not(.exprmode) .sign{display:inline-block}}
+@media (pointer:coarse){.ansrow:not(.exprmode) #sign{display:inline-block}.ansrow.exprmode #outBox{display:inline-block}}
 @media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
@@ -190,8 +190,9 @@ select{font-family:var(--font-text);font-size:.92rem;padding:5px 8px;border:1px 
                  aria-label="Your answer" disabled>
         </div>
         <button type="button" class="sign" id="sign" aria-label="Make the answer negative or positive">±</button>
+        <button type="button" class="sign" id="outBox" aria-label="Move out of this box">⇥</button>
       </div>
-      <div class="keys" id="keys" hidden><kbd>^</kbd> power &nbsp;·&nbsp; <kbd>r</kbd> √ &nbsp;·&nbsp; <kbd>/</kbd> fraction &nbsp;·&nbsp; <kbd>(</kbd> <kbd>)</kbd> group &nbsp;·&nbsp; x^(1/2) for a fractional power</div>
+      <div class="keys" id="keys" hidden><kbd>/</kbd> fraction &nbsp;·&nbsp; <kbd>^</kbd> power &nbsp;·&nbsp; <kbd>r</kbd> √ &nbsp;·&nbsp; <kbd>Tab</kbd> or <kbd>→</kbd> out of a box</div>
       <div class="verdict" id="verdict" aria-live="polite"></div>
     </div>
     <div class="cardctl" id="cardctl" hidden>
@@ -238,9 +239,12 @@ select{font-family:var(--font-text);font-size:.92rem;padding:5px 8px;border:1px 
       <li><b>Start</b> (or press Enter) gives you five minutes; <b>Endless</b> runs until you press Stop. Use
         <b>Focus</b> to practise only the operations you pick.</li>
       <li>Type your answer and press <kbd>Enter</kbd>. Most answers are whole numbers; when a question asks you to
-        differentiate, integrate, simplify, expand or factorise, type an expression instead — <kbd>^</kbd> for a power,
-        <kbd>r</kbd> for √, <kbd>/</kbd> for a fraction, brackets to group, e.g. <code>3x^2 - 4x^(1/2)</code> or
-        <code>6r2</code> for 6√2. Powers, fractions and roots take shape as you type; a dashed box shows where the next part goes. For an integral, “+ c” is optional.</li>
+        differentiate, integrate, simplify, expand or factorise, type an expression instead. <kbd>/</kbd> turns what you
+        just typed into the top of a fraction and puts you in the bottom; <kbd>/</kbd> on its own starts an empty fraction.
+        <kbd>^</kbd> opens a power, <kbd>r</kbd> a square root. You stay in a box until you press <kbd>Tab</kbd> or
+        <kbd>→</kbd> (on a phone, the ⇥ button) — so <code>x^1/2</code> then Tab is x to the half. Each press steps out of
+        one box, so a fraction inside a power takes two. A dashed box shows where
+        the next part goes; Backspace on an empty box removes it. For an integral, “+ c” is optional.</li>
       <li><b>Hint</b> (<kbd>?</kbd>) shows the general method or formula for that kind of question. A hinted answer
         does not count as right first time.</li>
       <li><b>Skip</b> (<kbd>Esc</kbd>) when you cannot start a question: it comes back a few questions later with a
@@ -995,7 +999,7 @@ function checkExpr(str,spec){
 function polyStr(c){let s="";c.forEach((a,i)=>{const p=c.length-1-i;if(a===0)return;const m=Math.abs(a);
   s+=(a<0?"-":(s?"+":""))+((m===1&&p>0)?"":String(m))+(p===0?"":p===1?"x":`x^${p}`);});return s||"0";}
 const linStr=(r)=>r>0?`(x-${r})`:`(x+${-r})`;
-const EXH="Type an expression";
+const EXH="Type an expression";   // the key legend under the box explains / ^ r and Tab
 
 /* ---------- hint cards: the general method for a shape ---------- */
 const TIPS={
@@ -1135,25 +1139,25 @@ addShape("calculus",3,"diffPower",()=>{const a=nz(-7,7),b=nz(-7,7);
   return{q:`Differentiate ${M(y_,EQ,par(poly([1,a])),par(poly([1,b])))}`,hint:`${EXH} for dy/dx`,e:polyStr([2,a+b]),mode:"expr",
          w:W(`Expand first:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,poly([1,a+b,a*b])))};});
 addShape("surds",1,"surdSimplify",()=>{const b=pick(SQF_S),k=ri(2,9);
-  return{q:`Simplify ${M(sq(k*k*b))}`,hint:`${EXH} — r types √`,e:`${k}√${b}`,mode:"expr",form:"surd",
+  return{q:`Simplify ${M(sq(k*k*b))}`,hint:EXH,e:`${k}√${b}`,mode:"expr",form:"surd",
   w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};});
 addShape("surds",2,"rationalise",()=>retry(()=>{const b=pick([2,3,5,6,7,10]),c=ri(2,15);const g=gcd(c,b),n=c/g,d=b/g;if(d===1)return null;
-  return{q:`Rationalise the denominator of ${M(fr(c,sq(b)))}`,hint:`${EXH} — r types √`,e:`${n===1?"":n}√${b}/${d}`,mode:"expr",form:"noRootDen",
+  return{q:`Rationalise the denominator of ${M(fr(c,sq(b)))}`,hint:EXH,e:`${n===1?"":n}√${b}/${d}`,mode:"expr",form:"noRootDen",
   w:W(`Multiply top and bottom by √${b}:`,M(fr(c,sq(b)),EQ,fr(row(c,sq(b)),row(sq(b),TM,sq(b)))),`then cancel.`)};}));
 addShape("surds",2,"surdExpand",()=>{const b=pick(SQF_S),a=ri(2,7);
   return{q:`Expand ${M(pw(par(a,PL,sq(b)),2))}`,hint:`${EXH} in the form a + b√c`,e:`${a*a+b}+${2*a}√${b}`,mode:"expr",form:"surdExp",
   w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`Collect the parts with and without √${b}.`)};});
 addShape("surds",3,"rationaliseConj",()=>{if(coin()){const m=ri(1,4),n=m*m+1;
-    return{q:`Rationalise the denominator of ${M(fr(1,row(sq(n),MI,m)))}`,hint:`${EXH} — r types √`,e:`√${n}+${m}`,mode:"expr",form:"surdExp",
+    return{q:`Rationalise the denominator of ${M(fr(1,row(sq(n),MI,m)))}`,hint:EXH,e:`√${n}+${m}`,mode:"expr",form:"surdExp",
       w:W(`Multiply top and bottom by (√${n} + ${m}); the bottom becomes`,M(par(sq(n),MI,m),par(sq(n),PL,m),EQ,n,MI,m*m))};}
   let a,b;do{a=pick(SQF_S);b=pick(SQF_S);}while(a<=b||a-b>6);const k=ri(1,5);
-  return{q:`Rationalise the denominator of ${M(fr(k*(a-b),row(sq(a),MI,sq(b))))}`,hint:`${EXH} — r types √`,
+  return{q:`Rationalise the denominator of ${M(fr(k*(a-b),row(sq(a),MI,sq(b))))}`,hint:EXH,
          e:`${k===1?"":k}√${a}+${k===1?"":k}√${b}`,mode:"expr",form:"surdExp",
          w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b))};});
 addShape("indices",2,"indexLaws",()=>{const a=ri(1,5),kind=R(3);   // exponents in halves
   const n2=kind===0?2*a+1:kind===1?-(2*a+1):1-2*a;
   const q=kind===0?M(pw1(x_,a),sq(x_)):kind===1?M(fr(1,row(pw1(x_,a),sq(x_)))):M(fr(sq(x_),pw1(x_,a)));
-  return{q:`Write ${q} as a single power of ${M(x_)}`,hint:`${EXH} like x^(3/2)`,e:`x^(${n2}/2)`,mode:"expr",form:"pow",
+  return{q:`Write ${q} as a single power of ${M(x_)}`,hint:`${EXH}, a single power of x`,e:`x^(${n2}/2)`,mode:"expr",form:"pow",
   w:W(Mid(sq(x_),EQ,pw(x_,fr(1,2))),`Multiplying adds the powers; dividing subtracts them.`)};});
 addShape("quadratics",1,"expand",()=>{const a=nz(-9,9),b=nz(-9,9);
   return{q:`Expand ${M(par(poly([1,a])),par(poly([1,b])))}`,hint:EXH,e:polyStr([1,a+b,a*b]),mode:"expr",form:"expanded",
@@ -1505,10 +1509,39 @@ $("ans").addEventListener("keydown",e=>{
   if(e.key==="Enter"){e.preventDefault();submit();return;}
   if(e.key==="Escape"){e.preventDefault();skip();return;}
   if(e.key==="?"){e.preventDefault();showTip();return;}
+  if(e.key==="Tab"&&cur&&isExpr(cur)){e.preventDefault();stepOut(e.target);return;}
+  if(e.key==="ArrowRight"&&cur&&isExpr(cur)&&e.target.value[e.target.selectionStart]===")"&&!e.shiftKey){e.preventDefault();stepOut(e.target);return;}
 });
 /* r types √ — done on the text, not the key, so it also works with phone keyboards and pasted input */
+/* Structured typing for expressions. /, ^ and √ open a box — a pair of brackets the display hides — with the
+   cursor inside, and you stay in it until Tab or → takes you out. Applied after each character arrives (the
+   input event), because phone keyboards do not reliably send key events or a cancellable beforeinput. */
+const FACTOR_END=/[0-9.x)]/;
+function stepOut(a){const v=a.value,i=a.selectionStart;const k=v.indexOf(")",i);
+  // from the top of a fraction, the next box is its bottom; otherwise just past the box
+  const c=k<0?v.length:v.slice(k+1,k+3)==="/("?k+3:k+1;a.setSelectionRange(c,c);updatePreview();}
+function structure(a,ch){   // ch has just been typed and sits at selectionStart − 1
+  const v=a.value,i=a.selectionStart,before=v.slice(0,i-1),after=v.slice(i),prev=before.slice(-1);
+  const set=(text,c)=>{a.value=text;a.setSelectionRange(c,c);};
+  if(ch==="/"){if(FACTOR_END.test(prev))set(before+"/()"+after,i+1);else set(before+"()/()"+after,i);return;}
+  if(ch==="^"){set(before+"^()"+after,i+1);return;}
+  if(ch==="r"||ch==="R"||ch==="√"){set(before+"√()"+after,i+1);return;}
+  if(ch==="("){set(before+"()"+after,i);return;}
+  if(ch===")"&&after[0]===")"){set(before+after,i);return;}   // typing ) over an auto-closed bracket just moves past it
+}
+$("ans").addEventListener("beforeinput",(e)=>{   // Backspace never breaks a box
+  if(!cur||!isExpr(cur)||e.inputType!=="deleteContentBackward"||!e.cancelable)return;
+  const a=e.target,v=a.value,i=a.selectionStart;if(i!==a.selectionEnd)return;const prev=v[i-1]||"",next=v[i]||"";
+  if(prev==="("&&next===")"){let k=i-1;if("/^√".includes(v[k-1]||""))k--;e.preventDefault();a.value=v.slice(0,k)+v.slice(i+1);a.setSelectionRange(k,k);updatePreview();return;}
+  if(prev===")"||prev==="("){e.preventDefault();a.setSelectionRange(i-1,i-1);updatePreview();}
+});
+$("outBox").addEventListener("pointerdown",(e)=>e.preventDefault());   // keep the keyboard open
+$("outBox").onclick=()=>{const a=$("ans");a.focus();stepOut(a);};
 $("ans").addEventListener("input",(e)=>{const a=e.target;
-  if(cur&&isExpr(cur)&&/[rR]/.test(a.value)){const i=a.selectionStart;a.value=a.value.replace(/[rR]/g,"√");a.setSelectionRange(i,i);}
+  if(cur&&isExpr(cur)){
+    if(e.inputType==="insertText"&&e.data&&e.data.length===1)structure(a,e.data);
+    else if(/[rR]/.test(a.value)){const i=a.selectionStart;a.value=a.value.replace(/[rR]/g,"√");a.setSelectionRange(i,i);}   // pasted text
+  }
   updatePreview();});
 // the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
 for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
