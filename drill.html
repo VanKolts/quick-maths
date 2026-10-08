@@ -9,24 +9,25 @@
    STIX Two Math has an OpenType MATH table, which is what lets brackets stretch round a binomial or a
    fraction; its one flaw in Chrome, a gap after every root, is trimmed in fixRadicals(). */
 :root{
-  --bg:#EEF1F3; --surface:#FDFDFC; --sunk:#E3E8EB;
-  --ink:#141E27; --muted:#55657A; --faint:#7D8D9A; --line:#D2DAE0;
-  --accent:#191970; --accent-soft:#E3E6F5; --on-accent:#FFFFFF;   /* midnight blue */
+  /* a light midnight-blue page; every text colour is at least 4.5:1 on bg, surface, sunk and accent-soft */
+  --bg:#E3E7F6; --surface:#FBFCFF; --sunk:#D9DEF1;
+  --ink:#121633; --muted:#46507A; --faint:#525D86; --line:#C6CDE8;
+  --accent:#191970; --accent-soft:#D2D8F2; --on-accent:#FFFFFF;   /* midnight blue */
   --ok:#1C7049; --bad:#A8271E; --bad-soft:#F6E1DE;
   --font-text:"Figtree",system-ui,sans-serif;
   --font-math:"Noto Sans Math","STIX Two Math","Cambria Math",math;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
-  --ink:#E4ECF2; --muted:#9AACBA; --faint:#7A8C9A; --line:#25313D;
-  --accent:#A3AEF5; --accent-soft:#1D2244; --on-accent:#0E151B;   /* midnight blue is unreadable on a dark page: a light blue instead */
-  --ok:#4FA97A; --bad:#DE6A60; --bad-soft:#341C1B; color-scheme:dark;
+  --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
+  --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
+  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A;
+  --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
-  --ink:#E4ECF2; --muted:#9AACBA; --faint:#7A8C9A; --line:#25313D;
-  --accent:#A3AEF5; --accent-soft:#1D2244; --on-accent:#0E151B;   /* midnight blue is unreadable on a dark page: a light blue instead */
-  --ok:#4FA97A; --bad:#DE6A60; --bad-soft:#341C1B; color-scheme:dark;
+  --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
+  --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
+  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A;
+  --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}   /* else display:flex rules beat the hidden attribute */
@@ -1421,7 +1422,7 @@ function finish(){
   clearInterval(run.t);
   const done=run; run=null; cur=null;
   document.body.classList.remove("running");
-  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;
+  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;
   $("ans").disabled=true;$("ans").value="";$("clock").textContent="5:00";$("cat").textContent="done";setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
