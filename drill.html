@@ -10,9 +10,10 @@
    fraction; its one flaw in Chrome, a gap after every root, is trimmed in fixRadicals(). */
 :root{
   /* a light midnight-blue page; every text colour is at least 4.5:1 on bg, surface, sunk and accent-soft */
-  --bg:#E3E7F6; --surface:#FBFCFF; --sunk:#D9DEF1;
+  --bg:#ECEFFA; --surface:#FDFDFF; --sunk:#DDE2F3;
   --ink:#121633; --muted:#46507A; --faint:#525D86; --line:#C6CDE8;
   --accent:#191970; --accent-soft:#D2D8F2; --on-accent:#FFFFFF;   /* midnight blue */
+  --start-bg:#D3E0FC;   /* light blue fill of the Start button */
   --ok:#1C7049; --bad:#A8271E; --bad-soft:#F6E1DE;
   --font-text:"Figtree",system-ui,sans-serif;
   --font-math:"Noto Sans Math","STIX Two Math","Cambria Math",math;
@@ -20,13 +21,13 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
   --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
-  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A;
+  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A; --start-bg:#26306B;
   --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
   --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
-  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A;
+  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A; --start-bg:#26306B;
   --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -125,12 +126,30 @@ button{font-family:var(--font-text);font-size:.92rem;padding:8px 16px;
   border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
-button.primary:hover{filter:brightness(1.08)}
+/* Start: light blue with a dotted outline that runs clockwise — four dashed edges, each sliding along its side */
+button.primary{border:0;padding:10px 20px;font-weight:600;color:var(--accent);
+  background:
+    linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 0/9px 2px,
+    linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 100%/9px 2px,
+    linear-gradient(0deg,var(--accent) 55%,transparent 0) repeat-y 0 0/2px 9px,
+    linear-gradient(0deg,var(--accent) 55%,transparent 0) repeat-y 100% 0/2px 9px,
+    var(--start-bg);
+  animation:march .9s linear infinite}
+@keyframes march{to{background-position:9px 0,-9px 100%,0 -9px,100% 9px,0 0}}
+button.primary:hover{filter:brightness(1.04)}
+@media (prefers-reduced-motion:reduce){button.primary{animation:none}}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-size:.82rem;padding:4px 11px;border:1px solid var(--line);
   border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
 .chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.focusbtn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+dialog{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:18px 20px;
+  width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
+dialog::backdrop{background:rgba(16,20,58,.35)}
+dialog h2{margin:0 0 4px;font-size:1.2rem}
+dialog h3{margin:14px 0 6px}
+.dlgfoot{display:flex;justify-content:flex-end;margin-top:14px}
+.dlgfoot .chip{font-size:.92rem;padding:6px 16px}
 
 /* ---- stats ---- */
 section h2{margin:0 0 9px}
@@ -212,10 +231,17 @@ details.info h2{margin:14px 0 6px}
     <button id="endless">Endless</button>
   </div>
 
-  <section>
-    <h2 class="label">Focus</h2>
+  <div><button class="chip focusbtn" id="focusBtn" aria-haspopup="dialog">Focus</button></div>
+
+  <dialog id="focusDlg" aria-labelledby="focusTitle">
+    <h2 id="focusTitle">Focus</h2>
+    <h3 class="label">Topics</h3>
     <div class="chips" id="chips"></div>
-  </section>
+    <h3 class="label">Levels</h3>
+    <div class="chips" id="levelChips"></div>
+    <p class="note" id="levelNote"></p>
+    <div class="dlgfoot"><button class="chip" id="focusDone">Done</button></div>
+  </dialog>
 
   <section>
     <h2 class="label">Per-operation</h2>
@@ -252,7 +278,9 @@ details.info h2{margin:14px 0 6px}
     </ol>
       <h2 class="label">Reading the table</h2>
     <dl class="legend">
-      <dt>Level</dt><dd>1–3, separately for each operation. After 5 answers at a level it rises if at least 80% of
+      <dt>Level</dt><dd>1–3, separately for each operation. Questions come from level 1 up to the highest level you
+        have reached — half at your current level, the rest from the levels below (or above, if you have dropped back) —
+        so the basics keep coming up. Only questions at your current level move it. After 5 answers at a level it rises if at least 80% of
         your recent answers were right <em>and</em> your median time is under 14 s (23 s for surds, polynomials and calculus);
         it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.</dd>
       <dt>Seen</dt><dd>Questions answered (first attempts; skips count).</dd>
@@ -1211,11 +1239,11 @@ const QUOTES=[
 ];
 
 /* ---------- state ---------- */
-const BLANK=()=>({lv:1,seen:0,right:0,times:[],recent:[],last:null});
+const BLANK=()=>({lv:1,best:1,seen:0,right:0,times:[],recent:[],last:null});
 let S={cats:Object.fromEntries(CATS.map(c=>[c,BLANK()])),sessions:[],streak:{last:null,count:0},total:0};
 const COVER=30;   // every operation in focus is shown at least once per this many questions
 const LEVEL_MS={surds:23000,poly:23000,calculus:23000};   // median needed to level up; 14 s otherwise
-let focus=new Set(CATS), run=null, cur=null, shownAt=0, db=null, uid=null;
+let focus=new Set(CATS), lvFilter=new Set(), run=null, cur=null, shownAt=0, db=null, uid=null;
 let lastCat=null; const lastIdx={}, recentQ=[];
 
 const $=(id)=>document.getElementById(id);
@@ -1299,7 +1327,7 @@ function nextQ(){
   const overdue=cand.filter((c)=>gap(c)>=COVER).sort((a,b)=>gap(b)-gap(a)||Math.random()-0.5);
   if(overdue.length)cat=overdue[0];
   let q=null;
-  for(let i=0;i<15;i++){let o;try{o=make(cat,S.cats[cat].lv,lastIdx[cat]);}catch(e){continue;}
+  for(let i=0;i<15;i++){let o;try{o=make(cat,pickLevel(cat),lastIdx[cat]);}catch(e){continue;}
     q=o;if(!recentQ.includes(o.q))break;}
   if(!q)q=make("mental",1);
   lastCat=q.cat;lastIdx[q.cat]=q.idx;S.cats[q.cat].last=S.total;recentQ.push(q.q);if(recentQ.length>80)recentQ.shift();
@@ -1310,10 +1338,11 @@ function record(q,ok,ms){
   const s=S.cats[q.cat];
   // the median is a speed for answers you got right: a wrong answer or a skip adds no time
   S.total++; s.seen++; if(ok)s.right++; if(ok&&ms!=null){s.times.push(ms); if(s.times.length>40)s.times.shift();}
+  if(q.lv!==s.lv)return;   // easier (or harder) questions from the range count in the stats but do not move the level
   s.recent.push(ok?1:0); if(s.recent.length>6)s.recent.shift();
   if(s.recent.length>=5){
     const hit=s.recent.reduce((a,b)=>a+b,0)/s.recent.length, m=med(s.times.slice(-6))||9999;
-    if(hit>=0.8&&m<(LEVEL_MS[q.cat]||14000)&&s.lv<3){s.lv++;s.recent=[];}
+    if(hit>=0.8&&m<(LEVEL_MS[q.cat]||14000)&&s.lv<3){s.lv++;s.best=Math.max(s.best||1,s.lv);s.recent=[];}
     else if(hit<0.5&&s.lv>1){s.lv--;s.recent=[];}
   }
 }
@@ -1453,6 +1482,17 @@ function renderStreak(){
   $("streakN").textContent=n||"—";
   $("streakL").textContent=n?"day streak":"no sessions yet";
 }
+/* ---------- Focus: topics and levels, chosen in a dialog, remembered on this device ---------- */
+function pickLevel(c){const s=S.cats[c];
+  if(lvFilter.size)return pick([...lvFilter]);
+  const top=Math.max(s.best||1,s.lv);if(top===1)return 1;
+  if(Math.random()<0.5)return s.lv;                       // half at the current level
+  const others=[];for(let l=1;l<=top;l++)if(l!==s.lv)others.push(l);return pick(others);}
+function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[...focus],levels:[...lvFilter]}));}catch(e){}}
+function renderFocusBtn(){
+  const t=focus.size===CATS.length?"All topics":focus.size===1?GEN[[...focus][0]].name:`${focus.size} topics`;
+  const l=lvFilter.size?`level ${[...lvFilter].sort().join(", ")}`:"adaptive levels";
+  $("focusBtn").textContent=`Focus: ${t} · ${l}`;}
 function renderChips(){
   $("chips").innerHTML=CATS.map(c=>
     `<button class="chip" data-c="${c}" aria-pressed="${focus.has(c)}">${GEN[c].name}</button>`).join("")
@@ -1461,22 +1501,34 @@ function renderChips(){
     const c=b.dataset.c;
     if(c==="__all")focus=new Set(CATS);
     else{focus.has(c)?focus.delete(c):focus.add(c);if(!focus.size)focus=new Set(CATS);}
-    renderChips();
+    saveFocus();renderChips();
   });
+  $("levelChips").innerHTML=`<button class="chip" data-l="auto" aria-pressed="${!lvFilter.size}">Adaptive</button>`
+    +[1,2,3].map(l=>`<button class="chip" data-l="${l}" aria-pressed="${lvFilter.has(l)}">Level ${l}</button>`).join("");
+  $("levelChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    const l=b.dataset.l;
+    if(l==="auto")lvFilter=new Set();else{const n=+l;lvFilter.has(n)?lvFilter.delete(n):lvFilter.add(n);}
+    saveFocus();renderChips();
+  });
+  $("levelNote").textContent=lvFilter.size
+    ?"Only the levels you picked, for every topic. Questions below or above your current level still count in your stats but do not move your level."
+    :"Adaptive: each topic gives questions from level 1 up to the highest level you have reached, half of them at your current level.";
+  renderFocusBtn();
 }
 
 /* ---------- persistence ---------- */
 function pack(){return{v:3,updated:new Date().toISOString(),streak:S.streak,total:S.total,
   sessions:S.sessions.slice(-160),
   cats:Object.fromEntries(CATS.map(c=>{const s=S.cats[c];
-    return[c,{lv:s.lv,seen:s.seen,right:s.right,times:s.times.slice(-40).map(Math.round),recent:s.recent,last:s.last}];}))};}
+    return[c,{lv:s.lv,best:Math.max(s.best||1,s.lv),seen:s.seen,right:s.right,times:s.times.slice(-40).map(Math.round),recent:s.recent,last:s.last}];}))};}
 function unpack(d){
   if(!d||typeof d!=="object")return;
   if(d.streak&&typeof d.streak==="object")S.streak={last:d.streak.last??null,count:+d.streak.count||0};
   if(Array.isArray(d.sessions))S.sessions=d.sessions.slice(-160);
   S.total=Number.isFinite(+d.total)&&d.total!=null?+d.total:CATS.reduce((n,c)=>n+(d.cats&&d.cats[c]?+d.cats[c].seen||0:0),0);
   if(d.cats&&typeof d.cats==="object")CATS.forEach(c=>{const o=d.cats[c];if(!o)return;
-    S.cats[c]={lv:Math.min(3,Math.max(1,+o.lv||1)),seen:+o.seen||0,right:+o.right||0,
+    const lv=Math.min(3,Math.max(1,+o.lv||1));
+    S.cats[c]={lv,best:Math.min(3,Math.max(lv,+o.best||1)),seen:+o.seen||0,right:+o.right||0,
       times:Array.isArray(o.times)?o.times.slice(-40).map(Number).filter(Number.isFinite):[],
       recent:Array.isArray(o.recent)?o.recent.slice(-6).map(Number):[],last:Number.isFinite(o.last)?o.last:null};});
 }
@@ -1492,7 +1544,13 @@ async function save(){
 /* ---------- boot ---------- */
 {const [t,by]=pick(QUOTES);$("quoteText").textContent=`“${t}”`;$("quoteBy").textContent=`— ${by}`;}
 document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("ansview"));});
+try{const f=JSON.parse(localStorage.getItem("qm-focus")||"null");
+  if(f){const cs=(f.cats||[]).filter((c)=>CATS.includes(c));if(cs.length)focus=new Set(cs);
+    lvFilter=new Set((f.levels||[]).filter((l)=>[1,2,3].includes(l)));}}catch(e){}
 renderChips(); renderStats(); renderStreak();
+$("focusBtn").onclick=()=>$("focusDlg").showModal();
+$("focusDone").onclick=()=>$("focusDlg").close();
+$("focusDlg").addEventListener("click",(e)=>{if(e.target===$("focusDlg"))$("focusDlg").close();});   // click outside closes
 $("start").onclick=()=>start(false);
 $("endless").onclick=()=>start(true);
 $("stop").onclick=stopPressed;
@@ -1542,7 +1600,7 @@ $("ans").addEventListener("input",(e)=>{const a=e.target;
 // the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
 for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
 document.addEventListener("keydown",e=>{
-  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY"].includes(e.target.tagName)){e.preventDefault();start(false);}
+  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&!$("focusDlg").open){e.preventDefault();start(false);}
 });
 
 (async()=>{
