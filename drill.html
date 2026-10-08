@@ -3,7 +3,7 @@
 <title>Quick Maths</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+Math&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+Math&display=swap">
 <style>
 /* One typeface family for prose, labels and numbers; its matching math font for the questions.
    STIX Two Math has an OpenType MATH table, which is what lets brackets stretch round a binomial or a
@@ -18,6 +18,7 @@
 }
 :root[data-font="modern"]{--font-text:"Source Serif 4",Georgia,serif}
 :root[data-font="sans"]{--font-text:"Noto Sans",system-ui,sans-serif;--font-math:"Noto Sans Math","STIX Two Math",math}
+:root[data-font="figtree"]{--font-text:"Figtree",system-ui,sans-serif;--font-math:"Noto Sans Math","STIX Two Math",math}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0E151B; --surface:#17202A; --sunk:#111A22;
   --ink:#E4ECF2; --muted:#9AACBA; --faint:#7A8C9A; --line:#25313D;
@@ -228,8 +229,9 @@ select{font-family:var(--font-text);font-size:.92rem;padding:5px 8px;border:1px 
         it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.</dd>
       <dt>Seen</dt><dd>Questions answered (first attempts; skips count).</dd>
       <dt>Accuracy</dt><dd>Share right first time, without a hint, over everything you have answered.</dd>
-      <dt>Median</dt><dd>Your middle time over the last 40 first attempts — half were faster, half slower. Greyed when
-        there are fewer than 3 answers, and only those with 3 or more are ranked for “slowest”.</dd>
+      <dt>Median</dt><dd>Your middle time over your last 40 questions answered right first time — half were faster, half
+        slower. Wrong answers, skips and second tries add no time. Greyed when there are fewer than 3 answers, and only
+        those with 3 or more are ranked for “slowest”.</dd>
     </dl>
   </section>
 
@@ -255,6 +257,7 @@ select{font-family:var(--font-text);font-size:.92rem;padding:5px 8px;border:1px 
     <div class="settings">
       <label for="fontSel">Typeface</label>
       <select id="fontSel">
+        <option value="figtree">Figtree</option>
         <option value="textbook">Textbook — STIX Two</option>
         <option value="modern">Modern serif — Source Serif</option>
         <option value="sans">Sans — Noto Sans</option>
@@ -1306,7 +1309,8 @@ function nextQ(){
 
 function record(q,ok,ms){
   const s=S.cats[q.cat];
-  S.total++; s.seen++; if(ok)s.right++; s.times.push(ms); if(s.times.length>40)s.times.shift();
+  // the median is a speed for answers you got right: a wrong answer or a skip adds no time
+  S.total++; s.seen++; if(ok)s.right++; if(ok&&ms!=null){s.times.push(ms); if(s.times.length>40)s.times.shift();}
   s.recent.push(ok?1:0); if(s.recent.length>6)s.recent.shift();
   if(s.recent.length>=5){
     const hit=s.recent.reduce((a,b)=>a+b,0)/s.recent.length, m=med(s.times.slice(-6))||9999;
@@ -1353,7 +1357,7 @@ function reveal(){cur.revealed=true;setSecond(false);
 function skip(){
   if(!run||!cur)return;
   if(run.phase==="review"){if(cur.revealed)advanceReview();else reveal();return;}
-  if(cur.tries===0){record(cur,false,performance.now()-shownAt);run.n++;}
+  if(cur.tries===0){record(cur,false,null);run.n++;}
   // first skip: back in a few questions with a worked start; skipped again: to the review, worked start and all
   if(!cur.back){run.later.push({q:{...cur,tries:1,worked:true,back:true,why:"skipped"},due:run.n+ri(3,5)});
     say("Skipped — it comes back in a few questions with a worked start","");}
@@ -1462,9 +1466,9 @@ function renderChips(){
   });
 }
 function setFont(f){
-  if(!["textbook","modern","sans"].includes(f))f="textbook";
+  if(!["figtree","textbook","modern","sans"].includes(f))f="figtree";
   document.documentElement.dataset.font=f;$("fontSel").value=f;
-  try{localStorage.setItem("qm-font",f);}catch(e){}
+  try{localStorage.setItem("qm-font2",f);}catch(e){}
   document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("ansview"));});
 }
 
@@ -1494,7 +1498,7 @@ async function save(){
 
 /* ---------- boot ---------- */
 {const [t,by]=pick(QUOTES);$("quoteText").textContent=`“${t}”`;$("quoteBy").textContent=`— ${by}`;}
-{let f="textbook";try{f=localStorage.getItem("qm-font")||f;}catch(e){}setFont(f);}
+{let f="figtree";try{f=localStorage.getItem("qm-font2")||f;}catch(e){}setFont(f);}   // qm-font2: Figtree became the default
 $("fontSel").onchange=(e)=>setFont(e.target.value);
 renderChips(); renderStats(); renderStreak();
 $("start").onclick=()=>start(false);
