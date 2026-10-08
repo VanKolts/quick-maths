@@ -113,7 +113,7 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 .cardctl{display:flex;gap:8px;justify-content:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
 
 /* ---- full-screen while a session runs: only the card is left ---- */
-body.running header,body.running #controls,body.running section,body.running footer{display:none}
+body.running header,body.running #focusRow,body.running #start,body.running section,body.running footer{display:none}
 body.running{padding-block:12px}
 body.running .wrap{max-width:960px}
 body.running .card{min-height:calc(100dvh - 24px)}
@@ -121,13 +121,12 @@ body.running .qtext{font-size:clamp(1.8rem,7vw,3.1rem)}
 body.running .qtext.long{font-size:clamp(1.3rem,5vw,2.2rem)}
 
 /* ---- controls ---- */
-.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 button{font-family:var(--font-text);font-size:.92rem;padding:8px 16px;
   border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 /* Start: light blue with a dotted outline that runs clockwise — four dashed edges, each sliding along its side */
-button.primary{border:0;padding:10px 20px;font-weight:600;color:var(--accent);
+button.primary{border:0;padding:12px 28px;font-size:1.05rem;font-weight:600;color:var(--accent);
   background:
     linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 0/9px 2px,
     linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 100%/9px 2px,
@@ -203,8 +202,10 @@ details.info h2{margin:14px 0 6px}
     </div>
     <div class="stage">
       <div class="tags"><span class="tag" id="cat">ready</span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
-      <div class="qtext" id="q">Press Start</div>
-      <div class="qhint" id="hint">Press Start, or Enter. How it works: “More information” at the bottom.</div>
+      <div class="qtext" id="q" hidden></div>
+      <div class="qhint" id="hint" hidden></div>
+      <button class="primary" id="start">Start 5:00</button>
+      <div class="qhint" id="startHint">or press Enter · topics, levels and length under Focus</div>
       <div class="tipbox" id="tip" hidden></div>
       <div class="tipbox worked" id="worked" hidden></div>
       <div class="ansrow" id="ansrow" hidden>
@@ -226,12 +227,7 @@ details.info h2{margin:14px 0 6px}
     </div>
   </div>
 
-  <div class="controls" id="controls">
-    <button class="primary" id="start">Start 5:00</button>
-    <button id="endless">Endless</button>
-  </div>
-
-  <div><button class="chip focusbtn" id="focusBtn" aria-haspopup="dialog">Focus</button></div>
+  <div id="focusRow"><button class="chip focusbtn" id="focusBtn" aria-haspopup="dialog">Focus</button></div>
 
   <dialog id="focusDlg" aria-labelledby="focusTitle">
     <h2 id="focusTitle">Focus</h2>
@@ -240,6 +236,8 @@ details.info h2{margin:14px 0 6px}
     <h3 class="label">Levels</h3>
     <div class="chips" id="levelChips"></div>
     <p class="note" id="levelNote"></p>
+    <h3 class="label">Length</h3>
+    <div class="chips" id="lenChips"></div>
     <div class="dlgfoot"><button class="chip" id="focusDone">Done</button></div>
   </dialog>
 
@@ -260,8 +258,8 @@ details.info h2{margin:14px 0 6px}
       <summary>More information</summary>
       <h2 class="label">How to use</h2>
     <ol>
-      <li><b>Start</b> (or press Enter) gives you five minutes; <b>Endless</b> runs until you press Stop. Use
-        <b>Focus</b> to practise only the operations you pick.</li>
+      <li><b>Start</b> (or press Enter) runs for the length set under <b>Focus</b> — five minutes unless you change
+        it, or <b>Endless</b>, which runs until you press Stop. Focus also picks the operations and levels.</li>
       <li>Type your answer and press <kbd>Enter</kbd>. Most answers are whole numbers; when a question asks you to
         differentiate, integrate, simplify, expand or factorise, type an expression instead. <kbd>/</kbd> turns what you
         just typed into the top of a fraction and puts you in the bottom; <kbd>/</kbd> on its own starts an empty fraction.
@@ -1243,7 +1241,7 @@ const BLANK=()=>({lv:1,best:1,seen:0,right:0,times:[],recent:[],last:null});
 let S={cats:Object.fromEntries(CATS.map(c=>[c,BLANK()])),sessions:[],streak:{last:null,count:0},total:0};
 const COVER=30;   // every operation in focus is shown at least once per this many questions
 const LEVEL_MS={surds:23000,poly:23000,calculus:23000};   // median needed to level up; 14 s otherwise
-let focus=new Set(CATS), lvFilter=new Set(), run=null, cur=null, shownAt=0, db=null, uid=null;
+let focus=new Set(CATS), lvFilter=new Set(), runMin=5, run=null, cur=null, shownAt=0, db=null, uid=null;
 let lastCat=null; const lastIdx={}, recentQ=[];
 
 const $=(id)=>document.getElementById(id);
@@ -1397,13 +1395,17 @@ function tick(){
   if(!run||run.phase!=="main")return;
   if(run.endless){$("clock").textContent="∞";return;}
   const left=Math.max(0,run.until-Date.now());
-  $("clock").textContent=`${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,"0")}`;
+  $("clock").textContent=clockText(left);
   if(left<=0)endMain();
 }
 
-function start(endless){
-  run={n:0,right:0,endless:!!endless,until:Date.now()+300000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
+const LENGTHS=[1,2,3,5,10,15,20,0];   // minutes; 0 = endless
+const clockText=(ms)=>`${Math.floor(ms/60000)}:${String(Math.floor(ms/1000)%60).padStart(2,"0")}`;
+function start(){
+  const endless=runMin===0;
+  run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
   document.body.classList.add("running");window.scrollTo(0,0);
+  $("q").hidden=false;$("hint").hidden=false;$("startHint").hidden=true;
   $("cardctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless":"";
   tick(); nextQ(); updateBar();
@@ -1452,12 +1454,13 @@ function finish(){
   const done=run; run=null; cur=null;
   document.body.classList.remove("running");
   $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;
-  $("ans").disabled=true;$("ans").value="";$("clock").textContent="5:00";$("cat").textContent="done";setSecond(false);
+  $("ans").disabled=true;$("ans").value="";renderLength();$("cat").textContent="done";setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
   $("hint").textContent=h;
   say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q ${done.n}`;
+  $("start").textContent=`Again · ${runMin?clockText(runMin*60000):"endless"}`;
 }
 
 function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
@@ -1488,11 +1491,15 @@ function pickLevel(c){const s=S.cats[c];
   const top=Math.max(s.best||1,s.lv);if(top===1)return 1;
   if(Math.random()<0.5)return s.lv;                       // half at the current level
   const others=[];for(let l=1;l<=top;l++)if(l!==s.lv)others.push(l);return pick(others);}
-function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[...focus],levels:[...lvFilter]}));}catch(e){}}
+function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[...focus],levels:[...lvFilter],min:runMin}));}catch(e){}}
 function renderFocusBtn(){
   const t=focus.size===CATS.length?"All topics":focus.size===1?GEN[[...focus][0]].name:`${focus.size} topics`;
   const l=lvFilter.size?`level ${[...lvFilter].sort().join(", ")}`:"adaptive levels";
-  $("focusBtn").textContent=`Focus: ${t} · ${l}`;}
+  $("focusBtn").textContent=`Focus: ${t} · ${l} · ${runMin?runMin+" min":"endless"}`;}
+function renderLength(){   // the Start button and the idle clock both show the chosen length
+  const t=runMin?clockText(runMin*60000):"∞";
+  $("start").textContent=runMin?`Start ${t}`:"Start · endless";
+  if(!run)$("clock").textContent=t;}
 function renderChips(){
   $("chips").innerHTML=CATS.map(c=>
     `<button class="chip" data-c="${c}" aria-pressed="${focus.has(c)}">${GEN[c].name}</button>`).join("")
@@ -1510,10 +1517,13 @@ function renderChips(){
     if(l==="auto")lvFilter=new Set();else{const n=+l;lvFilter.has(n)?lvFilter.delete(n):lvFilter.add(n);}
     saveFocus();renderChips();
   });
+  $("lenChips").innerHTML=LENGTHS.map(m=>
+    `<button class="chip" data-m="${m}" aria-pressed="${runMin===m}">${m?m+" min":"Endless"}</button>`).join("");
+  $("lenChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{runMin=+b.dataset.m;saveFocus();renderChips();});
   $("levelNote").textContent=lvFilter.size
     ?"Only the levels you picked, for every topic. Questions below or above your current level still count in your stats but do not move your level."
     :"Adaptive: each topic gives questions from level 1 up to the highest level you have reached, half of them at your current level.";
-  renderFocusBtn();
+  renderFocusBtn();renderLength();
 }
 
 /* ---------- persistence ---------- */
@@ -1546,13 +1556,13 @@ async function save(){
 document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("ansview"));});
 try{const f=JSON.parse(localStorage.getItem("qm-focus")||"null");
   if(f){const cs=(f.cats||[]).filter((c)=>CATS.includes(c));if(cs.length)focus=new Set(cs);
-    lvFilter=new Set((f.levels||[]).filter((l)=>[1,2,3].includes(l)));}}catch(e){}
+    lvFilter=new Set((f.levels||[]).filter((l)=>[1,2,3].includes(l)));
+    if(LENGTHS.includes(f.min))runMin=f.min;}}catch(e){}
 renderChips(); renderStats(); renderStreak();
 $("focusBtn").onclick=()=>$("focusDlg").showModal();
 $("focusDone").onclick=()=>$("focusDlg").close();
 $("focusDlg").addEventListener("click",(e)=>{if(e.target===$("focusDlg"))$("focusDlg").close();});   // click outside closes
-$("start").onclick=()=>start(false);
-$("endless").onclick=()=>start(true);
+$("start").onclick=()=>start();
 $("stop").onclick=stopPressed;
 $("skip").onclick=()=>skip();
 $("hintBtn").onclick=()=>showTip();
@@ -1600,7 +1610,7 @@ $("ans").addEventListener("input",(e)=>{const a=e.target;
 // the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
 for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
 document.addEventListener("keydown",e=>{
-  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&!$("focusDlg").open){e.preventDefault();start(false);}
+  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&!$("focusDlg").open){e.preventDefault();start();}
 });
 
 (async()=>{
