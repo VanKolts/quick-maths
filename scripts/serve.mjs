@@ -22,9 +22,11 @@ createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' });
     res.end(bytes); return;
   }
-  if (path !== '/' && path !== '/drill.html') { res.writeHead(404); res.end('not found'); return; }
+  // /previews/<name>.html = design previews built by scripts/make-previews.py
+  const pv = path.match(/^\/previews\/([a-z-]+)\.html$/);
+  if (path !== '/' && path !== '/drill.html' && !pv) { res.writeHead(404); res.end('not found'); return; }
   try {
-    const body = await readFile(join(ROOT, 'drill.html'), 'utf8');
+    const body = await readFile(join(ROOT, pv ? `previews/${pv[1]}.html` : 'drill.html'), 'utf8');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
     res.end(HEAD + body + '\n</body></html>');
   } catch (e) { res.writeHead(500); res.end(String(e)); }

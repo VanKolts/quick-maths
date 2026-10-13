@@ -1,0 +1,1690 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quick Maths Chalk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Noto+Sans+Math&display=swap">
+<style>
+/* One typeface family for prose, labels and numbers; its matching math font for the questions.
+   STIX Two Math has an OpenType MATH table, which is what lets brackets stretch round a binomial or a
+   fraction; its one flaw in Chrome, a gap after every root, is trimmed in fixRadicals(). */
+:root{
+  /* a light midnight-blue page; every text colour is at least 4.5:1 on bg, surface, sunk and accent-soft */
+  --bg:#ECEFFA; --surface:#FDFDFF; --sunk:#DDE2F3;
+  --ink:#121633; --muted:#46507A; --faint:#525D86; --line:#C6CDE8;
+  --accent:#191970; --accent-soft:#D2D8F2; --on-accent:#FFFFFF;   /* midnight blue */
+  --start-bg:#D3E0FC;   /* light blue fill of the Start button */
+  --ok:#1C7049; --bad:#A8271E; --bad-soft:#F6E1DE;
+  --font-text:"Figtree",system-ui,sans-serif;
+  --font-math:"Noto Sans Math","STIX Two Math","Cambria Math",math;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
+  --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
+  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A; --start-bg:#26306B;
+  --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
+  --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
+  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A; --start-bg:#26306B;
+  --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}   /* else display:flex rules beat the hidden attribute */
+body{background:var(--bg);color:var(--ink);font-family:var(--font-text);margin:0;
+  padding-inline:16px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.num,.bar,.verdict,table{font-variant-numeric:tabular-nums lining-nums}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:500}
+
+/* ---- header: title and a quote ---- */
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;letter-spacing:-.015em;color:var(--accent)}
+.quote{margin:8px 0 0;max-width:52ch}
+.quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:1.15rem;line-height:1.45;text-wrap:pretty}
+.quote figcaption{margin-top:4px;font-size:.88rem;color:var(--faint)}
+.streak{font-size:.78rem;color:var(--muted);text-align:right;flex:none}
+.streak b{color:var(--accent);font-size:1.7rem;font-weight:600;display:block;line-height:1.1}
+
+/* ---- drill card ---- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  display:flex;flex-direction:column;min-height:320px}
+.bar{display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
+  font-size:.85rem;color:var(--muted);flex-wrap:wrap}
+.bar .t{font-size:1.1rem;color:var(--ink);font-weight:600}
+.bar .sp{margin-left:auto}
+.bar .aside{color:var(--bad)}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:26px 18px;text-align:center}
+.qtext{font-size:clamp(1.5rem,6vw,2.3rem);line-height:1.35;font-weight:400;text-wrap:balance;
+  max-width:100%;overflow-wrap:anywhere}
+.qtext.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
+.qtext math,.ansview math,.verdict math{font-family:var(--font-math)}
+.qtext math{font-size:1.06em}
+.qtext math mfrac mfrac{font-size:.9em}
+.qhint{font-size:.9rem;color:var(--muted)}
+.tipbox{max-width:44rem;text-align:left;font-size:1rem;line-height:1.55;background:var(--accent-soft);
+  border-left:3px solid var(--accent);padding:10px 14px;border-radius:2px}
+.tipbox .label{display:block;margin-bottom:2px;color:var(--accent)}
+.tipbox.worked{background:var(--sunk);border-left-color:var(--ok);font-size:1.12rem;padding:12px 18px}
+.tipbox .step{margin:6px 0;line-height:1.7}
+.tipbox .step math{font-size:1.12em}
+.tipbox.worked .label{color:var(--ok)}
+.tipbox math{font-family:var(--font-math)}
+.ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-align:center;
+  padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:var(--sunk);
+  color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
+/* typed answers: an invisible text field over a live maths view of what has been typed */
+.ansbox{position:relative}
+/* the iPhone number pad has no minus key: on touch screens a ± button flips the sign of a whole-number answer */
+.sign{display:none;font-size:1.3rem;min-width:44px;min-height:44px;padding:0 12px}
+@media (pointer:coarse){.ansrow:not(.exprmode) #sign{display:inline-block}.ansrow.exprmode #outBox{display:inline-block}}
+@media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
+.ansview{display:none}
+.ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
+  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1px solid var(--line);border-radius:2px;background:var(--sunk);overflow-x:auto;overflow-y:hidden}
+.ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
+.ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
+.card.second .ansview{border-color:var(--bad)}
+.ansview .ph{border:1px dashed var(--faint);border-radius:1px}
+.ansview .caret{background:var(--accent);animation:blink 1.05s steps(1) infinite}
+.ansbox.expr:not(:focus-within) .caret{visibility:hidden}
+.ansview .raw{font-size:.8em;color:var(--muted)}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.ansview .caret{animation:none}}
+input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.keys{font-size:.82rem;color:var(--faint)}
+kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:2px;
+  padding:0 .35em;background:var(--surface);color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tag{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
+  color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:2px}
+.tag.retry{color:var(--bad);background:var(--bad-soft)}
+.verdict{font-size:1rem;min-height:1.5em;text-wrap:balance}
+.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.card.second{border-color:var(--bad)}
+.card.second input[type=text]{border-color:var(--bad)}
+.flash-ok{animation:fok .3s ease} .flash-bad{animation:fbad .3s ease}
+@keyframes fok{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--ok) 13%,var(--surface))}}
+@keyframes fbad{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--bad) 13%,var(--surface))}}
+@media (prefers-reduced-motion:reduce){.flash-ok,.flash-bad{animation:none}}
+.cardctl{display:flex;gap:8px;justify-content:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+
+/* ---- full-screen while a session runs: only the card is left ---- */
+body.running header,body.running #focusRow,body.running #start,body.running section,body.running footer{display:none}
+body.running{padding-block:12px}
+body.running .wrap{max-width:960px}
+body.running .card{min-height:calc(100dvh - 24px)}
+body.running .qtext{font-size:clamp(1.8rem,7vw,3.1rem)}
+body.running .qtext.long{font-size:clamp(1.3rem,5vw,2.2rem)}
+
+/* ---- controls ---- */
+button{font-family:var(--font-text);font-size:.92rem;padding:8px 16px;
+  border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* Start: light blue with a dotted outline that runs clockwise — four dashed edges, each sliding along its side */
+button.primary{border:0;padding:18px 48px;font-size:1.45rem;font-weight:800;color:var(--accent);border-radius:3px;
+  background:
+    linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 0/9px 2px,
+    linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 100%/9px 2px,
+    linear-gradient(0deg,var(--accent) 55%,transparent 0) repeat-y 0 0/2px 9px,
+    linear-gradient(0deg,var(--accent) 55%,transparent 0) repeat-y 100% 0/2px 9px,
+    var(--start-bg);
+  animation:march .9s linear infinite}
+@keyframes march{to{background-position:9px 0,-9px 100%,0 -9px,100% 9px,0 0}}
+button.primary:hover{filter:brightness(1.04)}
+@media (prefers-reduced-motion:reduce){button.primary{animation:none}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:.82rem;padding:4px 11px;border:1px solid var(--line);
+  border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.focusbtn{background:var(--surface);border-color:var(--line);color:var(--muted);font-weight:500}
+.focusbtn:hover{border-color:var(--accent);color:var(--accent)}
+dialog{border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);padding:18px 20px;
+  width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
+dialog::backdrop{background:rgba(16,20,58,.35)}
+dialog h2{margin:0 0 4px;font-size:1.2rem}
+dialog h3{margin:14px 0 6px}
+.dlgfoot{display:flex;justify-content:flex-end;margin-top:14px}
+.dlgfoot .chip{font-size:.92rem;padding:6px 16px}
+
+/* ---- stats ---- */
+section h2{margin:0 0 9px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.name{white-space:normal;min-width:11ch}
+td.few{color:var(--faint)}
+.lv{display:inline-block;width:1.6em;text-align:center;color:var(--accent);font-weight:600}
+.weak td{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.weak td.name::after{content:" ← slowest";color:var(--accent);font-size:.8rem}
+.legend{font-size:.85rem;color:var(--muted);margin:10px 2px 0;line-height:1.5}
+.legend dt{font-weight:600;color:var(--ink);float:left;clear:left;width:5.6em}
+.legend dd{margin:0 0 4px 5.6em}
+.empty{padding:22px 18px;color:var(--muted);font-size:.95rem;text-align:center;white-space:normal;text-wrap:pretty}
+.boxed{border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+footer{font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+footer h2{margin:0 0 6px}
+footer ol{margin:0 0 12px;padding-left:1.3em}
+footer li{margin-bottom:5px}
+details.info summary{display:inline-block;cursor:pointer;list-style:none;font-size:.88rem;padding:4px 0;
+  color:var(--muted)}
+details.info summary::-webkit-details-marker{display:none}
+details.info summary::after{content:" ▾";color:var(--muted)}
+details.info[open] summary::after{content:" ▴"}
+details.info summary:hover{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+details.info summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+details.info[open] summary{margin-bottom:14px}
+details.info h2{margin:14px 0 6px}
+.note{font-size:.82rem;color:var(--faint)}
+</style>
+<style>
+/* ---- preview: marks shared by both looks ---- */
+.flash-ok,.flash-bad{animation:none}
+.verdict svg.pen{width:1.35em;height:1.15em;vertical-align:-.18em;margin-right:.3em;fill:none;stroke:currentColor;
+  stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
+.verdict svg.pen path.p2{animation-delay:.18s}
+@keyframes draw{to{stroke-dashoffset:0}}
+#q.marked{position:relative;padding:.05em .4em}
+#q.marked::after{content:"";position:absolute;inset:-.12em -.35em;border:3px solid var(--mark);
+  border-radius:50% 46% 54% 48%;transform:rotate(-4deg);animation:ring .5s ease-out both}
+@keyframes ring{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){.verdict svg.pen path{animation:none;stroke-dashoffset:0}#q.marked::after{animation:none}}
+.stage{position:relative}
+
+/* ==== preview: CHALKBOARD — slate board in a wooden frame, chalk-white and chalk-yellow ==== */
+html:root:not(#x){
+  --bg:#141A17; --surface:#26342D; --sunk:#1F2B25;
+  --ink:#EEEDE6; --muted:#BEC8C0; --faint:#A3AFA6; --line:#3F5047;
+  --accent:#F3DA7A; --accent-soft:#33453B; --on-accent:#1F2B25; --start-bg:transparent;
+  --ok:#A9E2A1; --bad:#F4AAA2; --bad-soft:#3F3430; --mark:#F3DA7A;
+  --font-chalk:"Cabin Sketch","Figtree",sans-serif;
+  color-scheme:dark;
+}
+h1{font-family:var(--font-chalk);font-weight:700;letter-spacing:.01em}
+.card{border:10px solid #4B3A2B;border-radius:3px;background-color:var(--surface);
+  background-image:radial-gradient(ellipse at 22% 28%,rgba(255,255,255,.06),transparent 55%),
+    radial-gradient(ellipse at 78% 72%,rgba(255,255,255,.045),transparent 50%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .075 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  box-shadow:inset 0 0 50px rgba(0,0,0,.35),0 0 0 1px #2E241B,0 18px 36px -14px rgba(0,0,0,.7)}
+.card.second{border-color:#6A3B33}
+.bar{border-bottom:1px dashed var(--line);color:var(--muted)}
+.bar .t{font-family:var(--font-chalk);font-size:1.35rem;font-weight:700}
+.qtext,.verdict,.bar .t,h1,button.primary,#q.marked{text-shadow:0 0 1px rgba(238,237,230,.5),0 0 8px rgba(238,237,230,.08)}
+.tag{background:none;border:1px dashed var(--faint);color:var(--muted);border-radius:2px}
+.tag.retry{border-color:var(--bad);color:var(--bad);background:none}
+input[type=text],.ansbox.expr .ansview{background:transparent;border:0;border-bottom:2px solid rgba(238,237,230,.7);border-radius:0}
+.verdict{font-weight:600}
+#q.marked{font-family:var(--font-chalk);font-weight:700;font-size:3.2rem;color:var(--ink)}
+.tipbox{background:rgba(0,0,0,.18);border-left:2px dashed var(--accent)}
+button.primary{font-family:var(--font-chalk);font-weight:700;font-size:1.6rem}
+.chip{border-radius:2px}
+dialog{border-radius:3px}
+.tblwrap,.boxed{border:0;background:transparent}
+.empty{text-align:left;padding:2px 0}
+th,td{border-bottom:1px dashed var(--line)}
+.weak td{background:transparent}
+footer{border-top:1px dashed var(--line)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Quick Maths</h1>
+      <figure class="quote"><blockquote id="quoteText"></blockquote><figcaption id="quoteBy"></figcaption></figure>
+    </div>
+    <div class="streak"><b id="streakN" class="num">—</b><span id="streakL">no sessions yet</span></div>
+  </header>
+
+  <div class="card" id="card">
+    <div class="bar">
+      <span class="t" id="clock">5:00</span>
+      <span id="qn">Q0</span>
+      <span class="aside" id="aside"></span>
+      <span id="mode"></span>
+      <span class="sp" id="score">0 / 0</span>
+    </div>
+    <div class="stage">
+      <div class="tags"><span class="tag" id="cat" hidden></span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
+      <div class="qtext" id="q" hidden></div>
+      <div class="qhint" id="hint" hidden></div>
+      <button class="primary" id="start">Start 5:00</button>
+      <div class="tipbox" id="tip" hidden></div>
+      <div class="tipbox worked" id="worked" hidden></div>
+      <div class="ansrow" id="ansrow" hidden>
+        <div class="ansbox" id="ansbox">
+          <div class="ansview" id="ansview" aria-hidden="true"></div>
+          <input type="text" id="ans" inputmode="numeric" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 aria-label="Your answer" disabled>
+        </div>
+        <button type="button" class="sign" id="sign" aria-label="Make the answer negative or positive">±</button>
+        <button type="button" class="sign" id="outBox" aria-label="Move out of this box">⇥</button>
+      </div>
+      <div class="keys" id="keys" hidden><kbd>/</kbd> fraction &nbsp;·&nbsp; <kbd>^</kbd> power &nbsp;·&nbsp; <kbd>r</kbd> √ &nbsp;·&nbsp; <kbd>Tab</kbd> or <kbd>→</kbd> out of a box</div>
+      <div class="verdict" id="verdict" aria-live="polite"></div>
+    </div>
+    <div class="cardctl" id="cardctl" hidden>
+      <button id="hintBtn">Hint <kbd>?</kbd></button>
+      <button id="skip">Skip <kbd>Esc</kbd></button>
+      <button id="stop">Stop</button>
+    </div>
+  </div>
+
+  <div id="focusRow"><button class="chip focusbtn" id="focusBtn" aria-haspopup="dialog">Focus</button></div>
+
+  <dialog id="focusDlg" aria-labelledby="focusTitle">
+    <h2 id="focusTitle">Focus</h2>
+    <h3 class="label">Topics</h3>
+    <div class="chips" id="chips"></div>
+    <h3 class="label">Levels</h3>
+    <div class="chips" id="levelChips"></div>
+    <p class="note" id="levelNote"></p>
+    <h3 class="label">Length</h3>
+    <div class="chips" id="lenChips"></div>
+    <div class="dlgfoot"><button class="chip" id="focusDone">Done</button></div>
+  </dialog>
+
+  <section>
+    <h2 class="label">Per-operation</h2>
+    <div class="empty boxed" id="statsEmpty">No sessions yet. Finish one and your per-operation
+      level, accuracy and median time appear here.</div>
+    <div class="tblwrap" id="tblwrap" hidden>
+      <table>
+        <thead><tr><th class="label">Operation</th><th class="label">Level</th><th class="label">Seen</th><th class="label">Accuracy</th><th class="label">Median</th></tr></thead>
+        <tbody id="stats"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <details class="info">
+      <summary>More information</summary>
+      <h2 class="label">How to use</h2>
+    <ol>
+      <li><b>Start</b> (or press Enter) runs for the length set under <b>Focus</b> — five minutes unless you change
+        it, or <b>Endless</b>, which runs until you press Stop. Focus also picks the operations and levels.</li>
+      <li>Type your answer and press <kbd>Enter</kbd>. Most answers are whole numbers; when a question asks you to
+        differentiate, integrate, simplify, expand or factorise, type an expression instead. <kbd>/</kbd> turns what you
+        just typed into the top of a fraction and puts you in the bottom; <kbd>/</kbd> on its own starts an empty fraction.
+        <kbd>^</kbd> opens a power, <kbd>r</kbd> a square root. You stay in a box until you press <kbd>Tab</kbd> or
+        <kbd>→</kbd> (on a phone, the ⇥ button) — so <code>x^1/2</code> then Tab is x to the half. Each press steps out of
+        one box, so a fraction inside a power takes two. A dashed box shows where
+        the next part goes; Backspace on an empty box removes it. For an integral, “+ c” is optional.</li>
+      <li><b>Hint</b> (<kbd>?</kbd>) shows the general method or formula for that kind of question. A hinted answer
+        does not count as right first time.</li>
+      <li><b>Skip</b> (<kbd>Esc</kbd>) when you cannot start a question: it comes back a few questions later with a
+        <b>worked start</b> — the first steps done with its own numbers. Get one wrong and it also comes back later,
+        marked. Wrong again, or skipped again, and it is set aside: everything set aside comes back, untimed, at the end.</li>
+      <li>Each operation has its own level, which rises and falls with your accuracy and speed — see below.</li>
+    </ol>
+      <h2 class="label">Reading the table</h2>
+    <dl class="legend">
+      <dt>Level</dt><dd>1–3, separately for each operation. Questions come from level 1 up to the highest level you
+        have reached — half at your current level, the rest from the levels below (or above, if you have dropped back) —
+        so the basics keep coming up. Only questions at your current level move it. After 5 answers at a level it rises if at least 80% of
+        your recent answers were right <em>and</em> your median time is under 14 s (23 s for surds, polynomials and calculus);
+        it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.</dd>
+      <dt>Seen</dt><dd>Questions answered (first attempts; skips count).</dd>
+      <dt>Accuracy</dt><dd>Share right first time, without a hint, over everything you have answered.</dd>
+      <dt>Median</dt><dd>Your middle time over your last 40 questions answered right first time — half were faster, half
+        slower. Wrong answers, skips and second tries add no time. Greyed when there are fewer than 3 answers, and only
+        those with 3 or more are ranked for “slowest”.</dd>
+    </dl>
+    </details>
+    <p class="note" id="sync"></p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/*GEN-START*/
+const R=(n)=>Math.floor(Math.random()*n), pick=(a)=>a[R(a.length)], ri=(lo,hi)=>lo+R(hi-lo+1);
+const nz=(lo,hi)=>{let v;do v=ri(lo,hi);while(v===0);return v;};
+const coin=()=>R(2)===0;
+function retry(f){for(let i=0;i<5000;i++){const o=f();if(o)return o;}throw new Error("generator exhausted");}
+
+/* ---------- number helpers ---------- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a;}
+const lcm=(a,b)=>a/gcd(a,b)*b;
+function nCr(n,r){let v=1;for(let i=1;i<=r;i++)v=v*(n-r+i)/i;return Math.round(v);}
+const fact=(n)=>n<=1?1:n*fact(n-1);
+function ndiv(n){let c=0;for(let i=1;i*i<=n;i++)if(n%i===0)c+=(i*i===n?1:2);return c;}
+const isSq=(n)=>n>=0&&Number.isInteger(Math.sqrt(n));
+function isPowOf(d,b){while(d>1&&d%b===0)d/=b;return d===1;}
+const evalP=(c,t)=>c.reduce((s,a)=>s*t+a,0);
+/* floor(log10(num/den)) for positive integers, exactly */
+function flog(num,den){let t=0;while(num>=den*10){den*=10;t++;}while(num<den){num*=10;t--;}return t;}
+const SQF=[2,3,5,6,7,10,11,13,14,15,17,19,21,22,23,26,29,30], SQF_S=[2,3,5,6,7,10,11];
+const PRIMES=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+const ORD=(n)=>n+(n%100>=11&&n%100<=13?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th"));
+
+/* ---------- MathML builders : questions render the way the paper prints them ---------- */
+const grp=(s)=>/^\d{5,}$/.test(s)?s.replace(/\B(?=(\d{3})+(?!\d))/g," "):s;
+const mnum=(v)=>{const t=grp(String(Math.abs(v)));return v<0?`<mrow><mo>−</mo><mn>${t}</mn></mrow>`:`<mn>${t}</mn>`;};
+const X=(x)=>typeof x==="number"?mnum(x):x;
+const mi=(s)=>`<mi>${s}</mi>`, mo=(s)=>`<mo>${s}</mo>`, mn=(s)=>`<mn>${s}</mn>`;
+const row=(...a)=>`<mrow>${a.map(X).join("")}</mrow>`;
+const fr=(a,b)=>`<mfrac>${row(a)}${row(b)}</mfrac>`;
+const sq=(x)=>`<msqrt>${row(x)}</msqrt>`;
+const pw=(b,e)=>`<msup>${row(b)}${row(e)}</msup>`;
+const sb=(b,s)=>`<msub>${row(b)}${row(s)}</msub>`;
+const par=(...a)=>row(mo("("),...a,mo(")"));
+const bn=(n,r)=>row(mo("("),`<mfrac linethickness="0">${row(n)}${row(r)}</mfrac>`,mo(")"));
+const fac=(n)=>row(n,mo("!"));
+const SP=`<mspace width="0.17em"></mspace>`;
+const M=(...a)=>`<math displaystyle="true">${a.map(X).join("")}</math>`;
+const x_=mi("x"), y_=mi("y"), k_=mi("k"), EQ=mo("="), PL=mo("+"), MI=mo("−"), TM=mo("×"), DV=mo("÷");
+const xp=(k)=>k===1?x_:pw(x_,k);
+const pw1=(b,e)=>e===1?X(b):pw(b,e);   // a power, printed bare when the exponent is 1
+const mixed=(w,r,q)=>`<mrow class="mixed">${mnum(w)}${fr(r,q)}</mrow>`;
+const pt=(a,b)=>row(mo("("),a,mo(","),b,mo(")"));
+const lg=(b,x)=>row(sb(mi("log"),b),SP,X(x));
+const DEG=(d)=>mn(d+"°");
+const tf=(fn,d,p)=>row(SP,p===2?pw(mi(fn),2):mi(fn),SP,DEG(d));
+const dydx=fr(row(mi("d"),y_),row(mi("d"),x_));
+const fx=row(mi("f"),par(x_)), prime=(m)=>`<mo lspace="0" rspace="0">${m}</mo>`, fp=(t)=>row(mi("f"),prime("′"),par(t)), fpp=(t)=>row(mi("f"),prime("″"),par(t));
+const intg=(lo,hi)=>`<msubsup><mo>∫</mo>${row(lo)}${row(hi)}</msubsup>`;
+const dx=row(SP,mi("d"),x_);
+const SFR=row(mi("c"),TM,pw(10,k_)), SFH="Standard form, 1 ≤ c < 10 — find k";
+const tenth=(A)=>A%10===0?String(A/10):(A/10).toFixed(1);
+const sfm=(A,m)=>row(mn(tenth(A)),TM,pw(10,m));
+/* a run of signed terms: [{c:coefficient, t:mathml or ""}] -> "3x² − x + 2"; zero terms dropped */
+function terms(list){const out=[];for(const {c,t} of list){if(c===0)continue;const m=Math.abs(c);
+  if(out.length)out.push(mo(c<0?"−":"+"));else if(c<0)out.push(mo("−"));
+  out.push((m===1&&t?"":mnum(m))+(t||""));}
+  return out.length?row(...out):mnum(0);}
+/* one term that always carries its sign, for tails like "x³ + kx² − 4x + 12" */
+// sign and term are left loose (no <mrow>) so the sign sits between operands and gets binary-operator spacing
+const signed=(c,t)=>c===0?"":mo(c<0?"−":"+")+(Math.abs(c)===1&&t?"":mnum(Math.abs(c)))+(t||"");
+const poly=(c,v=x_)=>terms(c.map((a,i)=>{const p=c.length-1-i;return{c:a,t:p===0?"":p===1?v:pw(v,p)};}));
+const lin=(a)=>par(poly([1,-a]));            // (x − a)
+const coefx=(c,t)=>c===1?t:row(mnum(c),t);
+/* recurring decimal, dots over the first and last digit of the repeating block */
+function rec(pre,rep){const dot=(d)=>`<mover accent="false"><mn>${d}</mn><mo>·</mo></mover>`;   // over-script, not accent: an accent dot sits on the digit
+  return row(mn("0."+pre),...rep.split("").map((d,i)=>(i===0||i===rep.length-1)?dot(d):mn(d)));}
+
+/* ---------- exact trig values: n/d · √r ---------- */
+const SINT={0:[0,1,1],30:[1,2,1],45:[1,2,2],60:[1,2,3],90:[1,1,1]}, TANT={0:[0,1,1],30:[1,3,3],45:[1,1,1],60:[1,1,3]};
+const ANG=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
+function tv(fn,deg){deg=((deg%360)+360)%360;let a,ss,cs;
+  if(deg<=90){a=deg;ss=1;cs=1;}else if(deg<=180){a=180-deg;ss=1;cs=-1;}
+  else if(deg<=270){a=deg-180;ss=-1;cs=-1;}else{a=360-deg;ss=-1;cs=1;}
+  let t,s;
+  if(fn==="sin"){t=SINT[a];s=ss;}else if(fn==="cos"){t=SINT[90-a];s=cs;}
+  else{if(a===90)return null;t=TANT[a];s=ss*cs;}
+  return{n:t[0]===0?0:s*t[0],d:t[1],r:t[2]};}
+/* c·f(θ)^p as a rational [num,den], or null when it is irrational */
+function tvq(fn,deg,p){const v=tv(fn,deg);if(!v)return null;
+  if(p===2)return[v.n*v.n*v.r,v.d*v.d];if(v.r!==1&&v.n!==0)return null;return[v.n,v.d];}
+function valML(v,alt){const n=Math.abs(v.n);let body;if(n===0)return mnum(0);
+  if(v.r===1)body=v.d===1?mnum(n):fr(n,v.d);
+  else if(alt&&n===1&&v.d===v.r)body=fr(1,sq(v.r));
+  else body=v.d===1?row(n===1?"":mnum(n),sq(v.r)):fr(row(n===1?"":mnum(n),sq(v.r)),v.d);
+  return v.n<0?row(MI,body):body;}
+/* ---------- worked starts ----------
+   Each shape also returns w: the question broken into easy steps with its own numbers, stopping short of
+   the answer. Shown only when a skipped question comes back — never by the ordinary Hint.
+   Three kinds of maths inside a worked start, all checked by scripts/verify.js:
+     M(...)    an ordinary line; every side of an "=" that can be evaluated must agree
+     Mid(...)  an identity in x; both sides must agree for every x
+     Mans(...) an expression whose value IS the answer; it must equal the answer and must not be a bare number */
+const W=(...parts)=>parts.filter(Boolean).map((p)=>`<div class="step">${p}</div>`).join("");
+const Mid=(...a)=>`<math displaystyle="true" class="id">${a.map(X).join("")}</math>`;
+const Mans=(...a)=>`<math displaystyle="true" class="ans">${a.map(X).join("")}</math>`;
+const pn=(v)=>v<0?par(v):X(v);                       // a number, bracketed when negative
+const FL=(e)=>row(mo("⌊"),e,mo("⌋"));
+const ppow=(t,p)=>p===0?"":p===1?pn(t):pw(t<0?par(t):X(t),p);
+function factList(n){const f=[];for(let p=2;p*p<=n;p++){let e=0;while(n%p===0){n/=p;e++;}if(e)f.push([p,e]);}if(n>1)f.push([n,1]);return f;}
+function factML(n){const parts=[];factList(n).forEach(([p,e])=>{if(parts.length)parts.push(TM);parts.push(pw1(p,e));});return row(...parts);}
+/* a × b as partial products of tens and units: 45 × 83 = 40 × 80 + 5 × 80 + 40 × 3 + 5 × 3 */
+function splitMul(a,b){const sp=(v)=>v>=10&&v%10?[v-v%10,v%10]:[v];const out=[];
+  for(const y of sp(b))for(const x of sp(a)){if(out.length)out.push(PL);out.push(row(x,TM,y));}
+  return W(M(a,TM,b,EQ,...out),"Work out each product, then add.");}
+/* N ÷ b by taking off a round multiple first: 438 ÷ 6 → 438 = 6 × 70 + 18 */
+function chunkDiv(N,b){const q=N/b;let T=Math.floor(q/10)*10;if(T===q)T-=10;if(T<=0)T=Math.floor(q/2);
+  return W(M(N,EQ,b,TM,T,PL,N-b*T),`So the answer is ${M(T)} plus ${M(N-b*T,DV,b)}.`);}
+/* f(t) with t put in, term by term */
+function substML(c,t,isAns=true){const out=[];c.forEach((a,i)=>{const p=c.length-1-i;if(a===0)return;if(out.length)out.push(PL);
+  out.push(p===0?pn(a):row(pn(a),TM,ppow(t,p)));});return isAns?Mans(...out):M(...out);}
+const sqStep=(a)=>{const T=a-a%10,u=a%10;return u?M(pw(a,2),EQ,pw(T,2),PL,2,TM,T,TM,u,PL,pw(u,2)):M(pw(a,2),EQ,pw(a/10,2),TM,100);};
+const trigVal=(fn,d)=>M(tf(fn,d),EQ,valML(tv(fn,d),false));
+const refAng=(d)=>{d=((d%360)+360)%360;return d<=90?d:d<=180?180-d:d<=270?d-180:360-d;};
+const signOf=(fn,d)=>{const v=tv(fn,d);return v&&v.n<0?-1:1;};
+/* cos 120° = −cos 60°: reduce to the acute angle and carry the sign */
+const reduceTrig=(fn,d)=>{const a=refAng(d);if(a===d)return trigVal(fn,d);
+  return W(M(tf(fn,d),EQ,signOf(fn,d)<0?MI:"",tf(fn,a)),trigVal(fn,a));};
+
+function trigInv(angles){return retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(angles),v=tv(fn,d);if(!v)return null;
+  const lo=Math.ceil(d/90)*90-90,hi=lo+90,acute=[0,30,45,60,90].filter((a)=>tv(fn,a));
+  const rule=lo===0?"":lo===90?`In this range θ = 180° − α, where α is the acute angle with the same ${fn} up to sign.`
+    :lo===180?`In this range θ = 180° + α, where α is the acute angle with the same ${fn} up to sign.`
+    :`In this range θ = 360° − α, where α is the acute angle with the same ${fn} up to sign.`;
+  return{q:`${M(mi(fn),SP,mi("θ"),EQ,valML(v,coin()))} and ${M(DEG(lo),mo("&lt;"),mi("θ"),mo("≤"),DEG(hi))}`,hint:"Find θ in degrees",a:d,
+         w:W(`The ${fn} values you need:`,acute.map((a)=>trigVal(fn,a)).join(" &nbsp; "),rule)};});}
+
+/* ---------- question generators : every answer is an integer ----------
+   GEN[family].L[level-1] is a bank of zero-argument generators returning {q, hint?, a, w}. */
+const GEN={
+ mental:{name:"Mental arithmetic",L:[[
+  ()=>{const a=ri(13,99),b=ri(3,9);return{q:M(a,TM,b),a:a*b,w:splitMul(a,b)};},
+  ()=>{const a=ri(11,32);return{q:M(pw(a,2)),a:a*a,w:W(sqStep(a),"Work out each part, then add.")};},
+  ()=>{const p=pick([5,10,15,20,25,30,40,60,75]),u=100/gcd(p,100),n=u*ri(Math.ceil(40/u),Math.floor(900/u)),g=gcd(p,100);
+       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:n*p/100,w:W(M(p,mo("%"),EQ,fr(p,100),EQ,fr(p/g,100/g)),`So divide ${M(n)} by ${M(100/g)}, then multiply by ${M(p/g)}.`)};},
+  ()=>{const b=ri(3,19),q=ri(12,99);return{q:M(b*q,DV,b),a:q,w:chunkDiv(b*q,b)};},
+  ()=>retry(()=>{const d=ri(3,12),n=ri(1,d-1);if(gcd(n,d)!==1)return null;const amt=d*ri(3,40);
+       return{q:`${M(fr(n,d))} of ${M(amt)}`,a:n*amt/d,w:W(`Divide by the bottom, then multiply by the top:`,Mans(par(amt,DV,d),TM,n))};}),
+ ],[
+  ()=>{const a=ri(13,99),b=ri(13,99);return{q:M(a,TM,b),a:a*b,w:splitMul(a,b)};},
+  ()=>{let a;do a=ri(31,99);while(a%10===0);return{q:M(pw(a,2)),a:a*a,w:W(sqStep(a),"Work out each part, then add.")};},
+  ()=>{const m=pick([20,30,40,50,60,70,80,90,25,35,45,55,65,75]),d=ri(1,9);
+       return{q:M(m-d,TM,m+d),a:m*m-d*d,w:W(`Both numbers are ${M(d)} away from ${M(m)}:`,Mans(pw(m,2),MI,pw(d,2)))};},
+  ()=>{const FR={2.5:[1,40],12.5:[1,8],17.5:[7,40],35:[7,20],45:[9,20],65:[13,20],85:[17,20],120:[6,5],150:[3,2],175:[7,4],250:[5,2]};
+       const p=pick(Object.keys(FR).map(Number)),P=Math.round(p*10),u=1000/gcd(P,1000),
+         n=u*ri(Math.max(1,Math.ceil(40/u)),Math.floor(2000/u)),[fn,fd]=FR[p];
+       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:Math.round(n*P/1000),w:W(M(p,mo("%"),EQ,fr(fn,fd)),`So divide ${M(n)} by ${M(fd)}, then multiply by ${M(fn)}.`)};},
+  ()=>{const b=ri(20,95),a=b+ri(2,30);return{q:M(pw(a,2),MI,pw(b,2)),a:a*a-b*b,w:W(`Difference of two squares:`,Mans(par(a,MI,b),TM,par(a,PL,b)))};},
+  ()=>{const b=ri(3,9),q=ri(120,999);return{q:M(b*q,DV,b),a:q,w:chunkDiv(b*q,b)};},
+ ],[
+  ()=>{const a=ri(101,999),b=ri(11,99),T=b-b%10,u=b%10;
+       return{q:M(a,TM,b),a:a*b,w:W(u?M(a,TM,b,EQ,a,TM,T,PL,a,TM,u):M(a,TM,b,EQ,a,TM,b/10,TM,10),"Work out each part, then add.")};},
+  ()=>{const m=ri(1,19);return{q:M(pw(10*m+5,2)),a:(10*m+5)**2,w:W(`A number ending in 5, squared: multiply the front by one more, then put 25 on the end.`,Mans(m,TM,m+1,TM,100,PL,25))};},
+  ()=>{let a;do a=ri(5,19);while(a===10);return{q:M(pw(a,3)),a:a**3,w:W(M(pw(a,3),EQ,pw(a,2),TM,a,EQ,a*a,TM,a),"Now one multiplication.")};},
+  ()=>{const d=ri(12,49),q=ri(21,99);return{q:M(d*q,DV,d),a:q,w:chunkDiv(d*q,d)};},
+  ()=>{const [s,t]=pick([[25,4],[125,8],[50,2],[250,4]]),a=ri(3,19),b=ri(2,9);
+       return{q:M(s,TM,a,TM,t*b),a:s*a*t*b,w:W(`Pair the round numbers first: ${M(s,TM,t,EQ,s*t)}.`,Mans(par(s,TM,t),TM,a,TM,b))};},
+  ()=>retry(()=>{const P=[10,20,25,30,40,50,60,75,80],p=pick(P),q=pick(P),n=ri(4,80)*50;if((n*p*q)%10000!==0)return null;const g=gcd(p*q,10000);
+       return{q:`${M(p,mo("%"))} of ${M(q,mo("%"))} of ${M(n)}`,a:n*p*q/10000,
+              w:W(M(p,mo("%"),TM,q,mo("%"),EQ,fr(p*q,10000),EQ,fr(p*q/g,10000/g)),`So divide ${M(n)} by ${M(10000/g)}, then multiply by ${M(p*q/g)}.`)};}),
+ ]]},
+
+ surds:{name:"Surds",L:[[
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k,
+       w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};},
+  ()=>{const b=pick(SQF_S);let s,t;do{s=ri(1,5);t=ri(1,5);}while(s===t);
+       return{q:M(sq(b*s*s),TM,sq(b*t*t)),a:b*s*t,w:W(M(sq(b*s*s),TM,sq(b*t*t),EQ,sq(row(b*s*s,TM,b*t*t))),M(b*s*s,TM,b*t*t,EQ,b*s*s*b*t*t),"Find the number that squares to that.")};},
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(pw(par(k,sq(b)),2)),a:k*k*b,w:W(Mans(pw(k,2),TM,pw(sq(b),2)),`and ${M(pw(sq(b),2),EQ,b)}.`)};},
+  ()=>{const b=pick(SQF_S),s=ri(2,9);return{q:M(sq(b*s*s),DV,sq(b)),a:s,w:W(M(sq(b*s*s),DV,sq(b),EQ,sq(fr(b*s*s,b)),EQ,sq(s*s)))};},
+ ],[
+  ()=>{const b=pick(SQF),k=ri(5,15);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k,w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};},
+  ()=>{const a=ri(2,12);let b;do b=ri(2,40);while(isSq(b));
+       return{q:M(par(a,PL,sq(b)),par(a,MI,sq(b))),a:a*a-b,w:W(`The middle terms cancel:`,Mans(pw(a,2),MI,pw(sq(b),2)))};},
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(fr(k*b,sq(b)),EQ,k_,sq(b)),hint:"Find k",a:k,
+       w:W(`Multiply top and bottom by √${b}:`,M(fr(k*b,sq(b)),EQ,fr(row(k*b,sq(b)),b)))};},
+  ()=>{const b=pick(SQF_S);let s,t;do{s=ri(1,7);t=ri(1,7);}while(s===t);
+       return{q:M(sq(b*s*s),PL,sq(b*t*t),EQ,k_,sq(b)),hint:"Find k",a:s+t,
+              w:W(`Write each as a multiple of √${b}:`,M(b*s*s,EQ,s*s,TM,b),M(b*t*t,EQ,t*t,TM,b))};},
+  ()=>{const b=pick(SQF_S),a=ri(2,9),wantP=coin();
+       return{q:M(pw(par(a,PL,sq(b)),2),EQ,mi("p"),PL,mi("q"),sq(b)),hint:wantP?"Find p":"Find q",a:wantP?a*a+b:2*a,
+              w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`p is the part without a root; q is the number in front of √${b}.`)};},
+ ],[
+  ()=>{const b=pick(SQF_S);let s,t,u;do{s=ri(1,7);t=ri(1,7);u=ri(1,7);}while(s-t+u<=0||s===t||t===u||s===u);
+       return{q:M(sq(b*s*s),MI,sq(b*t*t),PL,sq(b*u*u),EQ,k_,sq(b)),hint:"Find k",a:s-t+u,
+              w:W(`Write each as a multiple of √${b}:`,M(b*s*s,EQ,s*s,TM,b),M(b*t*t,EQ,t*t,TM,b),M(b*u*u,EQ,u*u,TM,b))};},
+  ()=>{let a,b;do{a=pick(SQF_S);b=pick(SQF_S);}while(a<=b||a-b>6);const k=ri(1,6),c=k*(a-b);
+       return{q:M(fr(c,row(sq(a),MI,sq(b))),EQ,k_,par(sq(a),PL,sq(b))),hint:"Find k",a:k,
+              w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b))};},
+  ()=>{const b=pick(SQF_S),a=ri(2,6),c=ri(1,12);
+       return{q:M(par(a,sq(b),PL,c),par(a,sq(b),MI,c)),a:a*a*b-c*c,w:W(`Difference of two squares:`,Mans(pw(par(a,sq(b)),2),MI,pw(c,2)),M(pw(par(a,sq(b)),2),EQ,pw(a,2),TM,b))};},
+  ()=>{const b=pick([2,3,5,7]),p=nz(-5,5),q=nz(-4,4),r=nz(-5,5),s=nz(-4,4),wantX=coin();
+       const st=(u,v)=>row(u,mo(v<0?"−":"+"),Math.abs(v)===1?"":mnum(Math.abs(v)),sq(b));
+       return{q:M(par(st(p,q)),par(st(r,s)),EQ,mi("X"),PL,mi("Y"),sq(b)),hint:wantX?"Find X":"Find Y",a:wantX?p*r+q*s*b:p*s+q*r,
+              w:W(`Multiply every term by every term:`,M(par(st(p,q)),par(st(r,s)),EQ,pn(p),TM,pn(r),PL,pn(p),TM,pn(s),sq(b),PL,pn(q),TM,pn(r),sq(b),PL,pn(q),TM,pn(s),TM,b),
+                  `X collects the terms without √${b}; Y collects the numbers in front of √${b}.`)};},
+  ()=>retry(()=>{const a=ri(2,12),b=pick(SQF),n=a*a*b;if(n>3000)return null;
+       return{q:M(sq(n),EQ,mi("a"),sq(b)),hint:"Find a",a,w:W(M(n,DV,b,EQ,a*a),`So √${n} = √${a*a} × √${b}.`)};}),
+ ]]},
+
+ indices:{name:"Indices",L:[[
+  ()=>{const b=ri(2,12);let mx=2;while(b**(mx+1)<=5000)mx++;const e=ri(2,mx);
+       return{q:M(pw(b,e)),a:b**e,w:W(M(pw(b,e),EQ,pw1(b,e-1),TM,b,EQ,b**(e-1),TM,b))};},
+  ()=>{if(coin()){const r=ri(2,25);return{q:M(pw(r*r,fr(1,2))),a:r,w:W(M(pw(r*r,fr(1,2)),EQ,sq(r*r)),`Which number squared gives ${M(r*r)}?`)};}
+       const r=ri(2,10);return{q:M(pw(r**3,fr(1,3))),a:r,w:W(`The power ½ is a square root; the power ⅓ is a cube root.`,`Which number cubed gives ${M(r**3)}?`)};},
+  ()=>{const b=ri(2,9),m=ri(2,15),n=ri(2,15);
+       return coin()?{q:M(pw(b,m),TM,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m+n,w:W(`Multiplying powers of the same number: add the powers.`,Mans(m,PL,n))}
+                    :{q:M(pw(b,m+n),DV,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m,w:W(`Dividing powers of the same number: subtract the powers.`,Mans(m+n,MI,n))};},
+  ()=>{const b=ri(2,20),ex=b===7?3:7;return{q:M(pw(b,-1),EQ,fr(1,k_)),hint:"Find k",a:b,w:W(`A power of −1 means “one over”, for example`,M(pw(ex,-1),EQ,fr(1,ex)))};},
+ ],[
+  ()=>retry(()=>{const q=pick([2,3,4,5]),r=ri(2,{2:15,3:6,4:4,5:3}[q]),p=ri(1,q+3);if(gcd(p,q)!==1||r**p>10000)return null;
+       return{q:M(pw(r**q,fr(p,q))),a:r**p,w:W(`Root first, then the power:`,M(pw(r**q,fr(1,q)),EQ,r),Mans(pw(r,p)))};}),
+  ()=>{const b=ri(2,10);let mx=2;while(b**(mx+1)<=10000)mx++;const e=ri(2,mx);
+       return{q:M(pw(b,-e),EQ,fr(1,k_)),hint:"Find k",a:b**e,w:W(M(pw(b,-e),EQ,fr(1,pw(b,e))),`So k is ${M(pw(b,e))}.`)};},
+  ()=>retry(()=>{const q=pick([2,3]),r=ri(2,q===2?12:5),p=ri(1,4);if(gcd(p,q)!==1||r**p>5000)return null;
+       return{q:M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,k_)),hint:"Find k",a:r**p,
+              w:W(M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,pw(r**q,fr(p,q)))),M(pw(r**q,fr(1,q)),EQ,r),Mans(pw(r,p)))};}),
+  ()=>{const r=ri(2,9);let mx=2;while(r**(mx+1)<=10000)mx++;const e=ri(2,mx);
+       return{q:M(pw(par(fr(1,r)),-e)),a:r**e,w:W(`A negative power flips the fraction:`,Mans(pw(r,e)))};},
+  ()=>{const b=ri(2,7),m=ri(2,6),n=ri(2,5),j=ri(1,m*n+6);
+       return{q:M(pw(par(pw(b,m)),n),DV,pw1(b,j),EQ,pw(b,k_)),hint:"Find k",a:m*n-j,w:W(M(pw(par(pw(b,m)),n),EQ,pw(b,m*n)),`Then subtract the power you divide by.`)};},
+ ],[
+  ()=>retry(()=>{const p=pick([2,3,5]),pows=[1,2,3,4].filter(i=>p**i<=625),i=pick(pows),j=pick(pows);if(i===j)return null;
+       const m=ri(2,6),n=ri(2,6),div=coin();
+       return{q:M(pw(p**i,m),div?DV:TM,pw(p**j,n),EQ,pw(p,k_)),hint:"Find k",a:div?i*m-j*n:i*m+j*n,
+              w:W(`Write both as powers of ${M(p)}:`,i>1?M(p**i,EQ,pw(p,i)):"",j>1?M(p**j,EQ,pw(p,j)):"",M(pw(p**i,m),EQ,pw(p,i*m)))};}),
+  ()=>retry(()=>{const p=pick([2,3]),top=p===2?5:3,i=ri(1,top),j=ri(1,top),x=ri(2,9),y=i*x/j;
+       if(i===j||!Number.isInteger(y)||y<2)return null;
+       return{q:M(pw(p**i,x_),EQ,pw(p**j,y)),hint:"Find x",a:x,w:W(`Write both as powers of ${M(p)}:`,i>1?M(p**i,EQ,pw(p,i)):"",j>1?M(p**j,EQ,pw(p,j)):"",`Then compare the powers of ${M(p)} on each side.`)};}),
+  ()=>retry(()=>{const T=[[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[2,5]];
+       const A=pick(T),B=pick(T),pa=ri(1,3),pb=ri(1,3);
+       if(gcd(pa,A[1])!==1||gcd(pb,B[1])!==1||A[0]**A[1]===B[0]**B[1])return null;const v=A[0]**pa*B[0]**pb;if(v>5000)return null;
+       return{q:M(pw(A[0]**A[1],fr(pa,A[1])),TM,pw(B[0]**B[1],fr(pb,B[1]))),a:v,
+              w:W(`Each one: root first, then the power.`,M(pw(A[0]**A[1],fr(1,A[1])),EQ,A[0]),M(pw(B[0]**B[1],fr(1,B[1])),EQ,B[0]),Mans(pw1(A[0],pa),TM,pw1(B[0],pb)))};}),
+  ()=>retry(()=>{const [a,b]=pick([[2,3],[3,2],[2,5],[5,2],[3,5],[5,3],[4,5],[5,4],[3,4],[4,3],[2,7]]),q=pick([2,3]),p=pick([1,2]);
+       if(gcd(p,q)!==1||b**p>2000)return null;
+       return{q:M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,fr(k_,a**p)),hint:"Find k",a:b**p,
+              w:W(`The minus sign flips the fraction:`,M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,pw(par(fr(b**q,a**q)),fr(p,q)),EQ,pw(par(fr(b,a)),p)))};}),
+  ()=>{const p=pick([2,3]),a=ri(3,12),b=ri(1,6),c=ri(1,4);
+       return{q:M(fr(row(pw(p,a),TM,pw1(p*p,b)),pw1(p**3,c)),EQ,pw(p,k_)),hint:"Find k",a:a+2*b-3*c,
+              w:W(`Write everything as a power of ${M(p)}:`,M(p*p,EQ,pw(p,2)),M(p**3,EQ,pw(p,3)),`Add the powers on top, subtract the one below.`)};},
+ ]]},
+
+ ncr:{name:"Binomials & counting",L:[[
+  ()=>{const n=ri(4,25);return{q:M(bn(n,2)),a:nCr(n,2),w:W(Mans(fr(row(n,TM,n-1),2)))};},
+  ()=>{const n=ri(3,8);return{q:M(fac(n)),a:fact(n),w:W(Mans(...Array.from({length:n},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])))};},
+  ()=>{const n=ri(5,12);return{q:M(bn(n,3)),a:nCr(n,3),w:W(Mans(fr(row(n,TM,n-1,TM,n-2),row(3,TM,2,TM,1))),"Cancel before multiplying.")};},
+  ()=>{const n=ri(5,16);return{q:M(bn(n,n-2)),a:nCr(n,2),w:W(M(bn(n,n-2),EQ,bn(n,2)),Mans(fr(row(n,TM,n-1),2)))};},
+  ()=>{const n=ri(5,20);return{q:M(fr(fac(n),fac(n-2))),a:n*(n-1),w:W(`Everything from ${M(n-2)} down cancels:`,Mans(n,TM,n-1))};},
+ ],[
+  ()=>{const n=ri(7,12),r=ri(3,4),top=Array.from({length:r},(_,i)=>n-i),bot=Array.from({length:r},(_,i)=>r-i);
+       return{q:M(bn(n,r)),a:nCr(n,r),w:W(Mans(fr(row(...top.flatMap((v,i)=>i?[TM,v]:[v])),row(...bot.flatMap((v,i)=>i?[TM,v]:[v])))),"Cancel before multiplying.")};},
+  ()=>{const n=ri(6,15),r=ri(2,3);return{q:M(fr(fac(n),fac(n-r))),a:fact(n)/fact(n-r),
+       w:W(`Everything from ${M(n-r)} down cancels:`,Mans(...Array.from({length:r},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])))};},
+  ()=>{const n=ri(5,12),k=ri(2,Math.min(4,n-1));return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(1,PL,x_),n))}`,a:nCr(n,k),
+       w:W(`The coefficient of ${M(xp(k))} in ${M(pw(par(1,PL,x_),n))} is ${M(bn(n,k))}:`,
+           Mans(fr(row(...Array.from({length:k},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])),fac(k))))};},
+  ()=>retry(()=>{const L=ri(4,7),kinds=ri(2,3),c=Array(kinds).fill(1);for(let i=kinds;i<L;i++)c[R(kinds)]++;
+       if(Math.max(...c)<2)return null;const letters=c.flatMap((m,i)=>Array(m).fill("ABC"[i])).join(" ");
+       return{q:`Arrangements of the letters <span class="letters">${letters}</span>`,a:fact(L)/c.reduce((s,m)=>s*fact(m),1),
+              w:W(`${M(L)} letters, with repeats of ${c.join(", ")}:`,Mans(fr(fac(L),row(...c.flatMap((m,i)=>i?[TM,fac(m)]:[fac(m)])))),
+                  M(fac(L),EQ,fact(L)))};}),
+  ()=>{const n=ri(8,20);let a;do a=ri(2,n-2);while(2*a===n);
+       return{q:M(bn(n,a),EQ,bn(n,k_)),hint:`Find k ≠ ${a}`,a:n-a,w:W(`Choosing ${M(a)} to take is the same as choosing which to leave:`,Mans(n,MI,a))};},
+ ],[
+  ()=>{const c=pick([2,3,-2]),n=ri(4,8),k=ri(2,3);
+       return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(1,c<0?MI:PL,Math.abs(c),x_),n))}`,a:nCr(n,k)*c**k,
+              w:W(`The ${M(xp(k))} term is ${M(bn(n,k),pw(par(c,x_),k))}, so the coefficient is`,Mans(bn(n,k),TM,pw(par(c),k)),M(bn(n,k),EQ,nCr(n,k)))};},
+  ()=>retry(()=>{const a=ri(2,3),b=pick([1,-1,2,-2]),n=ri(3,6),k=ri(1,n-1),v=nCr(n,k)*a**(n-k)*b**k;if(Math.abs(v)>5000)return null;
+       return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(a,b<0?MI:PL,Math.abs(b)===1?"":mnum(Math.abs(b)),x_),n))}`,a:v,
+              w:W(`The coefficient is`,Mans(bn(n,k),TM,ppow(a,n-k),TM,pw(par(b),k)),M(bn(n,k),EQ,nCr(n,k)))};}),
+  ()=>{const n=ri(4,12);return{q:M(bn(n,0),PL,bn(n,1),PL,bn(n,2),PL,mo("⋯"),PL,bn(n,n)),a:2**n,
+       w:W(`This is ${M(pw(par(1,PL,x_),n))} with ${M(x_,EQ,1)}:`,Mans(pw(2,n)))};},
+  ()=>{const n=ri(5,30);return{q:M(bn(mi("n"),2),EQ,nCr(n,2)),hint:"Find n",a:n,
+       w:W(M(bn(mi("n"),2),EQ,fr(row(mi("n"),par(mi("n"),MI,1)),2)),`So ${M(mi("n"),par(mi("n"),MI,1),EQ,2*nCr(n,2))}: two consecutive numbers with that product.`)};},
+  ()=>{const n=ri(10,16),r=ri(3,4),top=Array.from({length:r},(_,i)=>n-i),bot=Array.from({length:r},(_,i)=>r-i);
+       return{q:M(bn(n,r)),a:nCr(n,r),w:W(Mans(fr(row(...top.flatMap((v,i)=>i?[TM,v]:[v])),row(...bot.flatMap((v,i)=>i?[TM,v]:[v])))),"Cancel before multiplying.")};},
+ ]]},
+
+ logs:{name:"Logarithms",L:[[
+  ()=>{const b=ri(2,10);let mx=1;while(b**(mx+1)<=100000)mx++;const e=ri(0,Math.min(mx,6));
+       return{q:M(lg(b,b**e)),a:e,w:W(`Ask: ${M(b)} to what power gives ${M(b**e)}?`,M(pw(b,2),EQ,b*b),M(pw(b,3),EQ,b**3))};},
+  ()=>{const b=ri(2,10);let mx=2;while(b**(mx+1)<=100000)mx++;const e=ri(2,Math.min(mx,7));
+       return{q:M(pw(b,x_),EQ,b**e),hint:"Find x",a:e,w:W(`Count how many ${M(b)}s multiply to ${M(b**e)}:`,M(pw(b,2),EQ,b*b),M(pw(b,3),EQ,b**3))};},
+  ()=>{const b=ri(2,10);let mx=1;while(b**(mx+1)<=10000)mx++;const e=ri(1,mx);
+       return{q:M(lg(b,fr(1,b**e))),a:-e,w:W(`One over a power is a negative power, for example`,M(fr(1,pw(b,2)),EQ,pw(b,-2)),`So first write ${M(b**e)} as a power of ${M(b)}.`)};},
+ ],[
+  ()=>retry(()=>{const b=pick([6,10,12,15,20]),k=ri(2,3),N=b**k;if(N>10000)return null;const divs=[];
+       for(let d=2;d<N;d++)if(N%d===0&&!isPowOf(d,b)&&!isPowOf(N/d,b))divs.push(d);if(!divs.length)return null;const x=pick(divs);
+       return{q:M(lg(b,x),PL,lg(b,N/x)),a:k,w:W(`Adding logs multiplies the numbers:`,M(lg(b,x),PL,lg(b,N/x),EQ,lg(b,par(x,TM,N/x)),EQ,lg(b,N)))};}),
+  ()=>retry(()=>{const b=ri(2,10),k=ri(1,3),y=ri(2,9),x=y*b**k;if(x>20000||isPowOf(y,b))return null;
+       return{q:M(lg(b,x),MI,lg(b,y)),a:k,w:W(`Subtracting logs divides the numbers:`,M(lg(b,x),MI,lg(b,y),EQ,lg(b,fr(x,y)),EQ,lg(b,x/y)))};}),
+  ()=>{const b=ri(2,5),c=ri(2,5);let mx=1;while(b**(mx+1)<=1000)mx++;const e=ri(1,mx);
+       return{q:M(c,lg(b,b**e)),a:c*e,w:W(`First the log on its own:`,M(b**e,EQ,pw1(b,e)),`then multiply by ${M(c)}.`)};},
+  ()=>retry(()=>{const b=pick([2,3,5]),p=ri(2,3),m=ri(1,4);if(b**(p*m)>100000)return null;
+       return{q:M(lg(b**p,b**(p*m))),a:m,w:W(`Write both as powers of ${M(b)}:`,M(b**p,EQ,pw(b,p)),M(b**(p*m),EQ,pw1(b,p*m)),`How many lots of ${M(pw(b,p))} make ${M(pw1(b,p*m))}?`)};}),
+  ()=>retry(()=>{const b=ri(2,10),m=ri(1,4);if(b**(2*m)>100000)return null;
+       return{q:M(lg(b,sq(b**(2*m)))),a:m,w:W(M(b**(2*m),EQ,pw(b,2*m)),`and a square root halves the power.`)};}),
+ ],[
+  ()=>retry(()=>{const b=ri(2,6),k=ri(1,3),x=ri(2,15),y=x*x/b**k;if(!Number.isInteger(y)||y<2)return null;
+       return{q:M(2,lg(b,x),MI,lg(b,y)),a:k,w:W(M(2,lg(b,x),EQ,lg(b,pw(x,2)),EQ,lg(b,x*x)),M(lg(b,x*x),MI,lg(b,y),EQ,lg(b,fr(x*x,y)),EQ,lg(b,x*x/y)))};}),
+  ()=>retry(()=>{const p=pick([2,3,5,7]),q=pick([2,3,5,7]);if(p===q)return null;const m=ri(1,4),n=ri(1,4);
+       if(q**m>3000||p**n>3000)return null;
+       return{q:M(lg(p,q**m),TM,lg(q,p**n)),a:m*n,w:W(M(lg(p,q**m),EQ,coefx(m,lg(p,q))),M(lg(q,p**n),EQ,coefx(n,lg(q,p))),M(lg(p,q),TM,lg(q,p),EQ,1))};}),
+  ()=>{const b=ri(2,10),n=ri(2,9),c=ri(1,3);
+       return{q:M(pw(b,row(c===1?"":mnum(c),lg(b,n)))),a:n**c,w:W(c===1?"":M(c,lg(b,n),EQ,lg(b,pw(n,c))),`and ${M(b)} to the power ${M(lg(b,mi("N")))} is just N.`,c===1?"":Mans(pw1(n,c)))};},
+  ()=>retry(()=>{const b=ri(2,5),e=ri(1,4),c=nz(-9,9),v=b**e-c;if(v<=0)return null;
+       return{q:M(lg(b,par(x_,c<0?MI:PL,Math.abs(c))),EQ,e),hint:"Find x",a:v,w:W(`Undo the log:`,M(par(x_,c<0?MI:PL,Math.abs(c)),EQ,pw(b,e),EQ,b**e))};}),
+  ()=>retry(()=>{const B=ri(2,9),k=ri(2,4),N=B**k;if(N>100000)return null;
+       return{q:M(fr(row(mi("log"),SP,mnum(N)),row(mi("log"),SP,mnum(B)))),a:k,
+              w:W(`Write ${M(N)} as a power of ${M(B)}, then use ${M(mi("log"),SP,pw(mi("a"),mi("n")),EQ,mi("n"),mi("log"),SP,mi("a"))}.`,M(pw(B,2),EQ,B*B))};}),
+ ]]},
+
+ trig:{name:"Exact trig",L:[[
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick([0,30,45,60,90]),q=tvq(fn,d,1);if(!q)return null;const c=q[1]*ri(1,6);
+       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1],w:W(trigVal(fn,d),c===1?"":`then multiply by ${M(c)}.`)};}),
+  ()=>trigInv([30,45,60,90]),
+  ()=>{const fn=pick(["sin","cos","tan"]),d=pick([30,45,60]),q=tvq(fn,d,2),c=q[1]*ri(1,4);
+       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1],w:W(trigVal(fn,d),`Square it${c===1?"":`, then multiply by ${M(c)}`}.`)};},
+ ],[
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG.filter(a=>a>90)),q=tvq(fn,d,1);if(!q)return null;const c=q[1]*ri(1,6);
+       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1],w:W(reduceTrig(fn,d),c===1?"":`then multiply by ${M(c)}.`)};}),
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG),q=tvq(fn,d,2);if(!q||q[0]===0)return null;const c=q[1]*ri(1,4);
+       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1],w:W(reduceTrig(fn,d),`Squaring removes the sign${c===1?"":`; then multiply by ${M(c)}`}.`)};}),
+  ()=>trigInv(ANG.filter(a=>a>0)),
+ ],[
+  ()=>retry(()=>{const t1=[pick(["sin","cos","tan"]),pick(ANG),pick([1,2])],t2=[pick(["sin","cos","tan"]),pick(ANG),pick([1,2])];
+       const q1=tvq(...t1),q2=tvq(...t2);if(!q1||!q2||q1[0]===0||q2[0]===0)return null;
+       const c1=q1[1]*ri(1,3),c2=q2[1]*ri(1,3)*pick([1,-1]);
+       return{q:M(c1===1?"":mnum(c1),tf(...t1),c2<0?MI:PL,Math.abs(c2)===1?"":mnum(Math.abs(c2)),tf(...t2)),
+              a:c1*q1[0]/q1[1]+c2*q2[0]/q2[1],w:W(`Each value on its own:`,reduceTrig(t1[0],t1[1]),reduceTrig(t2[0],t2[1]))};}),
+  ()=>retry(()=>{const A=[pick(["sin","cos","tan"]),pick(ANG)],B=[pick(["sin","cos","tan"]),pick(ANG)],u=tv(...A),w=tv(...B);
+       if(!u||!w||u.n===0||w.n===0||u.r!==w.r)return null;const num=u.n*w.n*u.r,den=u.d*w.d,c=den/gcd(Math.abs(num),den);if(c>12)return null;
+       return{q:M(c===1?"":mnum(c),tf(...A),SP,tf(...B)),a:c*num/den,w:W(`Each value on its own:`,reduceTrig(...A),reduceTrig(...B))};}),
+  ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG),v=tv(fn,d);if(!v)return null;const top=pick([180,360,540,720]);
+       let n=0;for(let e=0;e<top;e+=15){if(e%30&&e%45)continue;const w=tv(fn,e);if(w&&w.n===v.n&&(v.n===0||(w.d===v.d&&w.r===v.r)))n++;}
+       const first=[];for(let e=0;e<(fn==="tan"?180:360);e+=15){if(e%30&&e%45)continue;const w=tv(fn,e);if(w&&w.n===v.n&&(v.n===0||(w.d===v.d&&w.r===v.r)))first.push(e);}
+       return{q:`Number of solutions of ${M(mi(fn),SP,x_,EQ,valML(v,coin()))} for ${M(DEG(0),mo("≤"),x_,mo("&lt;"),DEG(top))}`,a:n,
+              w:W(`In one ${fn==="tan"?"180°":"360°"} cycle the solutions are ${first.map((e)=>M(DEG(e))).join(", ")}.`,`They repeat every ${fn==="tan"?"180°":"360°"}: count those below ${M(DEG(top))}.`)};}),
+  ()=>{const a=ri(2,12),b=ri(2,12),C=pick([60,90,120]);
+       return{q:`Triangle with ${M(mi("a"),EQ,a)}, ${M(mi("b"),EQ,b)} and angle ${M(mi("C"),EQ,DEG(C))} between them`,hint:"Find c² (c is the third side)",
+              a:a*a+b*b-{60:a*b,90:0,120:-a*b}[C],w:W(`Cosine rule:`,Mans(pw(a,2),PL,pw(b,2),MI,2,TM,a,TM,b,TM,mi("cos"),SP,DEG(C)),trigVal("cos",C))};},
+  ()=>retry(()=>{const a=ri(2,16),b=ri(2,16),C=pick([30,150,90]),A=C===90?a*b/2:a*b/4;if(!Number.isInteger(A))return null;
+       return{q:`Area of a triangle with sides ${M(a)} and ${M(b)} and included angle ${M(DEG(C))}`,a:A,
+              w:W(Mans(fr(1,2),TM,a,TM,b,TM,mi("sin"),SP,DEG(C)),trigVal("sin",C))};}),
+ ]]},
+
+ number:{name:"Number theory",L:[[
+  ()=>retry(()=>{const g=ri(2,15),x=ri(2,12),y=ri(2,12);if(x===y||gcd(x,y)!==1)return null;
+       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g,w:W(M(g*x,EQ,factML(g*x)),M(g*y,EQ,factML(g*y)),"Multiply the primes they share.")};}),
+  ()=>retry(()=>{const a=ri(4,30),b=ri(4,30);if(a===b||a%b===0||b%a===0)return null;const l=lcm(a,b);if(l>500)return null;
+       return{q:M(mi("LCM"),par(a,mo(","),b)),a:l,w:W(M(a,EQ,factML(a)),M(b,EQ,factML(b)),"Take the highest power of every prime that appears.")};}),
+  ()=>{const n=ri(12,100);return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply.")};},
+  ()=>retry(()=>{const p=pick([3,5,7,11,13,17,19,23,29,31]),q=pick(PRIMES.filter(v=>v>=p)),n=p*q;if(n>999)return null;
+       const ds=String(n).split("").reduce((s,d)=>s+ +d,0);
+       return{q:`Smallest prime factor of ${M(n)}`,a:p,w:W(`It is odd, so not 2. Digit sum ${M(ds)}: ${ds%3?"not":""} a multiple of 3.`,`Then try 5, 7, 11, 13 … — you only need primes up to about ${M(Math.floor(Math.sqrt(n)))}.`)};}),
+ ],[
+  ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11])n*=p**ri(0,p<=3?4:p===5?2:1);if(n<30||n>3000||ndiv(n)<6)return null;
+       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply.")};}),
+  ()=>retry(()=>{const a=ri(2,20),b=ri(2,20),c=ri(2,20);if(new Set([a,b,c]).size<3)return null;const l=lcm(lcm(a,b),c);
+       if(l>1000||l===Math.max(a,b,c))return null;
+       return{q:M(mi("LCM"),par(a,mo(","),b,mo(","),c)),a:l,w:W([a,b,c].map((v)=>M(v,EQ,factML(v))).join(" &nbsp; "),"Take the highest power of every prime that appears.")};}),
+  ()=>retry(()=>{const k=ri(3,5),ps=Array.from({length:k},()=>pick([2,3,5,7,11,13])),n=ps.reduce((s,p)=>s*p,1);if(n>2000)return null;
+       const p0=Math.min(...ps);
+       return{q:`Sum of the prime factors of ${M(n)}, counted with repeats`,a:ps.reduce((s,p)=>s+p,0),w:W(`Start dividing by the smallest prime:`,M(n,EQ,p0,TM,n/p0),`Keep going on ${M(n/p0)}.`)};}),
+  ()=>{const b=ri(6,13),a=ri(200,9999);let T=Math.floor(a/b/10)*10;if(T*b===a||T===0)T=Math.max(0,T-10);
+       return{q:`Remainder when ${M(a)} is divided by ${M(b)}`,a:a%b,w:W(M(a,EQ,b,TM,T,PL,a-b*T),`Now the remainder of ${M(a-b*T)} on dividing by ${M(b)}.`)};},
+  ()=>retry(()=>{const g=ri(6,40),x=ri(3,25),y=ri(3,25);if(x===y||gcd(x,y)!==1||g*x>999||g*y>999||g*x<100||g*y<100)return null;
+       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g,w:W(M(g*x,EQ,factML(g*x)),M(g*y,EQ,factML(g*y)),"Multiply the primes they share.")};}),
+ ],[
+  ()=>retry(()=>{const ps=[2,3,5,7,11].filter(()=>R(3)!==0);if(ps.length<2)return null;const es=ps.map(()=>ri(1,5)),parts=[];
+       if(es.reduce((s,e)=>s*(e+1),1)<8)return null;
+       ps.forEach((p,i)=>{if(parts.length)parts.push(TM);parts.push(es[i]===1?mnum(p):pw(p,es[i]));});
+       return{q:`Number of positive divisors of ${M(...parts)}`,a:es.reduce((s,e)=>s*(e+1),1),
+              w:W(`Add one to each power and multiply:`,Mans(...es.flatMap((e,i)=>i?[TM,par(e,PL,1)]:[par(e,PL,1)])))};}),
+  ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11,13])n*=p**ri(0,p<=3?5:p<=7?2:1);if(n<500||n>10000||ndiv(n)<12)return null;
+       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply.")};}),
+  ()=>{const n=ri(20,200);let z=0;const ps=[];for(let p=5;p<=n;p*=5){z+=Math.floor(n/p);ps.push(p);}
+       return{q:`Number of zeros at the end of ${M(fac(n))}`,a:z,w:W(`Each zero needs a factor 5. Count multiples of ${ps.join(", ")}:`,Mans(...ps.flatMap((p,i)=>i?[PL,FL(fr(n,p))]:[FL(fr(n,p))])))};},
+  ()=>{const p=pick([2,3,5,7]),n=ri(10,60);let e=0;const ps=[];for(let q=p;q<=n;q*=p){e+=Math.floor(n/q);ps.push(q);}
+       return{q:`Largest ${M(k_)} such that ${M(pw(p,k_))} divides ${M(fac(n))}`,a:e,w:W(`Count multiples of ${ps.join(", ")} up to ${M(n)}:`,Mans(...ps.flatMap((q,i)=>i?[PL,FL(fr(n,q))]:[FL(fr(n,q))])))};},
+  ()=>{const a=ri(2,9),n=ri(11,99);let d=1;for(let i=0;i<n;i++)d=d*a%10;const cyc=[];let v=a%10;for(let i=0;i<4;i++){cyc.push(v);v=v*a%10;}
+       return{q:`Last digit of ${M(pw(a,n))}`,a:d,w:W(`Last digits of ${M(a)}, ${M(pw(a,2))}, ${M(pw(a,3))}, ${M(pw(a,4))}: ${cyc.join(", ")} — then the pattern repeats.`,M(n,EQ,4,TM,Math.floor(n/4),PL,n%4))};},
+  ()=>retry(()=>{const a=ri(2,9),b=ri(2,9),N=ri(50,500);if(a===b||a%b===0||b%a===0)return null;const l=lcm(a,b);
+       return{q:`How many of ${M(1,mo(","),2,mo(","),3,mo(","),mo("…"),mo(","),N)} are divisible by ${M(a)} or ${M(b)}?`,
+              a:Math.floor(N/a)+Math.floor(N/b)-Math.floor(N/l),w:W(`Multiples of ${M(a)}, plus multiples of ${M(b)}, minus those counted twice (multiples of ${M(l)}):`,Mans(FL(fr(N,a)),PL,FL(fr(N,b)),MI,FL(fr(N,l))))};}),
+ ]]},
+
+ quadratics:{name:"Quadratics",L:[[
+  ()=>{const b=nz(-12,12),c=nz(-20,20);return{q:`Discriminant of ${M(poly([1,b,c]))}`,a:b*b-4*c,w:W(`Here a = 1, b = ${M(b)}, c = ${M(c)}:`,Mans(pw(pn(b),2),MI,4,TM,1,TM,pn(c)))};},
+  ()=>{const p=nz(-12,12);return{q:`${M(poly([1,2*p,0]),PL,mi("c"))} is a perfect square`,hint:"Find c",a:p*p,w:W(`Halve the number in front of x, then square it:`,Mans(pw(par(fr(2*p,2)),2)))};},
+  ()=>retry(()=>{const b=nz(-12,12),c=nz(-20,20);if(b*b-4*c<0)return null;
+       return{q:`Sum of the roots of ${M(poly([1,b,c]),EQ,0)}`,a:-b,w:W(`For ${M(pw(x_,2),PL,mi("b"),x_,PL,mi("c"),EQ,0)} the roots add to −b. Here b = ${M(b)}.`)};}),
+  ()=>retry(()=>{const r=ri(-9,9),s=ri(-9,9);if(r===s)return null;
+       return{q:`Larger root of ${M(poly([1,-(r+s),r*s]),EQ,0)}`,a:Math.max(r,s),w:W(`Two numbers with product ${M(r*s)} and sum ${M(-(r+s))}; the roots are those numbers with their signs changed.`)};}),
+ ],[
+  ()=>{const a=pick([-5,-4,-3,-2,2,3,4,5]),b=ri(-12,12),c=nz(-12,12);
+       return{q:`Discriminant of ${M(poly([a,b,c]))}`,a:b*b-4*a*c,w:W(`Here a = ${M(a)}, b = ${M(b)}, c = ${M(c)}:`,Mans(pw(pn(b),2),MI,4,TM,pn(a),TM,pn(c)))};},
+  ()=>{const p=nz(-12,12),c=ri(-30,30);
+       return{q:M(poly([1,2*p,c]),mo("≡"),pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-p*p,w:W(Mid(pw(par(poly([1,p])),2),EQ,poly([1,2*p,p*p])),`so q makes up the difference:`,Mans(c,MI,pn(p*p)))};},
+  ()=>{const p=nz(-12,12),c=ri(-30,40);
+       return{q:`Minimum value of ${M(poly([1,2*p,c]))}`,a:c-p*p,w:W(Mid(poly([1,2*p,c]),EQ,pw(par(poly([1,p])),2),PL,c-p*p===0?"":row(c<p*p?MI:PL,Math.abs(c-p*p))),`The bracket is never negative — so the smallest value is when it is 0.`)};},
+  ()=>retry(()=>{const a=ri(2,6),r=ri(-6,6),s=ri(-6,6);if(r===s)return null;const wantP=coin(),b=-a*(r+s),c=a*r*s;
+       return{q:`${wantP?"Product":"Sum"} of the roots of ${M(poly([a,b,c]),EQ,0)}`,a:wantP?r*s:r+s,
+              w:W(`For ${M(mi("a"),pw(x_,2),PL,mi("b"),x_,PL,mi("c"))}: sum of roots ${M(MI,fr(mi("b"),mi("a")))}, product ${M(fr(mi("c"),mi("a")))}.`,wantP?Mans(fr(c,a)):Mans(MI,fr(pn(b),a)))};}),
+ ],[
+  ()=>{const m=ri(2,20),pos=coin();
+       return{q:`${M(pw(x_,2),PL,k_,x_,PL,m*m,EQ,0)} has a repeated root and ${M(k_,mo(pos?"&gt;":"&lt;"),0)}`,hint:"Find k",a:pos?2*m:-2*m,
+              w:W(`Repeated root: discriminant = 0.`,M(pw(k_,2),MI,4,TM,m*m,EQ,0),`so ${M(pw(k_,2),EQ,4*m*m)}.`)};},
+  ()=>{const c=nz(-6,6),s=ri(1,4),b=2*c*s*pick([1,-1]);
+       return{q:`${M(k_,pw(x_,2),signed(b,x_),signed(c,""),EQ,0)} has a repeated root`,hint:"Find k",a:c*s*s,
+              w:W(`Repeated root: discriminant = 0.`,M(pw(pn(b),2),MI,4,TM,k_,TM,pn(c),EQ,0),`so ${M(4,TM,pn(c),TM,k_,EQ,b*b)}.`)};},
+  ()=>{const a=ri(2,5),p=nz(-6,6),c=ri(-20,30);
+       return{q:M(poly([a,2*a*p,c]),mo("≡"),a,pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-a*p*p,
+              w:W(Mid(a,pw(par(poly([1,p])),2),EQ,poly([a,2*a*p,a*p*p])),`so q makes up the difference:`,Mans(c,MI,pn(a*p*p)))};},
+  ()=>retry(()=>{const S=ri(-9,9),P=ri(-20,20);if(S*S-4*P<0)return null;
+       return{q:`${M(mi("α"),mo(","),mi("β"))} are the roots of ${M(poly([1,-S,P]),EQ,0)}. Find ${M(pw(mi("α"),2),PL,pw(mi("β"),2))}`,a:S*S-2*P,
+              w:W(`${M(mi("α"),PL,mi("β"),EQ,S)} and ${M(mi("α"),mi("β"),EQ,P)}.`,M(pw(mi("α"),2),PL,pw(mi("β"),2),EQ,pw(par(mi("α"),PL,mi("β")),2),MI,2,mi("α"),mi("β")),Mans(pw(pn(S),2),MI,2,TM,pn(P)))};}),
+  ()=>{const r=ri(-10,10),s=r+ri(2,9);
+       return{q:`How many integers ${M(x_)} satisfy ${M(poly([1,-(r+s),r*s]),mo("&lt;"),0)}?`,a:s-r-1,
+              w:W(Mid(poly([1,-(r+s),r*s]),EQ,lin(r),lin(s)),`It is negative strictly between the roots ${M(r)} and ${M(s)}: count the integers in between.`)};},
+  ()=>{const a=pick([-4,-3,-2,-1,1,2,3,4]),h=nz(-8,8),c=ri(-20,20),b=-2*a*h;
+       return{q:`${M(x_)}-coordinate of the turning point of ${M(y_,EQ,poly([a,b,c]))}`,a:h,w:W(`The turning point is at ${M(x_,EQ,MI,fr(mi("b"),row(2,mi("a"))))}.`,Mans(MI,fr(pn(b),row(2,TM,pn(a)))))};},
+ ]]},
+
+ stdform:{name:"Standard form",L:[[
+  ()=>retry(()=>{const d=ri(11,999);if(d%10===0)return null;const ds=String(d),c=ds[0]+(ds.length>1?"."+ds.slice(1):"");
+       if(coin()){const s=String(d)+"0".repeat(ri(2,7));
+         return{q:M(mnum(Number(s)),EQ,SFR),hint:SFH,a:s.length-1,w:W(`Here c = ${M(mn(c))}. Count how many places the decimal point moves left to get there.`)};}
+       const z=ri(1,6);return{q:M(mn("0."+"0".repeat(z)+d),EQ,SFR),hint:SFH,a:-(z+1),w:W(`Here c = ${M(mn(c))}. Count how many places the decimal point moves right — k is minus that.`)};}),
+  ()=>{const A=ri(11,99),B=ri(11,99),m=nz(-6,9),n=nz(-6,9);
+       return{q:M(par(sfm(A,m)),par(sfm(B,n)),EQ,SFR),hint:SFH,a:m+n+(A*B>=1000?1:0),
+              w:W(M(par(sfm(A,m)),par(sfm(B,n)),EQ,par(mn(tenth(A)),TM,mn(tenth(B))),TM,pw(10,m+n)),M(mn(tenth(A)),TM,mn(tenth(B)),EQ,mn(String(A*B/100))),`If that is 10 or more, the power goes up by one.`)};},
+ ],[
+  ()=>{const A=ri(11,99),B=ri(11,99),m=nz(-6,9),n=nz(-6,9);
+       return{q:M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,SFR),hint:SFH,a:m-n-(A<B?1:0),
+              w:W(M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,fr(mn(tenth(A)),mn(tenth(B))),TM,pw(10,m-n)),`If the fraction is less than 1, the power goes down by one.`)};},
+  ()=>{const A=ri(11,99),B=ri(11,99),m=ri(2,8),n=m-ri(0,2),V=A*10**(m-n)+B;
+       const Bm=Number((B/10/10**(m-n)).toPrecision(6));
+       return{q:M(sfm(A,m),PL,sfm(B,n),EQ,SFR),hint:SFH,a:flog(V,1)+n-1,
+              w:W(m===n?`Same power already — add the front numbers.`:M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m)),`Add, then check whether the front number is still under 10.`)};},
+  ()=>{const s=ri(2,9),j=nz(-5,8),V=s*s;
+       const inner=V>=10?row(mn(String(V/10)),TM,pw(10,2*j+1)):row(mn(String(V)),TM,pw(10,2*j));
+       return{q:M(sq(inner),EQ,SFR),hint:SFH,a:j,w:W(`Make the power even first:`,M(inner,EQ,V,TM,pw(10,2*j)),`and halve the power when you square-root.`)};},
+  ()=>{const A=ri(11,99),m=nz(-4,6),p=pick([2,3]),P=A**p;
+       return{q:M(pw(par(sfm(A,m)),p),EQ,SFR),hint:SFH,a:m*p+String(P).length-1-p,
+              w:W(M(pw(par(sfm(A,m)),p),EQ,pw(mn(tenth(A)),p),TM,pw(10,m*p)),M(pw(mn(tenth(A)),p),EQ,mn(String(Number((P/10**p).toPrecision(8))))),`Re-normalise if the front number is 10 or more.`)};},
+ ],[
+  ()=>{const A=pick([12,15,16,20,25,32,40,50,64,80]),m=nz(-6,9);
+       return{q:M(fr(1,sfm(A,m)),EQ,SFR),hint:SFH,a:-m-1,w:W(M(fr(1,sfm(A,m)),EQ,fr(1,mn(tenth(A))),TM,pw(10,-m)),`and ${M(fr(1,mn(tenth(A))))} is between 0.1 and 1.`)};},
+  ()=>{const b=ri(3,15),j=ri(0,10),twoHeavy=coin(),extra=twoHeavy?2**j:5**j;
+       return{q:`Number of digits in ${M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j))}`,a:b+String(extra).length,
+              w:W(`Pair each 2 with a 5 to make a 10:`,M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j),EQ,pw1(twoHeavy?2:5,j),TM,pw(10,b)),`so count the digits of ${M(pw1(twoHeavy?2:5,j))} and add ${M(b)} zeros.`)};},
+  ()=>{const A=ri(11,99),B=ri(11,99),C=ri(11,99),m=nz(-5,8),n=nz(-5,8),p=nz(-5,8);
+       return{q:M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,SFR),hint:SFH,a:m+n-p+flog(A*B,10*C),
+              w:W(M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,fr(row(mn(tenth(A)),TM,mn(tenth(B))),mn(tenth(C))),TM,pw(10,m+n-p)),`Estimate the fraction, then re-normalise.`)};},
+  ()=>retry(()=>{const A=ri(11,99),B=ri(11,99),m=ri(2,8),n=m-ri(0,1),V=A*10**(m-n)-B;if(V<=0)return null;
+       const Bm=Number((B/10/10**(m-n)).toPrecision(6));
+       return{q:M(sfm(A,m),MI,sfm(B,n),EQ,SFR),hint:SFH,a:flog(V,1)+n-1,
+              w:W(m===n?`Same power already — subtract the front numbers.`:M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m)),`Subtract, then check whether the front number fell below 1.`)};}),
+ ]]},
+
+ series:{name:"Sequences & series",L:[[
+  ()=>{const n=ri(10,100);return{q:M(1,PL,2,PL,3,PL,mo("⋯"),PL,n),a:n*(n+1)/2,w:W(`Pair the first and last: each pair makes ${M(n+1)}, and there are ${M(fr(n,2))} pairs.`,Mans(fr(n,2),TM,par(n+1)))};},
+  ()=>{const a=ri(-10,20),d=nz(-7,9),n=ri(10,40);
+       return{q:`The ${ORD(n)} term of ${M(a,mo(","),a+d,mo(","),a+2*d,mo(","),mo("…"))}`,a:a+(n-1)*d,
+              w:W(`It goes up by ${M(d)} each time. The ${ORD(n)} term is ${M(n-1)} steps after the first:`,Mans(a,PL,n-1,TM,pn(d)))};},
+  ()=>{const n=ri(5,30);return{q:M(1,PL,3,PL,5,PL,mo("⋯"),PL,2*n-1),a:n*n,w:W(`The sum of the first n odd numbers is ${M(pw(mi("n"),2))}. Here the last one is ${M(2*n-1)}, so n = ${M(fr(row(2*n-1,PL,1),2))}.`)};},
+ ],[
+  ()=>{const a=ri(1,20),d=ri(2,9),n=ri(6,30),l=a+(n-1)*d;
+       return{q:M(a,PL,a+d,PL,a+2*d,PL,mo("⋯"),PL,l),a:n*(a+l)/2,w:W(`Number of terms:`,M(fr(row(l,MI,a),d),PL,1,EQ,n),Mans(fr(n,2),TM,par(a,PL,l)))};},
+  ()=>retry(()=>{const a=ri(1,5)*pick([1,-1]),r=pick([2,3,-2,-3,4,5]),n=ri(4,8),v=a*r**(n-1);if(Math.abs(v)>50000)return null;
+       return{q:`The ${ORD(n)} term of ${M(a,mo(","),a*r,mo(","),a*r*r,mo(","),mo("…"))}`,a:v,w:W(`Each term is ${M(pn(r))} times the last:`,Mans(pn(a),TM,pw(par(r),n-1)))};}),
+  ()=>retry(()=>{const p=nz(-3,3),q=ri(-5,5),c=ri(-4,6),N=pick([4,5]);let v=c;for(let i=1;i<N;i++)v=p*v+q;if(Math.abs(v)>5000)return null;
+       return{q:`${M(sb(x_,row(mi("n"),PL,1)),EQ,terms([{c:p,t:sb(x_,mi("n"))},{c:q,t:""}]))} and ${M(sb(x_,1),EQ,c)}. Find ${M(sb(x_,N))}`,a:v,
+              w:W(`One step at a time:`,M(pn(p),TM,pn(c),PL,pn(q),EQ,p*c+q),`That is ${M(sb(x_,2))}; carry on to ${M(sb(x_,N))}.`)};}),
+  ()=>{const k=ri(3,9),N=ri(50,200),m=Math.floor((N-1)/k);
+       return{q:`Sum of the positive multiples of ${M(k)} less than ${M(N)}`,a:k*m*(m+1)/2,w:W(`The biggest is ${M(k,TM,m,EQ,k*m)}, so it is ${M(k)} × (1 + 2 + … + ${m}):`,Mans(k,TM,fr(row(m,TM,par(m+1)),2)))};},
+ ],[
+  ()=>retry(()=>{const a=ri(1,5),r=pick([2,3]),n=ri(4,8),v=a*(r**n-1)/(r-1);if(v>20000)return null;
+       return{q:M(a,PL,a*r,PL,a*r*r,PL,mo("⋯"),PL,a*r**(n-1)),a:v,w:W(`First term ${M(a)}, ratio ${M(r)}, ${M(n)} terms:`,Mans(fr(row(a,par(pw(r,n),MI,1)),row(r,MI,1))))};}),
+  ()=>retry(()=>{const [nu,de]=pick([[1,2],[1,3],[1,4],[-1,2],[2,3],[3,4],[-1,3],[-2,3]]),a=de*de*ri(1,4),S=a*de/(de-nu);
+       if(!Number.isInteger(S))return null;const t=[a,a*nu/de,a*nu*nu/(de*de)],next=nu<0?-1:1;
+       return{q:`Sum to infinity of ${M(t[0],signed(t[1],""),signed(t[2],""),mo(next<0?"−":"+"),mo("⋯"))}`,a:S,
+              w:W(`Ratio:`,M(fr(pn(t[1]),t[0]),EQ,fr(nu,de)),Mans(fr(a,row(1,MI,par(fr(nu,de))))))};}),
+  ()=>{const p=ri(1,6),q=ri(-5,9),n=ri(5,30);
+       return{q:M(`<munderover><mo>∑</mo>${row(mi("r"),EQ,1)}${row(n)}</munderover>`,par(terms([{c:p,t:mi("r")},{c:q,t:""}]))),a:p*n*(n+1)/2+q*n,
+              w:W(`Split it: ${M(p)} × (1 + 2 + … + ${n}) plus ${M(pn(q))} added ${M(n)} times:`,Mans(p,TM,fr(row(n,TM,n+1),2),PL,pn(q),TM,n))};},
+  ()=>{const a=ri(-10,20),d=nz(-6,8),i=ri(2,5),j=i+ri(2,6),n=ri(12,30),ui=a+(i-1)*d,uj=a+(j-1)*d;
+       return{q:`Arithmetic sequence with ${M(sb(mi("u"),i),EQ,ui)} and ${M(sb(mi("u"),j),EQ,uj)}. Find ${M(sb(mi("u"),n))}`,a:a+(n-1)*d,
+              w:W(`${M(j-i)} steps take it from ${M(ui)} to ${M(uj)}, so one step is`,M(fr(row(uj,MI,pn(ui)),j-i),EQ,d),`Then ${M(n-j)} more steps from ${M(sb(mi("u"),j))}.`)};},
+ ]]},
+
+ poly:{name:"Polynomials",L:[[
+  ()=>{const deg=pick([2,3]),c=Array.from({length:deg+1},(_,i)=>i===0?nz(-3,4):ri(-6,6)),t=nz(-3,3);
+       return{q:`${M(fx,EQ,poly(c))}. Find ${M(mi("f"),par(t))}`,a:evalP(c,t),w:W(`Put ${M(x_,EQ,t)} into every term:`,substML(c,t))};},
+  ()=>{const b=ri(-6,6),c=ri(-9,9),a=nz(-4,4);
+       return{q:`Remainder when ${M(poly([1,b,c]))} is divided by ${M(lin(a))}`,a:a*a+b*a+c,w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,substML([1,b,c],a))};},
+ ],[
+  ()=>{const c=[nz(-3,3),ri(-6,6),ri(-6,6),ri(-9,9)],a=nz(-3,4);
+       return{q:`Remainder when ${M(poly(c))} is divided by ${M(lin(a))}`,a:evalP(c,a),w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,substML(c,a))};},
+  ()=>{const b=ri(-6,6),c=ri(-9,9),a=nz(-3,3);
+       return{q:`${M(lin(a))} is a factor of ${M(pw(x_,3),signed(b,pw(x_,2)),signed(c,x_),PL,k_)}`,hint:"Find k",a:-(a**3+b*a*a+c*a),
+              w:W(`A factor means the value at ${M(x_,EQ,a)} is 0. Without k, the value is`,substML([1,b,c,0],a,false),`and k must cancel it.`)};},
+  ()=>{const n=ri(3,9),a=pick([-2,-1,1,2]),c=nz(-9,9);
+       return{q:`Remainder when ${M(pw(x_,n),signed(c,""))} is divided by ${M(lin(a))}`,a:a**n+c,w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,Mans(pw(par(a),n),PL,pn(c)))};},
+ ],[
+  ()=>retry(()=>{const c=[nz(-4,4),ri(-6,6),ri(-6,6),ri(-9,9)],s=pick([1,-1]),v=(c[0]*s**3+2*c[1]*s*s+4*c[2]*s+8*c[3])/8;
+       if(!Number.isInteger(v))return null;
+       return{q:`Remainder when ${M(poly(c))} is divided by ${M(par(poly([2,-s])))}`,a:v,
+              w:W(`${M(par(poly([2,-s])))} is zero at ${M(x_,EQ,fr(s,2))}, so the remainder is the value there:`,
+                  Mans(...c.flatMap((a,i)=>{const p=3-i;if(a===0)return[];const t=p===0?pn(a):row(pn(a),TM,pw1(par(fr(s,2)),p));return[PL,t];}).slice(1)))};}),
+  ()=>{const k=nz(-6,6),c=ri(-9,9),a=nz(-3,3),d=-(a**3+k*a*a+c*a);
+       return{q:`${M(lin(a))} is a factor of ${M(pw(x_,3),PL,k_,pw(x_,2),signed(c,x_),signed(d,""))}`,hint:"Find k",a:k,
+              w:W(`A factor means the value at ${M(x_,EQ,a)} is 0:`,M(pw(par(a),3),PL,k_,TM,pw(par(a),2),PL,pn(c),TM,pn(a),PL,pn(d),EQ,0),`Solve for k.`)};},
+  ()=>{const p=ri(-8,8),q=ri(-10,10);
+       return{q:`${M(fx,EQ,pw(x_,2),PL,mi("p"),x_,PL,mi("q"))}, with ${M(mi("f"),par(1),EQ,1+p+q)} and ${M(mi("f"),par(2),EQ,4+2*p+q)}`,hint:"Find p",a:p,
+              w:W(M(1,PL,mi("p"),PL,mi("q"),EQ,1+p+q),M(4,PL,2,mi("p"),PL,mi("q"),EQ,4+2*p+q),`Subtract the first from the second to get rid of q.`)};},
+ ]]},
+
+ calculus:{name:"Calculus",L:[[
+  ()=>{const c=ri(1,6),n=ri(2,4),t=nz(-3,3);
+       return{q:`${M(y_,EQ,coefx(c,pw(x_,n)))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:c*n*t**(n-1),w:W(`Bring the power down and reduce it by one:`,Mid(dydx,EQ,c*n,pw1(x_,n-1)),`Now put ${M(x_,EQ,t)} in:`,Mans(c*n,TM,ppow(t,n-1)))};},
+  ()=>{const c=[nz(-5,5),ri(-9,9),ri(-9,9)],t=ri(-4,4);
+       return{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:2*c[0]*t+c[1],w:W(`Differentiate term by term:`,M(mi("f"),prime("′"),par(x_),EQ,poly([2*c[0],c[1]])),`then put ${M(x_,EQ,t)} in.`)};},
+  ()=>retry(()=>{const a=nz(-6,6),b=ri(-6,6),t=ri(1,6),v=a*t*t/2+b*t;if(!Number.isInteger(v))return null;
+       return{q:M(intg(0,t),par(poly([a,b])),dx),a:v,w:W(`Integrate:`,M(mi("F"),par(x_),EQ,fr(a,2),pw(x_,2),b===0?"":row(b<0?MI:PL,Math.abs(b)===1?"":mnum(Math.abs(b)),x_)),`then F(${t}) − F(0).`)};}),
+ ],[
+  ()=>{const c=[nz(-4,4),ri(-6,6),ri(-6,6),ri(-9,9)],t=nz(-3,3);
+       return R(3)===0?{q:`${M(fx,EQ,poly(c))}. Find ${M(fpp(t))}`,a:6*c[0]*t+2*c[1],w:W(`Differentiate twice:`,M(mi("f"),prime("″"),par(x_),EQ,poly([6*c[0],2*c[1]])),`then put ${M(x_,EQ,t)} in.`)}
+                      :{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:3*c[0]*t*t+2*c[1]*t+c[2],w:W(`Differentiate term by term:`,M(mi("f"),prime("′"),par(x_),EQ,poly([3*c[0],2*c[1],c[2]])),`then put ${M(x_,EQ,t)} in.`)};},
+  ()=>retry(()=>{const q=pick([2,3]),p=pick([1,2,3,4,5,7]),r=ri(2,4);if(gcd(p,q)!==1||p===q||r**q>100)return null;
+       let num=p,den=q;if(p>=q)num*=r**(p-q);else den*=r**(q-p);const g=gcd(num,den);num/=g;den/=g;const c=den*ri(1,3);
+       return{q:`${M(y_,EQ,coefx(c,pw(x_,fr(p,q))))}. Find ${M(dydx)} at ${M(x_,EQ,r**q)}`,a:c*num/den,
+              w:W(Mid(dydx,EQ,c,TM,fr(p,q),TM,pw(x_,fr(p-q,q))),M(pw(r**q,fr(1,q)),EQ,r),`So ${M(pw(r**q,fr(p-q,q)),EQ,pw(r,p-q))}.`)};}),
+  ()=>retry(()=>{const k=ri(1,6),a=ri(0,3),b=a+ri(1,3),v=k*(b**3-a**3)/3;if(!Number.isInteger(v))return null;
+       return{q:M(intg(a,b),coefx(k,pw(x_,2)),dx),a:v,w:W(`Integrate:`,Mid(mi("F"),par(x_),EQ,fr(k,3),pw(x_,3)),Mans(fr(k,3),TM,par(pw(b,3),MI,pw(a,3))))};}),
+  ()=>retry(()=>{const c=ri(1,8),t=ri(1,4),v=c*t**4/4;if(!Number.isInteger(v))return null;
+       return{q:M(intg(0,t),coefx(c,pw(x_,3)),dx),a:v,w:W(`Integrate:`,Mid(mi("F"),par(x_),EQ,fr(c,4),pw(x_,4)),Mans(fr(c,4),TM,pw(t,4)))};}),
+ ],[
+  ()=>retry(()=>{const c=[ri(-4,4),ri(-6,6),ri(-6,6)],t=ri(2,4),v6=2*c[0]*(t**3-1)+3*c[1]*(t*t-1)+6*c[2]*(t-1);
+       if(v6%6!==0||c[0]===0)return null;
+       return{q:M(intg(1,t),par(poly(c)),dx),a:v6/6,w:W(`Integrate each term:`,Mid(mi("F"),par(x_),EQ,fr(c[0],3),pw(x_,3),PL,fr(c[1],2),pw(x_,2),PL,pn(c[2]),x_),`then F(${t}) − F(1).`)};}),
+  ()=>{const s=ri(2,6),k=ri(1,6);
+       return{q:M(intg(1,s*s),fr(k,sq(x_)),dx),a:2*k*(s-1),w:W(Mid(fr(k,sq(x_)),EQ,k,pw(x_,row(MI,fr(1,2)))),`which integrates to ${M(2*k,sq(x_))}:`,Mans(2*k,par(sq(s*s),MI,sq(1))))};},
+  ()=>{if(coin()){const m=ri(1,6),c=ri(-9,9);
+         return{q:`Positive ${M(x_)}-coordinate of a stationary point of ${M(y_,EQ,poly([1,0,-3*m*m,c]))}`,a:m,
+                w:W(Mid(dydx,EQ,poly([3,0,-3*m*m])),`Set it to 0: ${M(pw(x_,2),EQ,m*m)}.`)};}
+       const p=ri(-4,4),q=p+ri(1,5),c=ri(-9,9);
+       return{q:`Larger ${M(x_)}-coordinate of the stationary points of ${M(y_,EQ,poly([2,-3*(p+q),6*p*q,c]))}`,a:q,
+              w:W(Mid(dydx,EQ,poly([6,-6*(p+q),6*p*q])),`Set it to 0 and divide by 6: ${M(poly([1,-(p+q),p*q]),EQ,0)}.`)};},
+  ()=>{const t=nz(-4,4),m=nz(-3,3),a=m*t*t;
+       return{q:`${M(y_,EQ,fr(poly([1,0,a]),x_))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:1-m,
+              w:W(`Split the fraction first:`,Mid(fr(poly([1,0,a]),x_),EQ,x_,PL,pn(a),pw(x_,-1)),Mans(1,MI,fr(pn(a),pw(par(t),2))))};},
+ ]]},
+
+ fractions:{name:"Fractions & ratio",L:[[
+  ()=>retry(()=>{const d=ri(3,12),n=ri(1,2*d);if(gcd(n,d)!==1||n===d)return null;const amt=d*ri(2,30);
+       return{q:M(fr(n,d),TM,amt),a:n*amt/d,w:W(`Divide by the bottom first:`,Mans(n,TM,par(amt,DV,d)))};}),
+  ()=>retry(()=>{const v=ri(2,12),c=ri(1,9),d=ri(2,9);if(gcd(c,d)!==1)return null;let a=v*c,b=d;const g=gcd(a,b);a/=g;b/=g;if(b===1)return null;
+       return{q:M(fr(a,b),DV,fr(c,d)),a:v,w:W(`Flip the second fraction and multiply:`,Mans(fr(a,b),TM,fr(d,c)))};}),
+  ()=>retry(()=>{const q=pick([2,4,5,10,20,25,50]),p=ri(1,2*q);if(gcd(p,q)!==1)return null;
+       return{q:M(fr(p,q),EQ,k_,mo("%")),hint:"Find k",a:100*p/q,w:W(`Make the bottom 100:`,M(fr(p,q),EQ,fr(row(p,TM,100/q),row(q,TM,100/q))))};}),
+  ()=>{const parts=[ri(1,5),ri(1,5),ri(1,5)].slice(0,pick([2,3])),s=parts.reduce((a,b)=>a+b,0),N=s*ri(3,40);
+       return{q:`Share ${M(N)} in the ratio ${M(...parts.flatMap((v,i)=>i?[mo(":"),v]:[v]))}. The largest share?`,a:Math.max(...parts)*N/s,
+              w:W(`There are ${M(s)} parts in total, so one part is ${M(N,DV,s)}.`,`The largest share is ${M(Math.max(...parts))} parts.`)};},
+ ],[
+  ()=>retry(()=>{const b=ri(2,12),d=ri(2,12),a=ri(1,b*2),c=ri(1,d*2);if(gcd(a,b)!==1||gcd(c,d)!==1||b===d)return null;
+       const sub=R(3)===0;let n=sub?a*d-c*b:a*d+c*b,m=b*d;if(n<=0)return null;const g=gcd(n,m);n/=g;m/=g;if(m===1)return null;const wantQ=coin();
+       return{q:`${M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n,
+              w:W(M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(row(a,TM,d,sub?MI:PL,c,TM,b),row(b,TM,d))),`then cancel by the highest common factor.`)};}),
+  ()=>retry(()=>{const a=ri(0,9),b=ri(0,9);if(a===b)return null;let n=10*a+b,m=99;const g=gcd(n,m);n/=g;m/=g;const wantQ=R(3)!==0;
+       return{q:`${M(rec("",`${a}${b}`),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n,
+              w:W(`Two repeating digits go over 99:`,M(rec("",`${a}${b}`),EQ,fr(10*a+b,99)),`then cancel.`)};}),
+  ()=>retry(()=>{const q1=ri(2,5),q2=ri(2,5),w1=ri(1,3),w2=ri(1,3),r1=ri(1,q1-1),r2=ri(1,q2-1);if(gcd(r1,q1)!==1||gcd(r2,q2)!==1)return null;
+       const prod=(w1*q1+r1)*(w2*q2+r2)/(q1*q2);if(!Number.isInteger(prod))return null;
+       return{q:M(mixed(w1,r1,q1),TM,mixed(w2,r2,q2)),a:prod,w:W(`Make them top-heavy:`,M(mixed(w1,r1,q1),EQ,fr(w1*q1+r1,q1)),M(mixed(w2,r2,q2),EQ,fr(w2*q2+r2,q2)),`then multiply and cancel.`)};}),
+  ()=>retry(()=>{const a=ri(2,12),b=a+ri(1,8),v=a*b/(b-a);if(!Number.isInteger(v))return null;
+       return{q:M(fr(1,row(fr(1,a),MI,fr(1,b)))),a:v,w:W(`The bottom first:`,M(fr(1,a),MI,fr(1,b),EQ,fr(b-a,a*b)),`then flip it.`)};}),
+ ],[
+  ()=>retry(()=>{let pre,rep,n,m;if(coin()){pre=String(ri(1,9));rep=String(ri(10,99));if(rep[0]===rep[1]||pre===rep[1])return null;
+         const all=Number(pre+rep);n=all-Number(pre);m=990;}
+       else{pre=String(ri(10,99));rep=String(ri(1,8));if(pre[1]===rep)return null;n=Number(pre+rep)-Number(pre);m=900;}
+       const n0=n,g=gcd(n,m);n/=g;const m0=m;m/=g;const wantQ=coin();
+       return{q:`${M(rec(pre,rep),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n,
+              w:W(`All the digits, minus the part that does not repeat, over ${M(m0)}:`,M(rec(pre,rep),EQ,fr(row(Number(pre+rep),MI,Number(pre)),m0),EQ,fr(n0,m0)),`then cancel.`)};}),
+  ()=>{const k=ri(2,12),divs=[];for(let d=1;d<=k;d++)if((k*k)%d===0)divs.push(d);const d=pick(divs),a=k+d,b=k+k*k/d;
+       return coin()?{q:M(fr(1,a),PL,fr(1,b),EQ,fr(1,k_)),hint:"Find k",a:k,w:W(M(fr(1,a),PL,fr(1,b),EQ,fr(a+b,a*b)),`then flip it — k is the bottom over the top.`)}
+                    :{q:M(fr(1,a),PL,fr(1,k_),EQ,fr(1,k)),hint:"Find k",a:b,w:W(M(fr(1,k),MI,fr(1,a),EQ,fr(a-k,a*k)),`then flip it — k is the bottom over the top.`)};},
+  ()=>retry(()=>{const a=ri(1,5),b=ri(1,5),c=ri(2,6);let n=a*(b*c+1)+c,m=b*c+1;const g=gcd(n,m);n/=g;m/=g;if(m===1)return null;const wantP=coin();
+       return{q:`${M(a,PL,fr(1,row(b,PL,fr(1,c))),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantP?"Find p":"Find q",a:wantP?n:m,
+              w:W(`Inside out:`,M(b,PL,fr(1,c),EQ,fr(b*c+1,c)),`so the fraction is ${M(fr(c,b*c+1))}; then add ${M(a)}.`)};}),
+ ]]},
+
+ coord:{name:"Coordinate geometry",L:[[
+  ()=>{const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[6,8,10],[9,12,15],[9,40,41]]),s=pick([1,1,2]),
+         x1=ri(-9,9),y1=ri(-9,9),sw=coin(),ddx=(sw?a:b)*s*pick([1,-1]),ddy=(sw?b:a)*s*pick([1,-1]);
+       return{q:`Distance from ${M(pt(x1,y1))} to ${M(pt(x1+ddx,y1+ddy))}`,a:c*s,
+              w:W(`Across ${M(Math.abs(ddx))}, up or down ${M(Math.abs(ddy))}:`,Mans(sq(row(pw(Math.abs(ddx),2),PL,pw(Math.abs(ddy),2)))))};},
+  ()=>{const m=nz(-6,6),d=nz(-5,5),x1=ri(-9,9),y1=ri(-9,9);
+       return{q:`Gradient of the line through ${M(pt(x1,y1))} and ${M(pt(x1+d,y1+m*d))}`,a:m,w:W(`Change in y over change in x:`,Mans(fr(row(y1+m*d,MI,pn(y1)),row(x1+d,MI,pn(x1)))))};},
+  ()=>retry(()=>{const x1=ri(-12,12),y1=ri(-12,12),x2=ri(-12,12),y2=ri(-12,12),wantX=coin(),v=wantX?(x1+x2)/2:(y1+y2)/2;
+       if(!Number.isInteger(v)||(x1===x2&&y1===y2))return null;
+       return{q:`${M(wantX?x_:y_)}-coordinate of the midpoint of ${M(pt(x1,y1))} and ${M(pt(x2,y2))}`,a:v,
+              w:W(`Average the two ${wantX?"x":"y"}-coordinates:`,Mans(fr(row(wantX?x1:y1,PL,pn(wantX?x2:y2)),2)))};}),
+ ],[
+  ()=>{const a=ri(-8,8),b=ri(-8,8),r=ri(1,12),F=a*a+b*b-r*r;
+       return{q:`Radius of the circle ${M(pw(x_,2),PL,pw(y_,2),signed(-2*a,x_),signed(-2*b,y_),signed(F,""),EQ,0)}`,a:r,
+              w:W(`Centre ${M(pt(a,b))}, half of each x and y number with the sign changed.`,`${M(pw(mi("r"),2))} is the centre’s squares minus the constant:`,M(pw(a,2),PL,pw(b,2),MI,pn(F),EQ,r*r))};},
+  ()=>{const m=nz(-5,5),t=nz(-4,4),x1=ri(-8,8),y1=ri(-8,8);
+       return{q:`Gradient of a line perpendicular to the line through ${M(pt(x1,y1))} and ${M(pt(x1+m*t,y1-t))}`,a:m,
+              w:W(`The line’s gradient:`,M(fr(-t,m*t),EQ,fr(-1,m)),`A perpendicular gradient is −1 divided by it.`)};},
+  ()=>{const m=nz(-5,5),p=ri(-6,6),q=ri(-9,9);
+       return{q:`${M(y_)}-intercept of the line through ${M(pt(p,q))} with gradient ${M(m)}`,a:q-m*p,w:W(`Walk back to ${M(x_,EQ,0)}: that is ${M(p)} steps of gradient ${M(m)}:`,Mans(q,MI,pn(m),TM,pn(p)))};},
+  ()=>{const a=nz(-6,6),b=nz(-6,6),k=nz(-9,9);
+       return{q:`The line ${M(terms([{c:a,t:x_},{c:b,t:y_}]),EQ,a*k)} meets the ${M(x_)}-axis at ${M(pt(k_,0))}`,hint:"Find k",a:k,
+              w:W(`On the x-axis ${M(y_,EQ,0)}:`,M(coefx(a,x_),EQ,a*k))};},
+ ],[
+  ()=>{const a=nz(-8,8),b=nz(-8,8),r=ri(1,10),wantA=coin();
+       return{q:`The circle ${M(pw(x_,2),PL,pw(y_,2),signed(-2*a,x_),signed(-2*b,y_),signed(a*a+b*b-r*r,""),EQ,0)} has centre ${M(pt(mi("p"),mi("q")))}`,
+              hint:wantA?"Find p":"Find q",a:wantA?a:b,w:W(`The centre is half the ${wantA?"x":"y"} coefficient, with the sign changed:`,Mans(MI,fr(pn(wantA?-2*a:-2*b),2)))};},
+  ()=>retry(()=>{const m1=nz(-5,5),m2=nz(-5,5),x0=ri(-6,6),c1=ri(-9,9);if(m1===m2)return null;const c2=m1*x0+c1-m2*x0;if(Math.abs(c2)>20)return null;
+       return{q:`${M(x_)}-coordinate where ${M(y_,EQ,terms([{c:m1,t:x_},{c:c1,t:""}]))} meets ${M(y_,EQ,terms([{c:m2,t:x_},{c:c2,t:""}]))}`,a:x0,
+              w:W(`Set them equal and collect x on one side:`,M(coefx(m1-m2,x_),EQ,c2-c1))};}),
+  ()=>retry(()=>{const P=[0,1,2].map(()=>[ri(-6,6),ri(-6,6)]),det=(P[1][0]-P[0][0])*(P[2][1]-P[0][1])-(P[2][0]-P[0][0])*(P[1][1]-P[0][1]);
+       if(det===0||det%2!==0)return null;const [A,B,C]=P;
+       return{q:`Area of the triangle with vertices ${M(pt(...P[0]))}, ${M(pt(...P[1]))} and ${M(pt(...P[2]))}`,a:Math.abs(det)/2,
+              w:W(`Shoelace formula — half of`,M(pn(A[0]),par(B[1],MI,pn(C[1])),PL,pn(B[0]),par(C[1],MI,pn(A[1])),PL,pn(C[0]),par(A[1],MI,pn(B[1])),EQ,
+                    A[0]*(B[1]-C[1])+B[0]*(C[1]-A[1])+C[0]*(A[1]-B[1])),`ignoring its sign.`)};}),
+  ()=>retry(()=>{const a=nz(-6,6),b=nz(-6,6),r=ri(1,9);if(b-r>0||b+r<=0)return null;
+       return{q:`The line ${M(y_,EQ,k_)} is a tangent to ${M(pw(lin(a),2),PL,pw(par(terms([{c:1,t:y_},{c:-b,t:""}])),2),EQ,r*r)} and ${M(k_,mo("&gt;"),0)}`,
+              hint:"Find k",a:b+r,w:W(`Centre ${M(pt(a,b))}, radius ${M(sq(r*r),EQ,r)}.`,`A flat line touches the top or the bottom of the circle.`)};}),
+ ]]},
+};
+
+/* ---------- typed-expression answers ----------
+   Syntax: numbers, x, + − × ÷ * / ^, √ (typed as r, or "sqrt"), brackets, implicit multiplication.
+   √ applies to the next factor: √2, √x, √(x+1). A power takes the next factor: x^2, x^-1, x^(1/2). */
+const CARET_CH="\u2038";   // marks the cursor in live rendering; never part of a real answer
+function lexAns(s,live){
+  s=s.replace(/sqrt/g,"√").replace(/[rR]/g,"√").replace(/[−–]/g,"-").replace(/[×·]/g,"*").replace(/÷/g,"/").replace(/\s+/g,"");
+  const t=[];let i=0;
+  while(i<s.length){const c=s[i];let m;
+    if((m=s.slice(i).match(/^\d+(\.\d+)?/))){t.push({k:"n",v:parseFloat(m[0])});i+=m[0].length;continue;}
+    if(c==="x"||c==="X"){t.push({k:"x"});i++;continue;}
+    if("+-*/^()√".includes(c)){t.push({k:c});i++;continue;}
+    if(live&&c===CARET_CH){const prev=t[t.length-1];
+      if(prev&&prev.k==="n"&&/\d/.test(s[i-1]||""))prev.caret=true;   // still typing this number
+      else t.push({k:"caret"});i++;continue;}
+    if(live&&c===".")break;   // a decimal point still being typed
+    throw new Error(`can't read “${c}”`);}
+  if(live){   // make an unfinished expression drawable
+    const OPS="+-*/^(√",isOp=(x)=>x&&OPS.includes(x.k),startsF=(x)=>x&&(x.k==="n"||x.k==="x"||x.k==="("||x.k==="√");
+    const cj=t.findIndex((x)=>x.k==="caret");   // cursor just before a power: draw it on the base, not raised
+    if(cj>0&&t[cj+1]&&t[cj+1].k==="^"&&(t[cj-1].k==="n"||t[cj-1].k==="x")){t[cj-1].caret=true;t.splice(cj,1);}
+    t.forEach((x,j)=>{if(x.k==="caret")x.need=(j===0||isOp(t[j-1]))&&!startsF(t[j+1]);});
+    for(let j=t.length-1;j>=0;j--){if(isOp(t[j])&&(j===t.length-1||t[j+1].k===")"))t.splice(j+1,0,{k:"ph"});}
+    let open=0;for(const x of t){if(x.k==="(")open++;else if(x.k===")")open--;}
+    while(open-->0)t.push({k:")"});}
+  return t;}
+function parseAns(s,live){
+  const T=lexAns(s,live);let p=0;const pk=()=>T[p];
+  const need=(k)=>{if(!T[p]||T[p].k!==k)throw new Error(k===")"?"a bracket is not closed":"unfinished");p++;};
+  const startsF=(t)=>t&&(t.k==="n"||t.k==="x"||t.k==="("||t.k==="√"||t.k==="caret"||t.k==="ph");
+  function E(){let a=Tm();while(pk()&&(pk().k==="+"||pk().k==="-")){const o=T[p++].k;a={t:o==="+"?"add":"sub",a,b:Tm()};}return a;}
+  function Tm(){let a=U();for(;;){const t=pk();
+      if(t&&(t.k==="*"||t.k==="/")){p++;a={t:t.k==="*"?"mul":"div",a,b:U()};}
+      else if(startsF(t))a={t:"mul",a,b:Pw(),imp:true};else return a;}}
+  function U(){if(pk()&&pk().k==="-"){p++;return{t:"neg",a:U()};}if(pk()&&pk().k==="+"){p++;return U();}return Pw();}
+  function Pw(){const b=F();if(pk()&&pk().k==="^"){p++;return{t:"pow",a:b,b:U()};}return b;}
+  function F(){const t=T[p++];if(!t)throw new Error("unfinished");
+    if(t.k==="n")return{t:"num",v:t.v,caret:t.caret};
+    if(t.k==="x")return{t:"x",caret:t.caret};
+    if(t.k==="("){const a=E();need(")");return{t:"par",a};}
+    if(t.k==="√")return{t:"sqrt",a:Pw()};
+    if(t.k==="caret")return{t:"ph",caret:true,need:t.need};
+    if(t.k==="ph")return{t:"ph",need:true};
+    throw new Error("unfinished");}
+  if(!T.length)throw new Error("empty");
+  const r=E();if(p!==T.length)throw new Error(T[p].k===")"?"an extra )":"can't read that");return r;}
+function evalA(n,x){switch(n.t){
+  case"num":return n.v;case"x":return x;case"par":return evalA(n.a,x);case"neg":return -evalA(n.a,x);
+  case"add":return evalA(n.a,x)+evalA(n.b,x);case"sub":return evalA(n.a,x)-evalA(n.b,x);
+  case"mul":return evalA(n.a,x)*evalA(n.b,x);case"div":return evalA(n.a,x)/evalA(n.b,x);
+  case"pow":return Math.pow(evalA(n.a,x),evalA(n.b,x));case"sqrt":return Math.sqrt(evalA(n.a,x));}}
+const strip=(n)=>n.t==="par"?n.a:n;
+const CARET_ML=`<mspace class="caret" width="0.08em" height="0.9em" depth="0.22em"></mspace>`;
+/* the answer box: what has been typed so far, drawn as maths, with the cursor where the next key goes */
+function liveML(text,caret){
+  const s=text.slice(0,caret)+CARET_CH+text.slice(caret);
+  try{return M(exprML(parseAns(s,true)));}catch(e){return null;}}
+/* typed expression -> MathML, for the live preview and for showing a correct answer */
+function exprML(n){switch(n.t){
+  case"num":return n.caret?row(mnum(n.v),CARET_ML):mnum(n.v);case"x":return n.caret?row(x_,CARET_ML):x_;case"par":return par(exprML(n.a));
+  case"ph":return n.need?`<mrow class="ph">${n.caret?CARET_ML:""}<mspace width="0.5em" height="0.72em" depth="0.12em"></mspace></mrow>`:CARET_ML;
+  case"neg":return row(MI,exprML(n.a));
+  case"add":return row(exprML(n.a),PL,exprML(n.b));case"sub":return row(exprML(n.a),MI,exprML(n.b));
+  case"mul":return n.imp?row(exprML(n.a),exprML(n.b)):row(exprML(n.a),TM,exprML(n.b));
+  case"div":return fr(exprML(strip(n.a)),exprML(strip(n.b)));
+  case"pow":{const b=n.a;const base=(b.t==="x"||b.t==="par"||(b.t==="num"&&b.v>=0))?exprML(b):par(exprML(b));return pw(base,exprML(strip(n.b)));}
+  case"sqrt":return sq(exprML(strip(n.a)));}}
+function walkA(n,f){f(n);if(n.a&&typeof n.a==="object")walkA(n.a,f);if(n.b&&typeof n.b==="object")walkA(n.b,f);}
+const hasA=(n,pred)=>{let h=false;walkA(n,(m)=>{if(pred(m))h=true;});return h;};
+const isSqFreeInt=(v)=>{if(!Number.isInteger(v)||v<2)return false;for(let k=2;k*k<=v;k++)if(v%(k*k)===0)return false;return true;};
+const rootDen=(n)=>hasA(n,(m)=>m.t==="div"&&hasA(m.b,(q)=>q.t==="sqrt"));
+/* the form a question asks for, beyond being equal in value */
+const FORMS={
+  surd:(n)=>!rootDen(n)&&!hasA(n,(m)=>m.t==="sqrt"&&!(strip(m.a).t==="num"&&isSqFreeInt(strip(m.a).v))),
+  surdExp:(n)=>FORMS.surd(n)&&!hasA(n,(m)=>m.t==="par"||m.t==="pow"),
+  noRootDen:(n)=>!rootDen(n),
+  pow:(n)=>{const core=(m)=>m.t==="x"||(m.t==="pow"&&m.a.t==="x"&&!hasA(m.b,(q)=>q.t==="x"||q.t==="sqrt"));
+            return core(n)||(n.t==="mul"&&n.a.t==="num"&&core(n.b));},
+  expanded:(n)=>!hasA(n,(m)=>m.t==="par"||m.t==="sqrt"||m.t==="div"),
+  factored:(n)=>{let c=0;walkA(n,(m)=>{if(m.t==="par"&&hasA(m.a,(q)=>q.t==="x"))c++;});
+            return c>=2||(n.t==="pow"&&n.a.t==="par");},
+};
+const FORM_NAME={surd:"a simplified surd",surdExp:"the form a + b√c",noRootDen:"a rationalised denominator",
+  pow:"a single power of x",expanded:"expanded form",factored:"factorised form"};
+const XS=[0.37,1.3,2.2,3.1,4.7];
+/* {ok} | {ok:false} | {unread, why} | {form} — unreadable or wrong-form input is not counted as an attempt */
+function checkExpr(str,spec){
+  let s=String(str);if(spec.mode==="anti")s=s.replace(/\+\s*[cC]\s*$/,"");
+  let g;try{g=parseAns(s);}catch(e){return{ok:false,unread:true,why:e.message};}
+  const want=parseAns(spec.e);
+  const near=(a,b)=>Number.isFinite(a)&&Math.abs(a-b)<=1e-7*Math.max(1,Math.abs(b));
+  let eq;
+  if(spec.mode==="anti"){const g0=evalA(g,XS[0]),w0=evalA(want,XS[0]);eq=XS.slice(1).every((x)=>near(evalA(g,x)-g0,evalA(want,x)-w0));}
+  else eq=XS.every((x)=>near(evalA(g,x),evalA(want,x)));
+  if(!eq)return{ok:false};
+  if(spec.form&&!FORMS[spec.form](g))return{ok:false,form:spec.form};
+  return{ok:true};}
+
+/* polynomial in typing syntax, highest power first */
+function polyStr(c){let s="";c.forEach((a,i)=>{const p=c.length-1-i;if(a===0)return;const m=Math.abs(a);
+  s+=(a<0?"-":(s?"+":""))+((m===1&&p>0)?"":String(m))+(p===0?"":p===1?"x":`x^${p}`);});return s||"0";}
+const linStr=(r)=>r>0?`(x-${r})`:`(x+${-r})`;
+const EXH="Type an expression";   // the key legend under the box explains / ^ r and Tab
+
+/* ---------- hint cards: the general method for a shape ---------- */
+const TIPS={
+ mulSplit:"Split one factor: <i>a</i> × 47 = <i>a</i> × 40 + <i>a</i> × 7. Near a round number, go over and subtract: 49 × 6 = 50 × 6 − 6.",
+ square:"(<i>a</i> + <i>b</i>)² = <i>a</i>² + 2<i>ab</i> + <i>b</i>² — e.g. 43² = 1600 + 240 + 9. Near 50 or 100: 48² = (50 − 2)².",
+ percent:"<i>p</i>% of <i>n</i> = <i>p</i> × <i>n</i> ÷ 100, and <i>p</i>% of <i>n</i> = <i>n</i>% of <i>p</i>. 10% is ÷10, 5% is half of that, 1% is ÷100.",
+ divide:"Take off easy multiples of the divisor (×100, ×10, ×5, ×2) and add up how many you used.",
+ fracOf:"<i>a</i>/<i>b</i> of <i>n</i> = (<i>n</i> ÷ <i>b</i>) × <i>a</i> — divide first, the numbers stay small.",
+ diffSquaresProd:"(<i>m</i> − <i>d</i>)(<i>m</i> + <i>d</i>) = <i>m</i>² − <i>d</i>² — 47 × 53 = 50² − 3².",
+ diffSquares:"<i>a</i>² − <i>b</i>² = (<i>a</i> − <i>b</i>)(<i>a</i> + <i>b</i>).",
+ endsIn5:"(10<i>m</i> + 5)² = 100 · <i>m</i>(<i>m</i> + 1) + 25 — 65² = 42|25.",
+ cube:"<i>a</i>³ = <i>a</i>² × <i>a</i>. Know cubes to 10³ = 1000; (10 + <i>b</i>)³ = 1000 + 300<i>b</i> + 30<i>b</i>² + <i>b</i>³.",
+ pairTo100:"Pair numbers into round ones first: 25 × 4 = 100, 125 × 8 = 1000, 50 × 2 = 100.",
+ surdSimplify:"√(<i>k</i>²<i>b</i>) = <i>k</i>√<i>b</i> — pull out the largest square factor (4, 9, 16, 25, 36, 49 …).",
+ surdMul:"√<i>a</i> × √<i>b</i> = √(<i>ab</i>), and √<i>a</i> ÷ √<i>b</i> = √(<i>a</i>/<i>b</i>).",
+ surdSquare:"(<i>k</i>√<i>b</i>)² = <i>k</i>²<i>b</i>.",
+ conjugate:"(<i>a</i> + √<i>b</i>)(<i>a</i> − √<i>b</i>) = <i>a</i>² − <i>b</i> — the roots cancel.",
+ rationalise:"<i>c</i>/√<i>b</i> = <i>c</i>√<i>b</i>/<i>b</i>: multiply top and bottom by √<i>b</i>, then cancel.",
+ rationaliseConj:"Multiply top and bottom by the conjugate: 1/(√<i>a</i> − √<i>b</i>) × (√<i>a</i> + √<i>b</i>)/(√<i>a</i> + √<i>b</i>); the bottom becomes <i>a</i> − <i>b</i>.",
+ surdAdd:"Write each root as a multiple of the same √<i>b</i> (√50 = 5√2), then add the multiples.",
+ surdExpand:"(<i>p</i> + <i>q</i>√<i>b</i>)(<i>r</i> + <i>s</i>√<i>b</i>) = (<i>pr</i> + <i>qsb</i>) + (<i>ps</i> + <i>qr</i>)√<i>b</i>. (<i>a</i> + √<i>b</i>)² = <i>a</i>² + <i>b</i> + 2<i>a</i>√<i>b</i>.",
+ powers:"Build up from what you know: 2¹⁰ = 1024, 3⁵ = 243, 5⁴ = 625; <i>b</i>⁴ = (<i>b</i>²)².",
+ fracIndex:"<i>x</i><sup><i>p</i>/<i>q</i></sup> = (<sup><i>q</i></sup>√<i>x</i>)<sup><i>p</i></sup> — take the root first, then the power.",
+ negIndex:"<i>x</i><sup>−<i>n</i></sup> = 1/<i>x</i><sup><i>n</i></sup>, and (<i>a</i>/<i>b</i>)<sup>−<i>n</i></sup> = (<i>b</i>/<i>a</i>)<sup><i>n</i></sup>.",
+ indexLaws:"<i>x</i><sup><i>a</i></sup> × <i>x</i><sup><i>b</i></sup> = <i>x</i><sup><i>a</i>+<i>b</i></sup>, <i>x</i><sup><i>a</i></sup> ÷ <i>x</i><sup><i>b</i></sup> = <i>x</i><sup><i>a</i>−<i>b</i></sup>, (<i>x</i><sup><i>a</i></sup>)<sup><i>b</i></sup> = <i>x</i><sup><i>ab</i></sup>, √<i>x</i> = <i>x</i><sup>1/2</sup>, 1/<i>x</i> = <i>x</i><sup>−1</sup>.",
+ sameBase:"Rewrite everything as a power of one base — 4 = 2², 8 = 2³, 16 = 2⁴, 9 = 3², 27 = 3³ — then compare exponents.",
+ nCr:"(<i>n</i> choose <i>r</i>) = <i>n</i>(<i>n</i> − 1)…(<i>n</i> − <i>r</i> + 1) / <i>r</i>! — e.g. (<i>n</i> choose 2) = <i>n</i>(<i>n</i> − 1)/2. Cancel before multiplying.",
+ nCrSym:"(<i>n</i> choose <i>r</i>) = (<i>n</i> choose <i>n</i> − <i>r</i>) — choosing what to take is choosing what to leave.",
+ factorial:"<i>n</i>! = <i>n</i>(<i>n</i> − 1) … 1. 4! = 24, 5! = 120, 6! = 720, 7! = 5040, 8! = 40320.",
+ factorialRatio:"<i>n</i>!/(<i>n</i> − <i>r</i>)! = <i>n</i>(<i>n</i> − 1)…(<i>n</i> − <i>r</i> + 1) — cancel, never expand the factorials.",
+ binomExp:"In (<i>a</i> + <i>bx</i>)<sup><i>n</i></sup> the <i>x</i><sup><i>k</i></sup> term is (<i>n</i> choose <i>k</i>) <i>a</i><sup><i>n</i>−<i>k</i></sup> <i>b</i><sup><i>k</i></sup> <i>x</i><sup><i>k</i></sup> — keep the sign of <i>b</i> inside the power.",
+ arrangements:"<i>n</i> objects with repeats of size <i>p</i>, <i>q</i>, … : <i>n</i>! / (<i>p</i>! <i>q</i>! …).",
+ rowSum:"(<i>n</i> choose 0) + (<i>n</i> choose 1) + … + (<i>n</i> choose <i>n</i>) = 2<sup><i>n</i></sup> — put <i>x</i> = 1 in (1 + <i>x</i>)<sup><i>n</i></sup>.",
+ logDef:"<i>a</i><sup><i>b</i></sup> = <i>c</i> ⇔ <i>b</i> = log<sub><i>a</i></sub> <i>c</i>. Ask: what power of the base gives the number?",
+ logLaws:"log <i>x</i> + log <i>y</i> = log <i>xy</i>, log <i>x</i> − log <i>y</i> = log(<i>x</i>/<i>y</i>), <i>k</i> log <i>x</i> = log <i>x</i><sup><i>k</i></sup>. Combine first, then evaluate.",
+ logBase:"log<sub><i>a</i></sub> <i>b</i> = log <i>b</i> / log <i>a</i>, so log<sub><i>a</i></sub> <i>b</i> × log<sub><i>b</i></sub> <i>c</i> = log<sub><i>a</i></sub> <i>c</i>, and log<sub><i>a</i><sup><i>p</i></sup></sub> <i>a</i><sup><i>q</i></sup> = <i>q</i>/<i>p</i>.",
+ logInverse:"<i>a</i><sup>log<sub><i>a</i></sub> <i>n</i></sup> = <i>n</i>, and <i>a</i><sup><i>k</i> log<sub><i>a</i></sub> <i>n</i></sup> = <i>n</i><sup><i>k</i></sup>.",
+ trigTable:"sin 30° = ½, sin 45° = 1/√2, sin 60° = √3/2, sin 90° = 1. cos θ = sin(90° − θ). tan 30° = 1/√3, tan 45° = 1, tan 60° = √3.",
+ cast:"Reduce to the acute angle α. Positive: all in 0–90°, sin in 90–180°, tan in 180–270°, cos in 270–360°. sin(180° − α) = sin α, cos(180° − α) = −cos α, tan(180° + α) = tan α.",
+ trigSolutions:"Find the solutions in 0–360° (usually two), then add 360° each time (180° for tan) and count those inside the range.",
+ cosineRule:"<i>c</i>² = <i>a</i>² + <i>b</i>² − 2<i>ab</i> cos <i>C</i>; cos 60° = ½, cos 90° = 0, cos 120° = −½.",
+ triArea:"Area = ½ <i>ab</i> sin <i>C</i>; sin 30° = sin 150° = ½.",
+ hcf:"Euclid: HCF(<i>a</i>, <i>b</i>) = HCF(<i>b</i>, <i>a</i> − <i>b</i>) — keep subtracting or take remainders.",
+ lcm:"LCM(<i>a</i>, <i>b</i>) = <i>ab</i> / HCF(<i>a</i>, <i>b</i>); with primes, take the highest power of each.",
+ divisors:"If <i>n</i> = <i>p</i><sup><i>a</i></sup> <i>q</i><sup><i>b</i></sup> <i>r</i><sup><i>c</i></sup>, the number of divisors is (<i>a</i> + 1)(<i>b</i> + 1)(<i>c</i> + 1). Factorise first.",
+ primeTest:"Try primes up to √<i>n</i>: 3, 7, 11, 13, 17, 19, 23 … (digit sum for 3, alternating sum for 11).",
+ primeFactors:"Divide out 2s, then 3s, then 5s … and list every factor, repeats included.",
+ remainder:"Take away a convenient multiple of the divisor (×100, ×10), then finish off.",
+ legendre:"The power of <i>p</i> in <i>n</i>! is ⌊<i>n</i>/<i>p</i>⌋ + ⌊<i>n</i>/<i>p</i>²⌋ + ⌊<i>n</i>/<i>p</i>³⌋ + …; zeros at the end of <i>n</i>! = the power of 5.",
+ lastDigit:"Last digits repeat with a cycle of 1, 2 or 4: find the cycle, then use the exponent mod 4.",
+ inclusionExclusion:"How many are divisible by <i>a</i> or <i>b</i>: ⌊<i>N</i>/<i>a</i>⌋ + ⌊<i>N</i>/<i>b</i>⌋ − ⌊<i>N</i>/lcm(<i>a</i>, <i>b</i>)⌋.",
+ discriminant:"For <i>ax</i>² + <i>bx</i> + <i>c</i>: <i>b</i>² − 4<i>ac</i> &gt; 0 two roots, = 0 a repeated root, &lt; 0 no real roots.",
+ completeSquare:"<i>x</i>² + 2<i>px</i> + <i>c</i> = (<i>x</i> + <i>p</i>)² + <i>c</i> − <i>p</i>²; the minimum is <i>c</i> − <i>p</i>², at <i>x</i> = −<i>p</i>. With <i>a</i> ≠ 1, take <i>a</i> out of the <i>x</i> terms first.",
+ rootsSumProd:"For <i>ax</i>² + <i>bx</i> + <i>c</i> = 0: α + β = −<i>b</i>/<i>a</i>, αβ = <i>c</i>/<i>a</i>, and α² + β² = (α + β)² − 2αβ.",
+ factorise:"Find two numbers with product <i>c</i> and sum <i>b</i>: <i>x</i>² + <i>bx</i> + <i>c</i> = (<i>x</i> + <i>m</i>)(<i>x</i> + <i>n</i>).",
+ expand:"Multiply every term in one bracket by every term in the other, then collect like terms.",
+ quadInequality:"Factorise. A positive quadratic is negative strictly between its roots.",
+ stdForm:"<i>a</i> × 10<sup><i>k</i></sup> with 1 ≤ <i>a</i> &lt; 10: <i>k</i> counts how far the decimal point moves (positive for big numbers, negative for small).",
+ stdFormMul:"Multiply or divide the front numbers, add or subtract the powers, then re-normalise: 12 × 10⁵ = 1.2 × 10⁶.",
+ stdFormAdd:"Rewrite both with the same power of 10, add or subtract, then re-normalise.",
+ stdFormRoot:"Make the power even before rooting: 2.5 × 10⁷ = 25 × 10⁶, so the root is 5 × 10³.",
+ digits25:"2<sup><i>a</i></sup> × 5<sup><i>b</i></sup> = 10<sup>min</sup> × (the leftover power of 2 or 5): digits = min(<i>a</i>, <i>b</i>) + the digits of the leftover.",
+ arithSum:"<i>S<sub>n</sub></i> = <i>n</i>/2 × (first + last) = <i>n</i>/2 × (2<i>a</i> + (<i>n</i> − 1)<i>d</i>). 1 + 2 + … + <i>n</i> = <i>n</i>(<i>n</i> + 1)/2; 1 + 3 + … + (2<i>n</i> − 1) = <i>n</i>².",
+ apTerm:"<i>u<sub>n</sub></i> = <i>a</i> + (<i>n</i> − 1)<i>d</i>. From two terms: <i>d</i> = (<i>u<sub>j</sub></i> − <i>u<sub>i</sub></i>)/(<i>j</i> − <i>i</i>).",
+ gpTerm:"<i>u<sub>n</sub></i> = <i>ar</i><sup><i>n</i>−1</sup>; <i>r</i> = second term ÷ first.",
+ gpSum:"<i>S<sub>n</sub></i> = <i>a</i>(<i>r</i><sup><i>n</i></sup> − 1)/(<i>r</i> − 1).",
+ gpInf:"<i>S</i><sub>∞</sub> = <i>a</i>/(1 − <i>r</i>) when |<i>r</i>| &lt; 1; <i>r</i> = second term ÷ first.",
+ recurrence:"Apply the rule one step at a time from <i>x</i><sub>1</sub>, writing each term down.",
+ sigma:"Σ<sub><i>r</i>=1</sub><sup><i>n</i></sup> (<i>pr</i> + <i>q</i>) = <i>p</i> · <i>n</i>(<i>n</i> + 1)/2 + <i>qn</i>.",
+ evalPoly:"Horner: ((<i>ax</i> + <i>b</i>)<i>x</i> + <i>c</i>)<i>x</i> + <i>d</i> — one multiply and one add per step.",
+ remainderThm:"The remainder on dividing f(<i>x</i>) by (<i>x</i> − <i>a</i>) is f(<i>a</i>); by (2<i>x</i> − 1) it is f(½).",
+ factorThm:"(<i>x</i> − <i>a</i>) is a factor exactly when f(<i>a</i>) = 0 — substitute and solve for the unknown.",
+ simultaneous:"Write f(1) and f(2) as two equations and subtract to eliminate <i>q</i>.",
+ diffPower:"d/d<i>x</i> (<i>ax</i><sup><i>n</i></sup>) = <i>anx</i><sup><i>n</i>−1</sup>. Rewrite first: √<i>x</i> = <i>x</i><sup>1/2</sup>, 1/<i>x</i><sup>2</sup> = <i>x</i><sup>−2</sup>; expand brackets.",
+ integratePower:"∫ <i>ax</i><sup><i>n</i></sup> d<i>x</i> = <i>ax</i><sup><i>n</i>+1</sup>/(<i>n</i> + 1) + <i>c</i> (<i>n</i> ≠ −1). Definite: F(top) − F(bottom).",
+ stationary:"Stationary points are where d<i>y</i>/d<i>x</i> = 0: differentiate, set to zero, solve.",
+ fracDivide:"Dividing by a fraction is multiplying by its reciprocal: <i>a</i>/<i>b</i> ÷ <i>c</i>/<i>d</i> = <i>ad</i>/<i>bc</i>.",
+ fracPercent:"Scale the denominator to 100: 7/20 = 35/100 = 35%.",
+ ratio:"One part = total ÷ (sum of the ratio numbers); each share = its number × one part.",
+ fracAdd:"<i>a</i>/<i>b</i> + <i>c</i>/<i>d</i> = (<i>ad</i> + <i>bc</i>)/<i>bd</i>, then cancel by the HCF. Use the LCM of the denominators to keep numbers small.",
+ recurring:"0.<i>ȧḃ</i> = <i>ab</i>/99; 0.<i>a</i><i>ḃċ</i> = (<i>abc</i> − <i>a</i>)/990; 0.<i>ab</i><i>ċ</i> = (<i>abc</i> − <i>ab</i>)/900. Then cancel.",
+ mixed:"Convert to improper fractions first: 2½ = 5/2, then multiply.",
+ continued:"Work from the innermost fraction outwards, flipping as you go.",
+ distance:"<i>d</i> = √((<i>x</i>₂ − <i>x</i>₁)² + (<i>y</i>₂ − <i>y</i>₁)²) — look for 3-4-5, 5-12-13, 8-15-17, 7-24-25.",
+ gradient:"<i>m</i> = (<i>y</i>₂ − <i>y</i>₁)/(<i>x</i>₂ − <i>x</i>₁).",
+ midpoint:"Midpoint = ((<i>x</i>₁ + <i>x</i>₂)/2, (<i>y</i>₁ + <i>y</i>₂)/2).",
+ circle:"<i>x</i>² + <i>y</i>² + <i>Dx</i> + <i>Ey</i> + <i>F</i> = 0 has centre (−<i>D</i>/2, −<i>E</i>/2) and <i>r</i>² = (<i>D</i>/2)² + (<i>E</i>/2)² − <i>F</i>.",
+ perpendicular:"Perpendicular gradients multiply to −1: <i>m</i>₂ = −1/<i>m</i>₁.",
+ lineEq:"<i>y</i> − <i>y</i>₁ = <i>m</i>(<i>x</i> − <i>x</i>₁). On the <i>x</i>-axis, <i>y</i> = 0; on the <i>y</i>-axis, <i>x</i> = 0.",
+ intersect:"Set the two expressions for <i>y</i> equal and solve for <i>x</i>.",
+ shoelace:"Area = ½ |<i>x</i>₁(<i>y</i>₂ − <i>y</i>₃) + <i>x</i>₂(<i>y</i>₃ − <i>y</i>₁) + <i>x</i>₃(<i>y</i>₁ − <i>y</i>₂)|.",
+ circleTangent:"A horizontal line <i>y</i> = <i>k</i> touches (<i>x</i> − <i>a</i>)² + (<i>y</i> − <i>b</i>)² = <i>r</i>² when <i>k</i> = <i>b</i> ± <i>r</i>.",
+};
+/* hint card for every existing shape, parallel to GEN[family].L[level] — scripts/verify.js checks the lengths */
+const TIPMAP={
+ mental:[["mulSplit","square","percent","divide","fracOf"],["mulSplit","square","diffSquaresProd","percent","diffSquares","divide"],
+         ["mulSplit","endsIn5","cube","divide","pairTo100","percent"]],
+ surds:[["surdSimplify","surdMul","surdSquare","surdMul"],["surdSimplify","conjugate","rationalise","surdAdd","surdExpand"],
+        ["surdAdd","rationaliseConj","conjugate","surdExpand","surdSimplify"]],
+ indices:[["powers","fracIndex","indexLaws","negIndex"],["fracIndex","negIndex","fracIndex","negIndex","indexLaws"],
+          ["sameBase","sameBase","fracIndex","negIndex","sameBase"]],
+ ncr:[["nCr","factorial","nCr","nCrSym","factorialRatio"],["nCr","factorialRatio","binomExp","arrangements","nCrSym"],
+      ["binomExp","binomExp","rowSum","nCr","nCr"]],
+ logs:[["logDef","logDef","logLaws"],["logLaws","logLaws","logLaws","logBase","logLaws"],["logLaws","logBase","logInverse","logDef","logBase"]],
+ trig:[["trigTable","trigTable","trigTable"],["cast","cast","cast"],["cast","cast","trigSolutions","cosineRule","triArea"]],
+ number:[["hcf","lcm","divisors","primeTest"],["divisors","lcm","primeFactors","remainder","hcf"],
+         ["divisors","divisors","legendre","legendre","lastDigit","inclusionExclusion"]],
+ quadratics:[["discriminant","completeSquare","rootsSumProd","factorise"],["discriminant","completeSquare","completeSquare","rootsSumProd"],
+             ["discriminant","discriminant","completeSquare","rootsSumProd","quadInequality","completeSquare"]],
+ stdform:[["stdForm","stdFormMul"],["stdFormMul","stdFormAdd","stdFormRoot","stdFormMul"],["stdFormMul","digits25","stdFormMul","stdFormAdd"]],
+ series:[["arithSum","apTerm","arithSum"],["arithSum","gpTerm","recurrence","arithSum"],["gpSum","gpInf","sigma","apTerm"]],
+ poly:[["evalPoly","remainderThm"],["remainderThm","factorThm","remainderThm"],["remainderThm","factorThm","simultaneous"]],
+ calculus:[["diffPower","diffPower","integratePower"],["diffPower","diffPower","integratePower","integratePower"],
+           ["integratePower","integratePower","stationary","diffPower"]],
+ fractions:[["fracOf","fracDivide","fracPercent","ratio"],["fracAdd","recurring","mixed","fracAdd"],["recurring","fracAdd","continued"]],
+ coord:[["distance","gradient","midpoint"],["circle","perpendicular","lineEq","lineEq"],["circle","intersect","shoelace","circleTangent"]],
+};
+/* typed-answer shapes: appended to the banks with their hint card */
+function addShape(cat,lv,tip,fn){GEN[cat].L[lv-1].push(fn);TIPMAP[cat][lv-1].push(tip);}
+const sgnStr=(v)=>v<0?`-${-v}`:`+${v}`;
+addShape("calculus",1,"diffPower",()=>{const c=[nz(-5,5),ri(-8,8),ri(-9,9),ri(-9,9)];
+  return{q:`Differentiate ${M(y_,EQ,poly(c))}`,hint:`${EXH} for dy/dx`,e:polyStr([3*c[0],2*c[1],c[2]]),mode:"expr",
+         w:W(`Each term: bring the power down and reduce it by one; a number on its own disappears.`,`For example ${M(terms([{c:c[0],t:pw(x_,3)}]))} becomes ${M(terms([{c:3*c[0],t:pw(x_,2)}]))}.`)};});
+addShape("calculus",2,"diffPower",()=>{const k=nz(-5,5),b=nz(-9,9);   // y = 2k√x + b/x  ->  k x^(-1/2) − b x^(-2)
+  return{q:`Differentiate ${M(y_,EQ,coefx(2*k,sq(x_)),b<0?MI:PL,fr(Math.abs(b),x_))}`,hint:`${EXH} for dy/dx`,
+         e:`${k===1?"":k===-1?"-":k}x^(-1/2)${sgnStr(-b)}x^(-2)`,mode:"expr",
+         w:W(`Rewrite as powers first:`,Mid(sq(x_),EQ,pw(x_,fr(1,2))),Mid(fr(1,x_),EQ,pw(x_,-1)),`then bring each power down and reduce it by one.`)};});
+addShape("calculus",2,"integratePower",()=>{const a=3*nz(-3,3),b=2*ri(-4,4),c=ri(-9,9);
+  return{q:`Find ${M(`<mo>∫</mo>`,par(poly([a,b,c])),row(SP,mi("d"),x_))}`,hint:`${EXH} — + c is optional`,
+         e:polyStr([a/3,b/2,c,0]),mode:"anti",
+         w:W(`Raise each power by one and divide by the new power.`,`For example ${M(terms([{c:a,t:pw(x_,2)}]))} becomes ${M(fr(a,3),pw(x_,3))}, and a number ${M(mi("c"))} becomes ${M(mi("c"),x_)}.`)};});
+addShape("calculus",3,"integratePower",()=>{const m=nz(-3,3),c=nz(-8,8);   // ∫ 3m√x + c/x² dx = 2m x^(3/2) − c/x
+  return{q:`Find ${M(`<mo>∫</mo>`,par(coefx(3*m,sq(x_)),c<0?MI:PL,fr(Math.abs(c),pw(x_,2))),row(SP,mi("d"),x_))}`,
+         hint:`${EXH} — + c is optional`,e:`${2*m}x^(3/2)${sgnStr(-c)}x^(-1)`,mode:"anti",
+         w:W(`Rewrite as powers first:`,Mid(sq(x_),EQ,pw(x_,fr(1,2))),Mid(fr(1,pw(x_,2)),EQ,pw(x_,-2)),`then raise each power by one and divide by the new power.`)};});
+addShape("calculus",3,"diffPower",()=>{const a=nz(-7,7),b=nz(-7,7);
+  return{q:`Differentiate ${M(y_,EQ,par(poly([1,a])),par(poly([1,b])))}`,hint:`${EXH} for dy/dx`,e:polyStr([2,a+b]),mode:"expr",
+         w:W(`Expand first:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,poly([1,a+b,a*b])))};});
+addShape("surds",1,"surdSimplify",()=>{const b=pick(SQF_S),k=ri(2,9);
+  return{q:`Simplify ${M(sq(k*k*b))}`,hint:EXH,e:`${k}√${b}`,mode:"expr",form:"surd",
+  w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};});
+addShape("surds",2,"rationalise",()=>retry(()=>{const b=pick([2,3,5,6,7,10]),c=ri(2,15);const g=gcd(c,b),n=c/g,d=b/g;if(d===1)return null;
+  return{q:`Rationalise the denominator of ${M(fr(c,sq(b)))}`,hint:EXH,e:`${n===1?"":n}√${b}/${d}`,mode:"expr",form:"noRootDen",
+  w:W(`Multiply top and bottom by √${b}:`,M(fr(c,sq(b)),EQ,fr(row(c,sq(b)),row(sq(b),TM,sq(b)))),`then cancel.`)};}));
+addShape("surds",2,"surdExpand",()=>{const b=pick(SQF_S),a=ri(2,7);
+  return{q:`Expand ${M(pw(par(a,PL,sq(b)),2))}`,hint:`${EXH} in the form a + b√c`,e:`${a*a+b}+${2*a}√${b}`,mode:"expr",form:"surdExp",
+  w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`Collect the parts with and without √${b}.`)};});
+addShape("surds",3,"rationaliseConj",()=>{if(coin()){const m=ri(1,4),n=m*m+1;
+    return{q:`Rationalise the denominator of ${M(fr(1,row(sq(n),MI,m)))}`,hint:EXH,e:`√${n}+${m}`,mode:"expr",form:"surdExp",
+      w:W(`Multiply top and bottom by (√${n} + ${m}); the bottom becomes`,M(par(sq(n),MI,m),par(sq(n),PL,m),EQ,n,MI,m*m))};}
+  let a,b;do{a=pick(SQF_S);b=pick(SQF_S);}while(a<=b||a-b>6);const k=ri(1,5);
+  return{q:`Rationalise the denominator of ${M(fr(k*(a-b),row(sq(a),MI,sq(b))))}`,hint:EXH,
+         e:`${k===1?"":k}√${a}+${k===1?"":k}√${b}`,mode:"expr",form:"surdExp",
+         w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b))};});
+addShape("indices",2,"indexLaws",()=>{const a=ri(1,5),kind=R(3);   // exponents in halves
+  const n2=kind===0?2*a+1:kind===1?-(2*a+1):1-2*a;
+  const q=kind===0?M(pw1(x_,a),sq(x_)):kind===1?M(fr(1,row(pw1(x_,a),sq(x_)))):M(fr(sq(x_),pw1(x_,a)));
+  return{q:`Write ${q} as a single power of ${M(x_)}`,hint:`${EXH}, a single power of x`,e:`x^(${n2}/2)`,mode:"expr",form:"pow",
+  w:W(Mid(sq(x_),EQ,pw(x_,fr(1,2))),`Multiplying adds the powers; dividing subtracts them.`)};});
+addShape("quadratics",1,"expand",()=>{const a=nz(-9,9),b=nz(-9,9);
+  return{q:`Expand ${M(par(poly([1,a])),par(poly([1,b])))}`,hint:EXH,e:polyStr([1,a+b,a*b]),mode:"expr",form:"expanded",
+  w:W(`Every term by every term:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,pw(x_,2),signed(b,x_),signed(a,x_),signed(a*b,"")),`then collect the x terms.`)};});
+addShape("quadratics",2,"factorise",()=>retry(()=>{const r=nz(-9,9),s=nz(-9,9);if(r===s||r+s===0)return null;
+  return{q:`Factorise ${M(poly([1,-(r+s),r*s]))}`,hint:`${EXH} like (x+2)(x-5)`,e:linStr(r)+linStr(s),mode:"expr",form:"factored",
+  w:W(`Find two numbers with product ${M(r*s)} and sum ${M(-(r+s))}.`)};}));
+addShape("poly",2,"expand",()=>{const a=nz(-5,5),b=nz(-5,5),c=nz(-6,6);
+  return{q:`Expand ${M(par(poly([1,a])),par(poly([1,b,c])))}`,hint:EXH,e:polyStr([1,a+b,a*b+c,a*c]),mode:"expr",form:"expanded",
+  w:W(`Multiply the whole second bracket by x, then by ${M(a)}:`,Mid(par(poly([1,a])),par(poly([1,b,c])),EQ,x_,par(poly([1,b,c])),a<0?MI:PL,Math.abs(a)===1?"":mnum(Math.abs(a)),par(poly([1,b,c]))),`then collect like terms.`)};});
+
+const CATS=Object.keys(GEN);
+function make(cat,lv,avoid){const L=Math.min(3,Math.max(1,lv)),bank=GEN[cat].L[L-1];let idx=R(bank.length);
+  if(bank.length>1&&idx===avoid)idx=(idx+1+R(bank.length-1))%bank.length;
+  const o=bank[idx]();
+  return{cat,lv,idx,q:o.q,hint:o.hint||"",a:o.a,e:o.e,mode:o.mode,form:o.form,w:o.w,tip:TIPMAP[cat][L-1][idx]};}
+/*GEN-END*/
+
+/* ---------- quotes: one picked at random per visit. "(attributed)" marks the ones known only by report ---------- */
+const QUOTES=[
+ ["Pure mathematics is, in its way, the poetry of logical ideas.","Albert Einstein, on Emmy Noether"],
+ ["The essence of mathematics lies in its freedom.","Georg Cantor"],
+ ["In mathematics the art of proposing a question must be held of higher value than solving it.","Georg Cantor"],
+ ["Mathematics is the art of giving the same name to different things.","Henri Poincaré"],
+ ["Beauty is the first test: there is no permanent place in the world for ugly mathematics.","G. H. Hardy"],
+ ["A mathematician, like a painter or a poet, is a maker of patterns.","G. H. Hardy"],
+ ["We must know. We will know.","David Hilbert"],
+ ["No one shall expel us from the paradise that Cantor has created.","David Hilbert"],
+ ["Mathematics knows no races or geographic boundaries; for mathematics, the cultural world is one country.","David Hilbert"],
+ ["If you cannot solve the proposed problem, try to solve first some related problem.","George Pólya"],
+ ["Mathematics is not about numbers, equations, computations, or algorithms: it is about understanding.","William Thurston"],
+ ["It is not knowledge, but the act of learning, not possession but the act of getting there, which grants the greatest enjoyment.","Carl Friedrich Gauss"],
+ ["Mathematics is the queen of the sciences.","Carl Friedrich Gauss (attributed)"],
+ ["Do not worry about your difficulties in mathematics. I can assure you mine are still greater.","Albert Einstein"],
+ ["Mathematics is the music of reason.","James Joseph Sylvester"],
+ ["Read Euler, read Euler, he is the master of us all.","Pierre-Simon Laplace (attributed)"],
+ ["The only way to learn mathematics is to do mathematics.","Paul Halmos"],
+ ["Invert, always invert.","Carl Jacobi"],
+ ["The shortest path between two truths in the real domain passes through the complex domain.","Jacques Hadamard"],
+ ["Mathematics, rightly viewed, possesses not only truth, but supreme beauty.","Bertrand Russell"],
+ ["There is no royal road to geometry.","Euclid (attributed)"],
+ ["God made the integers; all else is the work of man.","Leopold Kronecker (attributed)"],
+ ["A mathematician is a device for turning coffee into theorems.","Alfréd Rényi"],
+ ["Young man, in mathematics you don’t understand things. You just get used to them.","John von Neumann (attributed)"],
+ ["The value of a problem is not so much coming up with the answer as in the ideas and attempted ideas it forces on the would-be solver.","I. N. Herstein"],
+ ["It is impossible to be a mathematician without being a poet in soul.","Sofia Kovalevskaya"],
+ ["The beauty of mathematics only shows itself to more patient followers.","Maryam Mirzakhani"],
+ ["An equation for me has no meaning unless it expresses a thought of God.","Srinivasa Ramanujan (attributed)"],
+];
+
+/* ---------- state ---------- */
+const BLANK=()=>({lv:1,best:1,seen:0,right:0,times:[],recent:[],last:null});
+let S={cats:Object.fromEntries(CATS.map(c=>[c,BLANK()])),sessions:[],streak:{last:null,count:0},total:0};
+const COVER=30;   // every operation in focus is shown at least once per this many questions
+const LEVEL_MS={surds:23000,poly:23000,calculus:23000};   // median needed to level up; 14 s otherwise
+let focus=new Set(CATS), lvFilter=new Set(), runMin=5, run=null, cur=null, shownAt=0, db=null, uid=null;
+let lastCat=null; const lastIdx={}, recentQ=[];
+
+const $=(id)=>document.getElementById(id);
+const med=(a)=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;
+  return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const ymd=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const secs=(ms)=>`${(ms/1000).toFixed(1)}s`;
+const isExpr=(q)=>q&&q.e!==undefined;
+const answerML=(q)=>isExpr(q)?M(exprML(parseAns(q.e))):M(q.a);
+
+function show(q,tag,why){
+  cur={...q,tries:q.tries||0,revealed:false,hinted:false};
+  $("cat").textContent=tag;
+  const el=$("q");el.innerHTML=cur.q;
+  el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
+  fixRadicals(el);
+  $("hint").textContent=cur.hint||"Whole-number answer";
+  $("tip").hidden=true;
+  const wk=$("worked");wk.hidden=!(cur.worked&&cur.w);
+  if(!wk.hidden){wk.innerHTML=`<span class="label">Worked start</span>${cur.w}`;fixRadicals(wk);}
+  setSecond(!!why,why==="skipped"?"skipped earlier — here is a start":"you got this wrong earlier");
+  const ex=isExpr(cur),a=$("ans");
+  $("ansbox").classList.toggle("expr",ex);$("ansrow").classList.toggle("exprmode",ex);a.inputMode=ex?"text":"numeric";
+  $("keys").hidden=!ex;
+  a.value="";a.disabled=false;a.focus();updatePreview();
+  shownAt=performance.now();
+}
+/* Chrome + STIX Two Math leave ~0.43em of empty box after every square root. Measure and trim it, rather
+   than hard-code a margin that would overlap on a device whose math font has no such gap. */
+function fixRadicals(root){
+  root.querySelectorAll("msqrt").forEach(s=>{s.style.marginInlineEnd="";
+    const c=s.firstElementChild;if(!c)return;const gap=s.getBoundingClientRect().right-c.getBoundingClientRect().right;
+    if(gap>1)s.style.marginInlineEnd=`${-(gap-1)}px`;});}
+function setSecond(on,text){$("card").classList.toggle("second",on);$("retryTag").hidden=!on;if(text)$("retryTag").textContent=text;}
+function say(text,kind,html){const v=$("verdict");if(html)v.innerHTML=html;else v.textContent=text;v.className="verdict "+(kind||"");
+  if(html)fixRadicals(v);}
+function flash(kind){const c=$("card");c.classList.remove("flash-ok","flash-bad");void c.offsetWidth;c.classList.add(kind==="ok"?"flash-ok":"flash-bad");}
+function updateBar(){
+  if(!run)return;
+  $("score").textContent=`${run.right} / ${run.n}`;
+  $("qn").textContent=run.phase==="review"?`R${run.ri+1} / ${run.shelf.length}`:`Q${run.n+1}`;
+  const parts=[];if(run.phase==="main"){if(run.later.length)parts.push(`${run.later.length} coming back`);
+    if(run.shelf.length)parts.push(`${run.shelf.length} set aside`);}
+  $("aside").textContent=parts.join(" · ");
+}
+
+/* draw what has been typed as maths, in place, with the cursor where the next key goes */
+function updatePreview(){
+  if(!cur||!isExpr(cur))return;const a=$("ans"),view=$("ansview");
+  let v=a.value,c=a.selectionStart??v.length,tail="";
+  const m=cur.mode==="anti"&&v.match(/\+\s*[cC]\s*$/);   // optional constant of integration
+  if(m){v=v.slice(0,m.index);c=Math.min(c,v.length);tail=row(PL,mi("c"));}
+  const ml=liveML(v,c);
+  view.innerHTML=ml?ml.replace(/<\/math>$/,tail+"</math>"):`<span class="raw">${v.replace(/[&<>]/g,(ch)=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[ch])}</span>`;
+  fixRadicals(view);
+}
+
+function showTip(){
+  if(!run||!cur||!cur.tip||!TIPS[cur.tip])return;
+  const t=$("tip");t.innerHTML=`<span class="label">Hint</span>${TIPS[cur.tip]}`;t.hidden=false;
+  if(run.phase==="main"&&cur.tries===0)cur.hinted=true;
+  $("ans").focus();
+}
+
+function nextQ(){
+  // a question missed once returns after a few new ones, flagged
+  if(run&&run.phase==="main"){const i=run.later.findIndex(x=>x.due<=run.n);
+    if(i>=0){const [x]=run.later.splice(i,1);lastCat=x.q.cat;show(x.q,`${GEN[x.q.cat].name} · level ${x.q.lv}`,x.q.why||"wrong");
+      const v=$("verdict");if(v.textContent)v.textContent="last one: "+v.textContent;   // not about this question
+      updateBar();return;}}
+  const pool=CATS.filter(c=>focus.has(c));
+  if(!pool.length)return;
+  const cand=pool.length>1&&lastCat&&pool.includes(lastCat)?pool.filter(c=>c!==lastCat):pool;
+  // weight toward low accuracy and few attempts
+  const w=cand.map(c=>{const s=S.cats[c];const acc=s.seen?s.right/s.seen:0.5;
+    return Math.max(0.35,1.25-acc)+(s.seen<6?0.5:0);});
+  let t=w.reduce((a,b)=>a+b,0),r=Math.random()*t,cat=cand[0];
+  for(let i=0;i<cand.length;i++){r-=w[i];if(r<=0){cat=cand[i];break;}}
+  // coverage beats weighting: an operation not shown for COVER questions (or never) goes next, most overdue first
+  const gap=(c)=>S.cats[c].last==null?Infinity:S.total-S.cats[c].last;
+  const overdue=cand.filter((c)=>gap(c)>=COVER).sort((a,b)=>gap(b)-gap(a)||Math.random()-0.5);
+  if(overdue.length)cat=overdue[0];
+  let q=null;
+  for(let i=0;i<15;i++){let o;try{o=make(cat,pickLevel(cat),lastIdx[cat]);}catch(e){continue;}
+    q=o;if(!recentQ.includes(o.q))break;}
+  if(!q)q=make("mental",1);
+  lastCat=q.cat;lastIdx[q.cat]=q.idx;S.cats[q.cat].last=S.total;recentQ.push(q.q);if(recentQ.length>80)recentQ.shift();
+  show(q,`${GEN[q.cat].name} · level ${q.lv}`);
+}
+
+function record(q,ok,ms){
+  const s=S.cats[q.cat];
+  // the median is a speed for answers you got right: a wrong answer or a skip adds no time
+  S.total++; s.seen++; if(ok)s.right++; if(ok&&ms!=null){s.times.push(ms); if(s.times.length>40)s.times.shift();}
+  if(q.lv!==s.lv)return;   // easier (or harder) questions from the range count in the stats but do not move the level
+  s.recent.push(ok?1:0); if(s.recent.length>6)s.recent.shift();
+  if(s.recent.length>=5){
+    const hit=s.recent.reduce((a,b)=>a+b,0)/s.recent.length, m=med(s.times.slice(-6))||9999;
+    if(hit>=0.8&&m<(LEVEL_MS[q.cat]||14000)&&s.lv<3){s.lv++;s.best=Math.max(s.best||1,s.lv);s.recent=[];}
+    else if(hit<0.5&&s.lv>1){s.lv--;s.recent=[];}
+  }
+}
+
+/* {ok} or {retype: message} — unreadable input, or the right value in the wrong form, is not an attempt */
+function judge(raw){
+  if(isExpr(cur)){const r=checkExpr(raw,cur);
+    if(r.unread)return{retype:raw.trim()?`Can’t read that yet — ${r.why}.`:""};
+    if(r.form)return{retype:`Right value — now write it as ${FORM_NAME[r.form]}.`};
+    return{ok:r.ok};}
+  const t=raw.trim().replace(/^[−–]/,"-");
+  if(!/^-?\d+$/.test(t))return{retype:t?"A whole number, please.":""};
+  return{ok:parseInt(t,10)===cur.a};
+}
+
+function submit(){
+  if(!run||!cur)return;
+  if(run.phase==="review"&&cur.revealed){advanceReview();return;}
+  const j=judge($("ans").value);
+  if(j.retype!==undefined){if(j.retype)say(j.retype,"");return;}
+  const ok=j.ok, ms=performance.now()-shownAt;
+  if(run.phase==="review"){reviewAnswer(ok);return;}
+  const clean=ok&&!cur.hinted;
+  if(cur.tries===0){record(cur,clean,ms);run.n++;if(clean)run.right++;}
+  cur.tries++;
+  if(ok){say(cur.tries===1?(cur.hinted?`correct, with the hint · ${secs(ms)}`:`correct · ${secs(ms)}`):"correct this time","ok");flash("ok");
+    updateBar();renderStats();nextQ();return;}
+  if(cur.tries===1){
+    run.later.push({q:{...cur,why:"wrong",back:true},due:run.n+ri(3,5)});
+    say("Not quite — it comes back in a few questions","bad");flash("bad");
+    updateBar();renderStats();nextQ();return;}
+  run.shelf.push(cur);
+  say("Wrong again — set aside, it comes back at the end","bad");flash("bad");
+  updateBar();renderStats();nextQ();
+}
+
+function reveal(){cur.revealed=true;setSecond(false);
+  say("","bad",`The answer is ${answerML(cur)} — press Enter to continue`);$("ans").value="";updatePreview();$("ans").focus();}
+
+function skip(){
+  if(!run||!cur)return;
+  if(run.phase==="review"){if(cur.revealed)advanceReview();else reveal();return;}
+  if(cur.tries===0){record(cur,false,null);run.n++;}
+  // first skip: back in a few questions with a worked start; skipped again: to the review, worked start and all
+  if(!cur.back){run.later.push({q:{...cur,tries:1,worked:true,back:true,why:"skipped"},due:run.n+ri(3,5)});
+    say("Skipped — it comes back in a few questions with a worked start","");}
+  else{run.shelf.push({...cur,worked:true});say("Skipped again — it comes back at the end","");}
+  updateBar();renderStats();nextQ();
+}
+
+function tick(){
+  if(!run||run.phase!=="main")return;
+  if(run.endless){$("clock").textContent="∞";return;}
+  const left=Math.max(0,run.until-Date.now());
+  $("clock").textContent=clockText(left);
+  if(left<=0)endMain();
+}
+
+const LENGTHS=[1,2,3,5,10,15,20,0];   // minutes; 0 = endless
+const clockText=(ms)=>`${Math.floor(ms/60000)}:${String(Math.floor(ms/1000)%60).padStart(2,"0")}`;
+function start(){
+  const endless=runMin===0;
+  run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
+  document.body.classList.add("running");window.scrollTo(0,0);
+  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;
+  $("cardctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
+  say("");$("mode").textContent=endless?"endless":"";
+  tick(); nextQ(); updateBar();
+}
+
+/* timed part over: bank the session, then replay what was set aside */
+function endMain(){
+  if(!run||run.phase!=="main")return;
+  clearInterval(run.t);
+  if(cur&&cur.tries===1&&!run.shelf.includes(cur))run.shelf.push(cur);
+  for(const x of run.later)run.shelf.push(x.q);   // missed once, never got their second go
+  run.later=[];
+  commitSession(run);
+  if(!run.shelf.length){finish();return;}
+  run.phase="review";run.ri=0;
+  $("clock").textContent="review";$("mode").textContent="untimed, not scored";
+  $("stop").textContent="End review";
+  say("Time. Now the ones you set aside.","");showReview();
+}
+function showReview(){
+  const q=run.shelf[run.ri];
+  show(q,`Review ${run.ri+1} of ${run.shelf.length} · ${GEN[q.cat].name}`);
+  updateBar();
+}
+function reviewAnswer(ok){
+  if(ok){run.fixed++;say("correct","ok");flash("ok");advanceReview();return;}
+  flash("bad");reveal();
+}
+function advanceReview(){if(cur&&cur.revealed)say("");run.ri++;if(run.ri<run.shelf.length)showReview();else finish();}
+
+function commitSession(done){
+  if(!done.n)return;
+  const d=ymd(new Date());
+  S.sessions.push({d,n:done.n,right:done.right,aside:done.shelf.length});
+  if(S.sessions.length>160)S.sessions.shift();
+  if(S.streak.last!==d){
+    const yd=ymd(new Date(Date.now()-86400000));
+    S.streak={last:d,count:S.streak.last===yd?S.streak.count+1:1};
+  }
+  renderStreak(); save();
+}
+
+function finish(){
+  if(!run)return;
+  clearInterval(run.t);
+  const done=run; run=null; cur=null;
+  document.body.classList.remove("running");
+  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;
+  $("ans").disabled=true;$("ans").value="";renderLength();$("cat").hidden=true;setSecond(false);
+  $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
+  let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
+  if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
+  $("hint").textContent=h;
+  say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q${done.n}`;
+  $("start").textContent=`Again · ${runMin?clockText(runMin*60000):"endless"}`;
+}
+
+function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
+
+/* ---------- render ---------- */
+const RANK_MIN=3;   // fewer answers than this: the median is too noisy to call an operation "slowest"
+function renderStats(){
+  const rows=CATS.map(c=>({c,s:S.cats[c]})).filter(x=>x.s.seen>0);
+  const body=$("stats");
+  $("statsEmpty").hidden=rows.length>0; $("tblwrap").hidden=rows.length===0;
+  if(!rows.length){body.innerHTML="";return;}
+  let slow=null,slowM=-1;
+  rows.forEach(x=>{const m=med(x.s.times);if(m!==null&&x.s.seen>=RANK_MIN&&m>slowM){slowM=m;slow=x.c;}});
+  body.innerHTML=rows.map(({c,s})=>{
+    const m=med(s.times), acc=Math.round(100*s.right/s.seen), few=s.seen<RANK_MIN;
+    return `<tr class="${c===slow?"weak":""}"><td class="name">${GEN[c].name}</td>
+      <td><span class="lv">${s.lv}</span></td><td>${s.seen}</td><td>${acc}%</td>
+      <td class="${few?"few":""}" title="${few?"Too few answers to rank":""}">${m===null?"—":secs(m)}</td></tr>`;}).join("");
+}
+function renderStreak(){
+  const n=S.streak.count||0;
+  $("streakN").textContent=n||"—";
+  $("streakL").textContent=n?"day streak":"no sessions yet";
+}
+/* ---------- Focus: topics and levels, chosen in a dialog, remembered on this device ---------- */
+function pickLevel(c){const s=S.cats[c];
+  if(lvFilter.size)return pick([...lvFilter]);
+  const top=Math.max(s.best||1,s.lv);if(top===1)return 1;
+  if(Math.random()<0.5)return s.lv;                       // half at the current level
+  const others=[];for(let l=1;l<=top;l++)if(l!==s.lv)others.push(l);return pick(others);}
+function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[...focus],levels:[...lvFilter],min:runMin}));}catch(e){}}
+function renderFocusBtn(){
+  const t=focus.size===CATS.length?"All topics":focus.size===1?GEN[[...focus][0]].name:`${focus.size} topics`;
+  const l=lvFilter.size?`level ${[...lvFilter].sort().join(", ")}`:"adaptive levels";
+  $("focusBtn").textContent=`Focus: ${t} · ${l} · ${runMin?runMin+" min":"endless"}`;}
+function renderLength(){   // the Start button and the idle clock both show the chosen length
+  const t=runMin?clockText(runMin*60000):"∞";
+  $("start").textContent=runMin?`Start ${t}`:"Start · endless";
+  if(!run)$("clock").textContent=t;}
+function renderChips(){
+  $("chips").innerHTML=CATS.map(c=>
+    `<button class="chip" data-c="${c}" aria-pressed="${focus.has(c)}">${GEN[c].name}</button>`).join("")
+    +`<button class="chip" data-c="__all" aria-pressed="false">All</button>`;
+  $("chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    const c=b.dataset.c;
+    if(c==="__all")focus=new Set(CATS);
+    else{focus.has(c)?focus.delete(c):focus.add(c);if(!focus.size)focus=new Set(CATS);}
+    saveFocus();renderChips();
+  });
+  $("levelChips").innerHTML=`<button class="chip" data-l="auto" aria-pressed="${!lvFilter.size}">Adaptive</button>`
+    +[1,2,3].map(l=>`<button class="chip" data-l="${l}" aria-pressed="${lvFilter.has(l)}">Level ${l}</button>`).join("");
+  $("levelChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    const l=b.dataset.l;
+    if(l==="auto")lvFilter=new Set();else{const n=+l;lvFilter.has(n)?lvFilter.delete(n):lvFilter.add(n);}
+    saveFocus();renderChips();
+  });
+  $("lenChips").innerHTML=LENGTHS.map(m=>
+    `<button class="chip" data-m="${m}" aria-pressed="${runMin===m}">${m?m+" min":"Endless"}</button>`).join("");
+  $("lenChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{runMin=+b.dataset.m;saveFocus();renderChips();});
+  $("levelNote").textContent=lvFilter.size
+    ?"Only the levels you picked, for every topic. Questions below or above your current level still count in your stats but do not move your level."
+    :"Adaptive: each topic gives questions from level 1 up to the highest level you have reached, half of them at your current level.";
+  renderFocusBtn();renderLength();
+}
+
+/* ---------- persistence ---------- */
+function pack(){return{v:3,updated:new Date().toISOString(),streak:S.streak,total:S.total,
+  sessions:S.sessions.slice(-160),
+  cats:Object.fromEntries(CATS.map(c=>{const s=S.cats[c];
+    return[c,{lv:s.lv,best:Math.max(s.best||1,s.lv),seen:s.seen,right:s.right,times:s.times.slice(-40).map(Math.round),recent:s.recent,last:s.last}];}))};}
+function unpack(d){
+  if(!d||typeof d!=="object")return;
+  if(d.streak&&typeof d.streak==="object")S.streak={last:d.streak.last??null,count:+d.streak.count||0};
+  if(Array.isArray(d.sessions))S.sessions=d.sessions.slice(-160);
+  S.total=Number.isFinite(+d.total)&&d.total!=null?+d.total:CATS.reduce((n,c)=>n+(d.cats&&d.cats[c]?+d.cats[c].seen||0:0),0);
+  if(d.cats&&typeof d.cats==="object")CATS.forEach(c=>{const o=d.cats[c];if(!o)return;
+    const lv=Math.min(3,Math.max(1,+o.lv||1));
+    S.cats[c]={lv,best:Math.min(3,Math.max(lv,+o.best||1)),seen:+o.seen||0,right:+o.right||0,
+      times:Array.isArray(o.times)?o.times.slice(-40).map(Number).filter(Number.isFinite):[],
+      recent:Array.isArray(o.recent)?o.recent.slice(-6).map(Number):[],last:Number.isFinite(o.last)?o.last:null};});
+}
+let saving=false;
+async function save(){
+  if(!db||!uid||saving)return;
+  saving=true;
+  try{await db.doc(`data/users/${uid}/drill`).set(pack());$("sync").textContent="saved";}
+  catch(e){$("sync").textContent="not saved ("+(e&&e.code?e.code:"error")+")";}
+  finally{saving=false;}
+}
+
+/* ---------- boot ---------- */
+{const [t,by]=pick(QUOTES);$("quoteText").textContent=`“${t}”`;$("quoteBy").textContent=`— ${by}`;}
+document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("ansview"));});
+try{const f=JSON.parse(localStorage.getItem("qm-focus")||"null");
+  if(f){const cs=(f.cats||[]).filter((c)=>CATS.includes(c));if(cs.length)focus=new Set(cs);
+    lvFilter=new Set((f.levels||[]).filter((l)=>[1,2,3].includes(l)));
+    if(LENGTHS.includes(f.min))runMin=f.min;}}catch(e){}
+renderChips(); renderStats(); renderStreak();
+$("focusBtn").onclick=()=>$("focusDlg").showModal();
+$("focusDone").onclick=()=>$("focusDlg").close();
+$("focusDlg").addEventListener("click",(e)=>{if(e.target===$("focusDlg"))$("focusDlg").close();});   // click outside closes
+$("start").onclick=()=>start();
+$("stop").onclick=stopPressed;
+$("skip").onclick=()=>skip();
+$("hintBtn").onclick=()=>showTip();
+$("sign").addEventListener("pointerdown",(e)=>e.preventDefault());   // keep the keyboard open
+$("sign").onclick=()=>{const a=$("ans");a.value=a.value.startsWith("-")?a.value.slice(1):"-"+a.value;a.focus();
+  a.setSelectionRange(a.value.length,a.value.length);};
+$("ans").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();submit();return;}
+  if(e.key==="Escape"){e.preventDefault();skip();return;}
+  if(e.key==="?"){e.preventDefault();showTip();return;}
+  if(e.key==="Tab"&&cur&&isExpr(cur)){e.preventDefault();stepOut(e.target);return;}
+  if(e.key==="ArrowRight"&&cur&&isExpr(cur)&&e.target.value[e.target.selectionStart]===")"&&!e.shiftKey){e.preventDefault();stepOut(e.target);return;}
+});
+/* r types √ — done on the text, not the key, so it also works with phone keyboards and pasted input */
+/* Structured typing for expressions. /, ^ and √ open a box — a pair of brackets the display hides — with the
+   cursor inside, and you stay in it until Tab or → takes you out. Applied after each character arrives (the
+   input event), because phone keyboards do not reliably send key events or a cancellable beforeinput. */
+const FACTOR_END=/[0-9.x)]/;
+function stepOut(a){const v=a.value,i=a.selectionStart;const k=v.indexOf(")",i);
+  // from the top of a fraction, the next box is its bottom; otherwise just past the box
+  const c=k<0?v.length:v.slice(k+1,k+3)==="/("?k+3:k+1;a.setSelectionRange(c,c);updatePreview();}
+function structure(a,ch){   // ch has just been typed and sits at selectionStart − 1
+  const v=a.value,i=a.selectionStart,before=v.slice(0,i-1),after=v.slice(i),prev=before.slice(-1);
+  const set=(text,c)=>{a.value=text;a.setSelectionRange(c,c);};
+  if(ch==="/"){if(FACTOR_END.test(prev))set(before+"/()"+after,i+1);else set(before+"()/()"+after,i);return;}
+  if(ch==="^"){set(before+"^()"+after,i+1);return;}
+  if(ch==="r"||ch==="R"||ch==="√"){set(before+"√()"+after,i+1);return;}
+  if(ch==="("){set(before+"()"+after,i);return;}
+  if(ch===")"&&after[0]===")"){set(before+after,i);return;}   // typing ) over an auto-closed bracket just moves past it
+}
+$("ans").addEventListener("beforeinput",(e)=>{   // Backspace never breaks a box
+  if(!cur||!isExpr(cur)||e.inputType!=="deleteContentBackward"||!e.cancelable)return;
+  const a=e.target,v=a.value,i=a.selectionStart;if(i!==a.selectionEnd)return;const prev=v[i-1]||"",next=v[i]||"";
+  if(prev==="("&&next===")"){let k=i-1;if("/^√".includes(v[k-1]||""))k--;e.preventDefault();a.value=v.slice(0,k)+v.slice(i+1);a.setSelectionRange(k,k);updatePreview();return;}
+  if(prev===")"||prev==="("){e.preventDefault();a.setSelectionRange(i-1,i-1);updatePreview();}
+});
+$("outBox").addEventListener("pointerdown",(e)=>e.preventDefault());   // keep the keyboard open
+$("outBox").onclick=()=>{const a=$("ans");a.focus();stepOut(a);};
+$("ans").addEventListener("input",(e)=>{const a=e.target;
+  if(cur&&isExpr(cur)){
+    if(e.inputType==="insertText"&&e.data&&e.data.length===1)structure(a,e.data);
+    else if(/[rR]/.test(a.value)){const i=a.selectionStart;a.value=a.value.replace(/[rR]/g,"√");a.setSelectionRange(i,i);}   // pasted text
+  }
+  updatePreview();});
+// the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
+for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
+document.addEventListener("keydown",e=>{
+  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&!$("focusDlg").open){e.preventDefault();start();}
+});
+
+(async()=>{
+  if(!window.claude||!window.claude.use){$("sync").textContent="opened outside claude.ai — progress is not saved";return;}
+  try{
+    const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!d||!u){$("sync").textContent="not signed in, nothing saved";return;}
+    db=d; uid=await u.id();
+    if(!uid){$("sync").textContent="no private store, nothing saved";db=null;return;}
+    const snap=await db.doc(`data/users/${uid}/drill`).get();
+    if(snap.exists){unpack(snap.data());renderStats();renderStreak();$("sync").textContent="synced";}
+    else $("sync").textContent="ready to save";
+  }catch(e){$("sync").textContent="store unavailable";}
+})();
+</script>
+
+<script>
+"use strict";
+(()=>{
+  const TICK='<svg class="pen" viewBox="0 0 60 50" aria-hidden="true"><path pathLength="100" d="M6 29 C12 33 17 38 21 44 C29 28 40 14 55 5"/></svg>';
+  const CROSS='<svg class="pen" viewBox="0 0 50 50" aria-hidden="true"><path pathLength="100" d="M9 8 C20 20 32 32 43 44"/><path class="p2" pathLength="100" d="M42 7 C30 20 19 31 8 43"/></svg>';
+  const f0=flash; flash=function(k){f0(k);$("verdict").insertAdjacentHTML("afterbegin",k==="ok"?TICK:CROSS);};
+  const s0=show; show=function(...a){s0(...a);$("q").classList.remove("marked");};
+  const stage=$("q").parentElement;
+  const u0=updateBar; updateBar=function(){u0();if(run)stage.dataset.qn=run.phase==="review"?`R${run.ri+1}`:run.n+1;};
+  const e0=finish; finish=function(){e0();delete stage.dataset.qn;$("q").classList.add("marked");};
+})();
+</script>
