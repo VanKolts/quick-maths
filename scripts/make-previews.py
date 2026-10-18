@@ -140,9 +140,7 @@ footer{border-top:1px dashed var(--line)}
 """.replace("NOISE", NOISE)
 
 LOOKS = {
-    "paper": ("Quick Maths Paper", PAPER,
-              "family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400"
-              "&family=Caveat:wght@500;700&family=STIX+Two+Math"),
+    # the paper look became drill.html itself on 2026-10-18; previews/paper.html is the old serif snapshot
     "chalk": ("Quick Maths Chalk", CHALK, "family=Cabin+Sketch:wght@400;700"),
 }
 

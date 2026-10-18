@@ -9,26 +9,27 @@
    STIX Two Math has an OpenType MATH table, which is what lets brackets stretch round a binomial or a
    fraction; its one flaw in Chrome, a gap after every root, is trimmed in fixRadicals(). */
 :root{
-  /* a light midnight-blue page; every text colour is at least 4.5:1 on bg, surface, sunk and accent-soft */
-  --bg:#ECEFFA; --surface:#FDFDFF; --sunk:#DDE2F3;
-  --ink:#121633; --muted:#46507A; --faint:#525D86; --line:#C6CDE8;
-  --accent:#191970; --accent-soft:#D2D8F2; --on-accent:#FFFFFF;   /* midnight blue */
-  --start-bg:#D3E0FC;   /* light blue fill of the Start button */
-  --ok:#1C7049; --bad:#A8271E; --bad-soft:#F6E1DE;
+  /* exam paper: a cream sheet on a desk, black ink, marked in red pen; every text colour is at least 4.5:1 */
+  --bg:#E4DED0; --surface:#FCFAF4; --sunk:#F4EFE3;
+  --ink:#1C1B18; --muted:#524E47; --faint:#5F5A51; --line:#D3CAB7;
+  --accent:#1C1B18; --accent-soft:#ECE6D7; --on-accent:#FCFAF4;
+  --start-bg:#F2ECDD;   /* fill of the Start button */
+  --ok:#1F6B45; --bad:#B3261E; --bad-soft:#F6E3DC; --mark:#B02218;
+  --grid:rgba(70,58,36,.075);   /* the faint squares on the sheet */
   --font-text:"Figtree",system-ui,sans-serif;
   --font-math:"Noto Sans Math","STIX Two Math","Cambria Math",math;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
-  --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
-  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A; --start-bg:#26306B;
-  --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
+  --bg:#171613; --surface:#22201C; --sunk:#1B1A17;   /* the same paper at night */
+  --ink:#ECE7DC; --muted:#BDB5A6; --faint:#A39B8C; --line:#3A362F;
+  --accent:#ECE7DC; --accent-soft:#2E2B25; --on-accent:#171613; --start-bg:#2A2722;
+  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:rgba(236,231,220,.05); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#10143A; --surface:#181D47; --sunk:#0D1131;   /* a midnight-blue page; accent is a light blue so it reads on it */
-  --ink:#E6E9FA; --muted:#A8B0D6; --faint:#8E97C4; --line:#2C3268;
-  --accent:#A3AEF5; --accent-soft:#262C63; --on-accent:#10143A; --start-bg:#26306B;
-  --ok:#4FA97A; --bad:#E57A70; --bad-soft:#3A1F3A; color-scheme:dark;
+  --bg:#171613; --surface:#22201C; --sunk:#1B1A17;   /* the same paper at night */
+  --ink:#ECE7DC; --muted:#BDB5A6; --faint:#A39B8C; --line:#3A362F;
+  --accent:#ECE7DC; --accent-soft:#2E2B25; --on-accent:#171613; --start-bg:#2A2722;
+  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:rgba(236,231,220,.05); color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}   /* else display:flex rules beat the hidden attribute */
@@ -39,7 +40,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-text);margin:0
 .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:500}
 
 /* ---- header: title and a quote ---- */
-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:14px}
 h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;letter-spacing:-.015em;color:var(--accent)}
 .quote{margin:8px 0 0;max-width:52ch}
 .quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:1.15rem;line-height:1.45;text-wrap:pretty}
@@ -48,19 +49,25 @@ h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;
 .streak b{color:var(--accent);font-size:1.7rem;font-weight:600;display:block;line-height:1.1}
 
 /* ---- drill card ---- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;
-  display:flex;flex-direction:column;min-height:320px}
-.bar{display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
+.card{background-color:var(--surface);border:0;border-radius:0;display:flex;flex-direction:column;min-height:320px;position:relative;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;background-position:-1px -1px;
+  box-shadow:0 1px 0 rgba(60,50,30,.06),0 14px 30px -14px rgba(60,50,30,.35)}
+.bar{display:flex;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--surface);
   font-size:.85rem;color:var(--muted);flex-wrap:wrap}
-.bar .t{font-size:1.1rem;color:var(--ink);font-weight:600}
+.bar .t{font-size:1.1rem;color:var(--ink);font-weight:700}
 .bar .sp{margin-left:auto}
-.bar .aside{color:var(--bad)}
+.bar .aside{color:var(--mark)}
+#qn{display:none}   /* the number sits in the margin instead */
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;padding:26px 18px;text-align:center}
 .qtext{font-size:clamp(1.5rem,6vw,2.3rem);line-height:1.35;font-weight:400;text-wrap:balance;
   max-width:100%;overflow-wrap:anywhere}
 .qtext.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
 .qtext math,.ansview math,.verdict math{font-family:var(--font-math)}
+/* one typeface: numbers and letters inside maths are Figtree too; the math font only draws roots, brackets and operators */
+math mn,math mi,math mtext{font-family:var(--font-text)}
+math msqrt>mrow{padding-top:.07em}   /* Figtree digits are tall: a little air under the root's bar */
 .qtext math{font-size:1.06em}
 .qtext math mfrac mfrac{font-size:.9em}
 .qhint{font-size:.9rem;color:var(--muted)}
@@ -68,13 +75,23 @@ h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;
   border-left:3px solid var(--accent);padding:10px 14px;border-radius:2px}
 .tipbox .label{display:block;margin-bottom:2px;color:var(--accent)}
 .tipbox.worked{background:var(--sunk);border-left-color:var(--ok);font-size:1.12rem;padding:12px 18px}
+/* the full solution: every line labelled in words on the left, its maths on the right */
+.tipbox.sol{background:var(--surface);border-left-color:var(--mark);font-size:1.08rem;padding:12px 18px;width:min(44rem,100%)}
+.tipbox.sol .label{color:var(--mark)}
+.sol .sl{display:grid;grid-template-columns:minmax(9rem,15rem) 1fr;gap:4px 16px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.sol .sl:first-child{border-top:0}
+.sol .sll{font-size:.86rem;line-height:1.35;color:var(--muted)}
+.sol .slm{line-height:1.8;overflow-x:auto;overflow-y:hidden;padding-block:.1em}.sol .slm math{font-size:1.1em}
+.sol.full .sl:last-child .sll{color:var(--mark);font-weight:600}   /* the answer line */
+@media (max-width:560px){.sol .sl{grid-template-columns:1fr}}
 .tipbox .step{margin:6px 0;line-height:1.7}
 .tipbox .step math{font-size:1.12em}
 .tipbox.worked .label{color:var(--ok)}
 .tipbox math{font-family:var(--font-math)}
+.tipbox{border-radius:0}
 .ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
 input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-align:center;
-  padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:var(--sunk);
+  padding:8px 10px;border:1.5px solid var(--ink);border-radius:0;background:var(--surface);
   color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
 /* typed answers: an invisible text field over a live maths view of what has been typed */
 .ansbox{position:relative}
@@ -84,7 +101,7 @@ input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-al
 @media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
-  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1px solid var(--line);border-radius:2px;background:var(--sunk);overflow-x:auto;overflow-y:hidden}
+  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1.5px solid var(--ink);border-radius:0;background:var(--surface);overflow-x:auto;overflow-y:hidden}
 .ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
 .ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
 .card.second .ansview{border-color:var(--bad)}
@@ -99,18 +116,25 @@ input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1p
 kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:2px;
   padding:0 .35em;background:var(--surface);color:var(--muted)}
 .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.tag{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
-  color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:2px}
-.tag.retry{color:var(--bad);background:var(--bad-soft)}
-.verdict{font-size:1rem;min-height:1.5em;text-wrap:balance}
-.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
-.card.second{border-color:var(--bad)}
+.tag{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.tags .tag+.tag::before{content:"·";margin-right:6px;color:var(--faint)}
+.tag.retry{color:var(--mark)}
+.verdict{font-size:1.05rem;min-height:1.5em;text-wrap:balance;font-style:italic;font-weight:600}
+.verdict.ok,.verdict.bad{color:var(--mark)}
+.verdict math{font-weight:600}
+.verdict svg.pen{width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
+  stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
+.verdict svg.pen path.p2{animation-delay:.18s}
+@keyframes draw{to{stroke-dashoffset:0}}
+#q.marked{position:relative;padding:.05em .4em;font-weight:700;font-size:3.2rem;color:var(--mark)}
+#q.marked::after{content:"";position:absolute;inset:-.12em -.35em;border:3px solid var(--mark);
+  border-radius:50% 46% 54% 48%;transform:rotate(-4deg);animation:ring .5s ease-out both}
+@keyframes ring{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){.verdict svg.pen path{animation:none;stroke-dashoffset:0}#q.marked::after{animation:none}}
+.card.second{box-shadow:inset 0 0 0 2px var(--mark),0 14px 30px -14px rgba(60,50,30,.35)}
 .card.second input[type=text]{border-color:var(--bad)}
-.flash-ok{animation:fok .3s ease} .flash-bad{animation:fbad .3s ease}
-@keyframes fok{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--ok) 13%,var(--surface))}}
-@keyframes fbad{0%,100%{background:var(--surface)}40%{background:color-mix(in srgb,var(--bad) 13%,var(--surface))}}
-@media (prefers-reduced-motion:reduce){.flash-ok,.flash-bad{animation:none}}
-.cardctl{display:flex;gap:8px;justify-content:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.cardctl{display:flex;gap:8px;justify-content:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap;background:var(--surface)}
 
 /* ---- full-screen while a session runs: only the card is left ---- */
 body.running header,body.running #focusRow,body.running #start,body.running section,body.running footer{display:none}
@@ -119,6 +143,16 @@ body.running .wrap{max-width:960px}
 body.running .card{min-height:calc(100dvh - 24px)}
 body.running .qtext{font-size:clamp(1.8rem,7vw,3.1rem)}
 body.running .qtext.long{font-size:clamp(1.3rem,5vw,2.2rem)}
+/* question number in the left margin, the mark on the right, question and answer box set left */
+.stage[data-qn]::before{content:attr(data-qn);position:absolute;left:24px;top:40px;font-weight:700;font-size:1.55rem;line-height:1;color:var(--ink)}
+body.running .stage{position:relative;align-items:flex-start;justify-content:flex-start;text-align:left;gap:18px;padding:44px 72px 36px}
+body.running .stage::after{content:"[1]";position:absolute;right:24px;top:44px;font-size:1rem;line-height:1;color:var(--muted)}
+body.running .tags,body.running .ansrow{justify-content:flex-start}
+body.running .ansbox::before{content:"Answer";display:block;text-align:left;margin-bottom:4px;
+  font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+body.running .ansbox.expr input{top:auto;height:calc(100% - 1.4rem)}
+@media (max-width:560px){body.running .stage{padding:40px 16px 28px 46px}.stage[data-qn]::before{left:14px}
+  body.running .stage::after{right:14px;top:14px}}
 
 /* ---- controls ---- */
 button{font-family:var(--font-text);font-size:.92rem;padding:8px 16px;
@@ -140,10 +174,10 @@ button.primary:hover{filter:brightness(1.04)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-size:.82rem;padding:4px 11px;border:1px solid var(--line);
   border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
-.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
-.focusbtn{background:var(--surface);border-color:var(--line);color:var(--muted);font-weight:500}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--surface);font-weight:600}
+.focusbtn{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
 .focusbtn:hover{border-color:var(--accent);color:var(--accent)}
-dialog{border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);padding:18px 20px;
+dialog{border:1px solid var(--ink);border-radius:0;background:var(--surface);color:var(--ink);padding:18px 20px;
   width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
 dialog::backdrop{background:rgba(16,20,58,.35)}
 dialog h2{margin:0 0 4px;font-size:1.2rem}
@@ -153,22 +187,21 @@ dialog h3{margin:14px 0 6px}
 
 /* ---- stats ---- */
 section h2{margin:0 0 9px}
-.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+.tblwrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
-th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{text-align:left;padding:8px 12px;border-bottom:1.5px solid var(--ink);white-space:nowrap}
 td{padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 tr:last-child td{border-bottom:none}
 td.name{white-space:normal;min-width:11ch}
 td.few{color:var(--faint)}
 .lv{display:inline-block;width:1.6em;text-align:center;color:var(--accent);font-weight:600}
-.weak td{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
-.weak td.name::after{content:" ← slowest";color:var(--accent);font-size:.8rem}
+.weak td.name::after{content:" ← slowest";color:var(--mark);font-size:.8rem;font-style:italic;font-weight:600}
 .legend{font-size:.85rem;color:var(--muted);margin:10px 2px 0;line-height:1.5}
 .legend dt{font-weight:600;color:var(--ink);float:left;clear:left;width:5.6em}
 .legend dd{margin:0 0 4px 5.6em}
-.empty{padding:22px 18px;color:var(--muted);font-size:.95rem;text-align:center;white-space:normal;text-wrap:pretty}
-.boxed{border:1px solid var(--line);border-radius:3px;background:var(--surface)}
-footer{font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.empty{padding:2px 0;color:var(--muted);font-size:.95rem;text-align:left;white-space:normal;text-wrap:pretty;font-style:italic}
+.boxed{}
+footer{font-size:.92rem;color:var(--muted);border-top:1px solid var(--ink);padding-top:14px}
 footer h2{margin:0 0 6px}
 footer ol{margin:0 0 12px;padding-left:1.3em}
 footer li{margin-bottom:5px}
@@ -208,6 +241,7 @@ details.info h2{margin:14px 0 6px}
       <button class="primary" id="start">Start 5:00</button>
       <div class="tipbox" id="tip" hidden></div>
       <div class="tipbox worked" id="worked" hidden></div>
+      <div class="tipbox sol" id="sol" hidden></div>
       <div class="ansrow" id="ansrow" hidden>
         <div class="ansbox" id="ansbox">
           <div class="ansview" id="ansview" aria-hidden="true"></div>
@@ -272,6 +306,9 @@ details.info h2{margin:14px 0 6px}
       <li><b>Skip</b> (<kbd>Esc</kbd>) when you cannot start a question: it comes back a few questions later with a
         <b>worked start</b> — the first steps done with its own numbers. Get one wrong and it also comes back later,
         marked. Wrong again, or skipped again, and it is set aside: everything set aside comes back, untimed, at the end.</li>
+      <li>In that review, a wrong answer (or <kbd>Esc</kbd>) first gives you a <b>push</b> — the first steps with its own
+        numbers — and you try again. Wrong again, and you get the <b>full solution</b>: every line of the working,
+        each labelled in words, ending in the answer.</li>
       <li>Each operation has its own level, which rises and falls with your accuracy and speed — see below.</li>
     </ol>
       <h2 class="label">Reading the table</h2>
@@ -417,512 +454,755 @@ function trigInv(angles){return retry(()=>{const fn=pick(["sin","cos","tan"]),d=
     :lo===180?`In this range θ = 180° + α, where α is the acute angle with the same ${fn} up to sign.`
     :`In this range θ = 360° − α, where α is the acute angle with the same ${fn} up to sign.`;
   return{q:`${M(mi(fn),SP,mi("θ"),EQ,valML(v,coin()))} and ${M(DEG(lo),mo("&lt;"),mi("θ"),mo("≤"),DEG(hi))}`,hint:"Find θ in degrees",a:d,
-         w:W(`The ${fn} values you need:`,acute.map((a)=>trigVal(fn,a)).join(" &nbsp; "),rule)};});}
+         w:W(`The ${fn} values you need:`,acute.map((a)=>trigVal(fn,a)).join(" &nbsp; "),rule),
+         s:SOL([`The acute angle with this ${fn} value, ignoring the sign`,M(tf(fn,refAng(d)),EQ,valML(tv(fn,refAng(d)),false))],[`${fn} is ${v.n<0?"negative":v.n>0?"positive":"zero"}, and θ is between ${lo}° and ${hi}°`,M(DEG(lo),mo("&lt;"),mi("θ"),mo("≤"),DEG(hi))],[lo===0?"In this range θ is the acute angle itself":lo===90?"Between 90° and 180°: θ = 180° − the acute angle":lo===180?"Between 180° and 270°: θ = 180° + the acute angle":"Between 270° and 360°: θ = 360° − the acute angle",Mfin(mi("θ"),EQ,lo===0?DEG(refAng(d)):lo===90?row(DEG(180),MI,DEG(refAng(d))):lo===180?row(DEG(180),PL,DEG(refAng(d))):row(DEG(360),MI,DEG(refAng(d))),EQ,DEG(d))])};});}
+
+/* ---------- full solutions ----------
+   s: the whole working, one line per step, each line labelled in words. Shown in the review only after the push
+   (the worked start) was not enough. Lines use M / Mid as above; the last line is Mfin (its last side IS the
+   answer) or, for a typed answer, Mfinx (its last side is the answer expression). scripts/verify.js checks every line. */
+const SOL=(...ps)=>{const L=[];for(const p of ps){if(!p)continue;if(Array.isArray(p[0]))L.push(...p.filter(Boolean));else L.push(p);}
+  return`<div class="sol">${L.map(([l,m])=>`<div class="sl"><span class="sll">${l}</span><span class="slm">${m}</span></div>`).join("")}</div>`;};
+const Mfin=(...a)=>`<math displaystyle="true" class="fin">${a.map(X).join("")}</math>`;
+const Mfinx=(...a)=>`<math displaystyle="true" class="finx">${a.map(X).join("")}</math>`;
+const tn=(v)=>String(v).replace("-","−");                       // a number written inside a label
+const cx=(c,t)=>c===1?t:c===-1?row(MI,t):row(mnum(c),t);        // c·t, with 1 and −1 left bare
+const prodML=(a)=>row(...a.flatMap((v,i)=>i?[TM,v]:[v]));
+const sumML=(a)=>row(...a.flatMap((v,i)=>i?[PL,v]:[v]));
+const ROOTN={2:"square",3:"cube",4:"fourth",5:"fifth"};
+/* n/d in lowest terms; a whole number when it divides */
+function qML(n,d=1){if(d<0){n=-n;d=-d;}const g=gcd(n,d)||1;n/=g;d/=g;const b=d===1?mnum(Math.abs(n)):fr(Math.abs(n),d);return n<0?row(MI,b):b;}
+const qP=(n,d=1)=>n*d<0?par(qML(n,d)):qML(n,d);                 // bracketed when negative, for after × or −
+/* signed run of fraction-coefficient terms [{n,d,t}] -> "−3/2 x² + 4x − 1/3" */
+function fterms(list){const out=[];for(const {n,d=1,t=""} of list){if(n===0)continue;const g=gcd(n,d),N=Math.abs(n/g),D=d/g;
+  out.push(mo(n<0?"−":"+"));out.push((N===1&&D===1&&t?"":D===1?mnum(N):fr(N,D))+(t||""));}
+  if(!out.length)return mnum(0);if(out[0]===mo("+"))out.shift();return row(...out);}
+/* a × b, splitting one factor into tens and units */
+function mulLines(a,b){
+  if(b<10){const A=a-a%10,v=a%10;if(!v||a<10)return[["Multiply",Mfin(a,TM,b,EQ,a*b)]];
+    return[[`Split ${a} into tens and units`,M(a,TM,b,EQ,par(A,PL,v),TM,b)],[`The tens: ${A} × ${b}`,M(A,TM,b,EQ,A/10,TM,b,TM,10,EQ,A*b)],
+      [`The units: ${v} × ${b}`,M(v,TM,b,EQ,v*b)],["Add the two parts",Mfin(A*b,PL,v*b,EQ,a*b)]];}
+  const T=b-b%10,u=b%10;
+  if(!u)return[[`Multiply by ${T/10}, then by 10`,M(a,TM,b,EQ,a,TM,T/10,TM,10)],[`${a} × ${T/10}`,M(a,TM,T/10,EQ,a*T/10)],["Then × 10",Mfin(a*T/10,TM,10,EQ,a*b)]];
+  return[[`Split ${b} into tens and units`,M(a,TM,b,EQ,a,TM,T,PL,a,TM,u)],
+    [`The tens: × ${T/10}, then × 10`,M(a,TM,T,EQ,a,TM,T/10,TM,10,EQ,a*T)],
+    [`The units: × ${u}`,M(a,TM,u,EQ,a*u)],["Add the two parts",Mfin(a*T,PL,a*u,EQ,a*b)]];}
+function sqLines(a){const T=a-a%10,u=a%10;
+  if(!u)return[["Square the front digit, then add two zeros",Mfin(pw(a,2),EQ,pw(a/10,2),TM,100,EQ,a*a)]];
+  return[[`Split ${a} into ${T} + ${u}`,M(pw(a,2),EQ,pw(par(T,PL,u),2))],
+    ["Expand: (a + b)² = a² + 2ab + b²",M(pw(par(T,PL,u),2),EQ,pw(T,2),PL,2,TM,T,TM,u,PL,pw(u,2))],
+    ["Work out each part",M(pw(T,2),PL,2,TM,T,TM,u,PL,pw(u,2),EQ,T*T,PL,2*T*u,PL,u*u)],
+    ["Add",Mfin(T*T,PL,2*T*u,PL,u*u,EQ,a*a)]];}
+/* N ÷ b by taking off a round multiple first, the same split as chunkDiv */
+function divLines(N,b){const q=N/b;let T=Math.floor(q/10)*10;if(T===q)T-=10;if(T<=0)T=Math.floor(q/2);const r=N-b*T;
+  return[[`Take off ${T} lots of ${b}`,M(N,EQ,b,TM,T,PL,r)],[`Divide what is left by ${b}`,M(r,DV,b,EQ,r/b)],
+    [`Add up the lots of ${b}`,Mfin(T,PL,r/b,EQ,q)]];}
+/* the value of the polynomial c at x = t, term by term */
+function subLines(c,t,lhs){const parts=[],vals=[];c.forEach((a,i)=>{const p=c.length-1-i;if(a===0)return;
+    parts.push(p===0?pn(a):row(pn(a),TM,ppow(t,p)));vals.push(a*t**p);});
+  const v=vals.reduce((s,x)=>s+x,0);
+  return[[`Put x = ${tn(t)} into every term`,M(lhs,EQ,sumML(parts))],
+    ["Work out each term",M(sumML(parts),EQ,sumML(vals.map(pn)))],["Add them up",Mfin(sumML(vals.map(pn)),EQ,v)]];}
+function facLines(n){const L=[[`Multiply every whole number from ${n} down to 1`,M(fac(n),EQ,prodML(Array.from({length:n},(_,i)=>n-i)))]];
+  let v=n;for(let k=n-1;k>=2;k--){const nv=v*k;L.push([`Times ${k}`,(k===2?Mfin:M)(v,TM,k,EQ,nv)]);v=nv;}return L;}
+/* exact value of fn d°, reduced to the acute angle first when it is not acute */
+function trigLines(fn,d){const a=refAng(d),L=[];
+  if(a!==d){const sg=signOf(fn,d);L.push([`Reduce to the acute angle: ${fn} is ${sg<0?"negative":"positive"} at ${d}°`,M(tf(fn,d),EQ,sg<0?MI:"",tf(fn,a))]);}
+  L.push([`The exact value of ${fn} ${a}°`,M(tf(fn,a),EQ,valML(tv(fn,a),false))]);
+  if(a!==d)L.push([`So the value at ${d}°`,M(tf(fn,d),EQ,valML(tv(fn,d),false))]);
+  return L;}
+const divCount=(n)=>[[`Prime factorise ${n}`,M(n,EQ,factML(n))],
+  ["Each divisor takes every prime to a power from 0 up: add one to each power and multiply",
+   Mfin(prodML(factList(n).map(([,e])=>par(e,PL,1))),EQ,ndiv(n))]];
+const factLine=(v)=>[`Prime factors of ${v}`,M(v,EQ,factML(v))];
 
 /* ---------- question generators : every answer is an integer ----------
    GEN[family].L[level-1] is a bank of zero-argument generators returning {q, hint?, a, w}. */
 const GEN={
  mental:{name:"Mental arithmetic",L:[[
-  ()=>{const a=ri(13,99),b=ri(3,9);return{q:M(a,TM,b),a:a*b,w:splitMul(a,b)};},
-  ()=>{const a=ri(11,32);return{q:M(pw(a,2)),a:a*a,w:W(sqStep(a),"Work out each part, then add.")};},
+  ()=>{const a=ri(13,99),b=ri(3,9);return{q:M(a,TM,b),a:a*b,w:splitMul(a,b),
+         s:SOL(mulLines(a,b))};},
+  ()=>{const a=ri(11,32);return{q:M(pw(a,2)),a:a*a,w:W(sqStep(a),"Work out each part, then add."),
+         s:SOL(sqLines(a))};},
   ()=>{const p=pick([5,10,15,20,25,30,40,60,75]),u=100/gcd(p,100),n=u*ri(Math.ceil(40/u),Math.floor(900/u)),g=gcd(p,100);
-       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:n*p/100,w:W(M(p,mo("%"),EQ,fr(p,100),EQ,fr(p/g,100/g)),`So divide ${M(n)} by ${M(100/g)}, then multiply by ${M(p/g)}.`)};},
-  ()=>{const b=ri(3,19),q=ri(12,99);return{q:M(b*q,DV,b),a:q,w:chunkDiv(b*q,b)};},
+       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:n*p/100,w:W(M(p,mo("%"),EQ,fr(p,100),EQ,fr(p/g,100/g)),`So divide ${M(n)} by ${M(100/g)}, then multiply by ${M(p/g)}.`),
+         s:SOL([`Write ${p}% as a fraction`,M(p,mo("%"),EQ,fr(p,100),EQ,fr(p/g,100/g))],[`Divide ${n} by ${100/g}`,M(n,DV,100/g,EQ,n*g/100)],[`Multiply by ${p/g}`,Mfin(n*g/100,TM,p/g,EQ,n*p/100)])};},
+  ()=>{const b=ri(3,19),q=ri(12,99);return{q:M(b*q,DV,b),a:q,w:chunkDiv(b*q,b),
+         s:SOL(divLines(b*q,b))};},
   ()=>retry(()=>{const d=ri(3,12),n=ri(1,d-1);if(gcd(n,d)!==1)return null;const amt=d*ri(3,40);
-       return{q:`${M(fr(n,d))} of ${M(amt)}`,a:n*amt/d,w:W(`Divide by the bottom, then multiply by the top:`,Mans(par(amt,DV,d),TM,n))};}),
+       return{q:`${M(fr(n,d))} of ${M(amt)}`,a:n*amt/d,w:W(`Divide by the bottom, then multiply by the top:`,Mans(par(amt,DV,d),TM,n)),
+         s:SOL([`Divide ${amt} by the bottom number, ${d}`,M(amt,DV,d,EQ,amt/d)],[`Multiply by the top number, ${n}`,Mfin(amt/d,TM,n,EQ,n*amt/d)])};}),
  ],[
-  ()=>{const a=ri(13,99),b=ri(13,99);return{q:M(a,TM,b),a:a*b,w:splitMul(a,b)};},
-  ()=>{let a;do a=ri(31,99);while(a%10===0);return{q:M(pw(a,2)),a:a*a,w:W(sqStep(a),"Work out each part, then add.")};},
+  ()=>{const a=ri(13,99),b=ri(13,99);return{q:M(a,TM,b),a:a*b,w:splitMul(a,b),
+         s:SOL(mulLines(a,b))};},
+  ()=>{let a;do a=ri(31,99);while(a%10===0);return{q:M(pw(a,2)),a:a*a,w:W(sqStep(a),"Work out each part, then add."),
+         s:SOL(sqLines(a))};},
   ()=>{const m=pick([20,30,40,50,60,70,80,90,25,35,45,55,65,75]),d=ri(1,9);
-       return{q:M(m-d,TM,m+d),a:m*m-d*d,w:W(`Both numbers are ${M(d)} away from ${M(m)}:`,Mans(pw(m,2),MI,pw(d,2)))};},
+       return{q:M(m-d,TM,m+d),a:m*m-d*d,w:W(`Both numbers are ${M(d)} away from ${M(m)}:`,Mans(pw(m,2),MI,pw(d,2))),
+         s:SOL([`Both numbers are ${d} away from ${m}`,M(m-d,TM,m+d,EQ,par(m,MI,d),par(m,PL,d))],["Difference of two squares",M(par(m,MI,d),par(m,PL,d),EQ,pw(m,2),MI,pw(d,2))],["Square each",M(pw(m,2),MI,pw(d,2),EQ,m*m,MI,d*d)],["Subtract",Mfin(m*m,MI,d*d,EQ,m*m-d*d)])};},
   ()=>{const FR={2.5:[1,40],12.5:[1,8],17.5:[7,40],35:[7,20],45:[9,20],65:[13,20],85:[17,20],120:[6,5],150:[3,2],175:[7,4],250:[5,2]};
        const p=pick(Object.keys(FR).map(Number)),P=Math.round(p*10),u=1000/gcd(P,1000),
          n=u*ri(Math.max(1,Math.ceil(40/u)),Math.floor(2000/u)),[fn,fd]=FR[p];
-       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:Math.round(n*P/1000),w:W(M(p,mo("%"),EQ,fr(fn,fd)),`So divide ${M(n)} by ${M(fd)}, then multiply by ${M(fn)}.`)};},
-  ()=>{const b=ri(20,95),a=b+ri(2,30);return{q:M(pw(a,2),MI,pw(b,2)),a:a*a-b*b,w:W(`Difference of two squares:`,Mans(par(a,MI,b),TM,par(a,PL,b)))};},
-  ()=>{const b=ri(3,9),q=ri(120,999);return{q:M(b*q,DV,b),a:q,w:chunkDiv(b*q,b)};},
+       return{q:`${M(p,mo("%"))} of ${M(n)}`,a:Math.round(n*P/1000),w:W(M(p,mo("%"),EQ,fr(fn,fd)),`So divide ${M(n)} by ${M(fd)}, then multiply by ${M(fn)}.`),
+         s:SOL([`Write ${p}% as a fraction`,M(p,mo("%"),EQ,fr(fn,fd))],[`Divide ${n} by ${fd}`,M(n,DV,fd,EQ,n/fd)],[`Multiply by ${fn}`,Mfin(n/fd,TM,fn,EQ,Math.round(n*P/1000))])};},
+  ()=>{const b=ri(20,95),a=b+ri(2,30);return{q:M(pw(a,2),MI,pw(b,2)),a:a*a-b*b,w:W(`Difference of two squares:`,Mans(par(a,MI,b),TM,par(a,PL,b))),
+         s:SOL(["Difference of two squares",M(pw(a,2),MI,pw(b,2),EQ,par(a,MI,b),par(a,PL,b))],["Work out each bracket",M(par(a,MI,b),par(a,PL,b),EQ,a-b,TM,a+b)],["Multiply",Mfin(a-b,TM,a+b,EQ,a*a-b*b)])};},
+  ()=>{const b=ri(3,9),q=ri(120,999);return{q:M(b*q,DV,b),a:q,w:chunkDiv(b*q,b),
+         s:SOL(divLines(b*q,b))};},
  ],[
   ()=>{const a=ri(101,999),b=ri(11,99),T=b-b%10,u=b%10;
-       return{q:M(a,TM,b),a:a*b,w:W(u?M(a,TM,b,EQ,a,TM,T,PL,a,TM,u):M(a,TM,b,EQ,a,TM,b/10,TM,10),"Work out each part, then add.")};},
-  ()=>{const m=ri(1,19);return{q:M(pw(10*m+5,2)),a:(10*m+5)**2,w:W(`A number ending in 5, squared: multiply the front by one more, then put 25 on the end.`,Mans(m,TM,m+1,TM,100,PL,25))};},
-  ()=>{let a;do a=ri(5,19);while(a===10);return{q:M(pw(a,3)),a:a**3,w:W(M(pw(a,3),EQ,pw(a,2),TM,a,EQ,a*a,TM,a),"Now one multiplication.")};},
-  ()=>{const d=ri(12,49),q=ri(21,99);return{q:M(d*q,DV,d),a:q,w:chunkDiv(d*q,d)};},
+       return{q:M(a,TM,b),a:a*b,w:W(u?M(a,TM,b,EQ,a,TM,T,PL,a,TM,u):M(a,TM,b,EQ,a,TM,b/10,TM,10),"Work out each part, then add."),
+         s:SOL(mulLines(a,b))};},
+  ()=>{const m=ri(1,19);return{q:M(pw(10*m+5,2)),a:(10*m+5)**2,w:W(`A number ending in 5, squared: multiply the front by one more, then put 25 on the end.`,Mans(m,TM,m+1,TM,100,PL,25)),
+         s:SOL(["A number ending in 5, squared",M(pw(10*m+5,2),EQ,m,TM,par(m,PL,1),TM,100,PL,25)],["Multiply the front by one more",M(m,TM,m+1,EQ,m*(m+1))],["Then put 25 on the end",Mfin(m*(m+1),TM,100,PL,25,EQ,(10*m+5)**2)])};},
+  ()=>{let a;do a=ri(5,19);while(a===10);return{q:M(pw(a,3)),a:a**3,w:W(M(pw(a,3),EQ,pw(a,2),TM,a,EQ,a*a,TM,a),"Now one multiplication."),
+         s:SOL(["A cube is the square times the number",M(pw(a,3),EQ,pw(a,2),TM,a)],["Square first",M(pw(a,2),EQ,a*a)],mulLines(a*a,a))};},
+  ()=>{const d=ri(12,49),q=ri(21,99);return{q:M(d*q,DV,d),a:q,w:chunkDiv(d*q,d),
+         s:SOL(divLines(d*q,d))};},
   ()=>{const [s,t]=pick([[25,4],[125,8],[50,2],[250,4]]),a=ri(3,19),b=ri(2,9);
-       return{q:M(s,TM,a,TM,t*b),a:s*a*t*b,w:W(`Pair the round numbers first: ${M(s,TM,t,EQ,s*t)}.`,Mans(par(s,TM,t),TM,a,TM,b))};},
+       return{q:M(s,TM,a,TM,t*b),a:s*a*t*b,w:W(`Pair the round numbers first: ${M(s,TM,t,EQ,s*t)}.`,Mans(par(s,TM,t),TM,a,TM,b)),
+         s:SOL(["Pair the round numbers",M(s,TM,t,EQ,s*t)],["Regroup the product",M(s,TM,a,TM,t*b,EQ,par(s,TM,t),TM,a,TM,b)],["Multiply the other numbers",M(a,TM,b,EQ,a*b)],[`Multiply by ${s*t}`,Mfin(s*t,TM,a*b,EQ,s*a*t*b)])};},
   ()=>retry(()=>{const P=[10,20,25,30,40,50,60,75,80],p=pick(P),q=pick(P),n=ri(4,80)*50;if((n*p*q)%10000!==0)return null;const g=gcd(p*q,10000);
        return{q:`${M(p,mo("%"))} of ${M(q,mo("%"))} of ${M(n)}`,a:n*p*q/10000,
-              w:W(M(p,mo("%"),TM,q,mo("%"),EQ,fr(p*q,10000),EQ,fr(p*q/g,10000/g)),`So divide ${M(n)} by ${M(10000/g)}, then multiply by ${M(p*q/g)}.`)};}),
+              w:W(M(p,mo("%"),TM,q,mo("%"),EQ,fr(p*q,10000),EQ,fr(p*q/g,10000/g)),`So divide ${M(n)} by ${M(10000/g)}, then multiply by ${M(p*q/g)}.`),
+         s:SOL(["Combine the percentages into one fraction",M(p,mo("%"),TM,q,mo("%"),EQ,fr(p*q,10000),EQ,fr(p*q/g,10000/g))],[`Divide ${n} by ${10000/g}`,M(n,DV,10000/g,EQ,n*g/10000)],[`Multiply by ${p*q/g}`,Mfin(n*g/10000,TM,p*q/g,EQ,n*p*q/10000)])};}),
  ]]},
 
  surds:{name:"Surds",L:[[
   ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k,
-       w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};},
+       w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`),
+         s:SOL([`The largest square that divides ${k*k*b}`,M(k*k*b,EQ,k*k,TM,b)],["Split the root",M(sq(k*k*b),EQ,sq(k*k),TM,sq(b))],[`The square root of ${k*k}`,M(sq(k*k),EQ,k)],["Put it together",M(sq(k*k*b),EQ,k,sq(b))],["Read off k",Mfin(k_,EQ,k)])};},
   ()=>{const b=pick(SQF_S);let s,t;do{s=ri(1,5);t=ri(1,5);}while(s===t);
-       return{q:M(sq(b*s*s),TM,sq(b*t*t)),a:b*s*t,w:W(M(sq(b*s*s),TM,sq(b*t*t),EQ,sq(row(b*s*s,TM,b*t*t))),M(b*s*s,TM,b*t*t,EQ,b*s*s*b*t*t),"Find the number that squares to that.")};},
-  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(pw(par(k,sq(b)),2)),a:k*k*b,w:W(Mans(pw(k,2),TM,pw(sq(b),2)),`and ${M(pw(sq(b),2),EQ,b)}.`)};},
-  ()=>{const b=pick(SQF_S),s=ri(2,9);return{q:M(sq(b*s*s),DV,sq(b)),a:s,w:W(M(sq(b*s*s),DV,sq(b),EQ,sq(fr(b*s*s,b)),EQ,sq(s*s)))};},
+       return{q:M(sq(b*s*s),TM,sq(b*t*t)),a:b*s*t,w:W(M(sq(b*s*s),TM,sq(b*t*t),EQ,sq(row(b*s*s,TM,b*t*t))),M(b*s*s,TM,b*t*t,EQ,b*s*s*b*t*t),"Find the number that squares to that."),
+         s:SOL(["Multiply under one root",M(sq(b*s*s),TM,sq(b*t*t),EQ,sq(row(b*s*s,TM,b*t*t)))],["Group the factors into squares",M(b*s*s,TM,b*t*t,EQ,pw(b,2),TM,pw(s*t,2))],["Square-root each square",Mfin(sq(row(pw(b,2),TM,pw(s*t,2))),EQ,b,TM,s*t,EQ,b*s*t)])};},
+  ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(pw(par(k,sq(b)),2)),a:k*k*b,w:W(Mans(pw(k,2),TM,pw(sq(b),2)),`and ${M(pw(sq(b),2),EQ,b)}.`),
+         s:SOL(["Square each part",M(pw(par(k,sq(b)),2),EQ,pw(k,2),TM,pw(sq(b),2))],["A square root squared is the number inside",M(pw(sq(b),2),EQ,b)],["Multiply",Mfin(pw(k,2),TM,b,EQ,k*k,TM,b,EQ,k*k*b)])};},
+  ()=>{const b=pick(SQF_S),s=ri(2,9);return{q:M(sq(b*s*s),DV,sq(b)),a:s,w:W(M(sq(b*s*s),DV,sq(b),EQ,sq(fr(b*s*s,b)),EQ,sq(s*s))),
+         s:SOL(["Divide under one root",M(sq(b*s*s),DV,sq(b),EQ,sq(fr(b*s*s,b)))],["Simplify the fraction",M(fr(b*s*s,b),EQ,s*s)],["Square-root",Mfin(sq(s*s),EQ,s)])};},
  ],[
-  ()=>{const b=pick(SQF),k=ri(5,15);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k,w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};},
+  ()=>{const b=pick(SQF),k=ri(5,15);return{q:M(sq(k*k*b),EQ,k_,sq(b)),hint:"Find k",a:k,w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`),
+         s:SOL([`The largest square that divides ${k*k*b}`,M(k*k*b,EQ,k*k,TM,b)],["Split the root",M(sq(k*k*b),EQ,sq(k*k),TM,sq(b))],[`The square root of ${k*k}`,M(sq(k*k),EQ,k)],["Put it together",M(sq(k*k*b),EQ,k,sq(b))],["Read off k",Mfin(k_,EQ,k)])};},
   ()=>{const a=ri(2,12);let b;do b=ri(2,40);while(isSq(b));
-       return{q:M(par(a,PL,sq(b)),par(a,MI,sq(b))),a:a*a-b,w:W(`The middle terms cancel:`,Mans(pw(a,2),MI,pw(sq(b),2)))};},
+       return{q:M(par(a,PL,sq(b)),par(a,MI,sq(b))),a:a*a-b,w:W(`The middle terms cancel:`,Mans(pw(a,2),MI,pw(sq(b),2))),
+         s:SOL(["Multiply every term by every term",M(par(a,PL,sq(b)),par(a,MI,sq(b)),EQ,pw(a,2),MI,a,sq(b),PL,a,sq(b),MI,pw(sq(b),2))],["The middle terms cancel",M(pw(a,2),MI,pw(sq(b),2),EQ,a*a,MI,b)],["Subtract",Mfin(a*a,MI,b,EQ,a*a-b)])};},
   ()=>{const b=pick(SQF_S),k=ri(2,9);return{q:M(fr(k*b,sq(b)),EQ,k_,sq(b)),hint:"Find k",a:k,
-       w:W(`Multiply top and bottom by √${b}:`,M(fr(k*b,sq(b)),EQ,fr(row(k*b,sq(b)),b)))};},
+       w:W(`Multiply top and bottom by √${b}:`,M(fr(k*b,sq(b)),EQ,fr(row(k*b,sq(b)),b))),
+         s:SOL([`Multiply top and bottom by √${b}`,M(fr(k*b,sq(b)),EQ,fr(row(k*b,sq(b)),row(sq(b),TM,sq(b))))],[`√${b} × √${b} = ${b}`,M(sq(b),TM,sq(b),EQ,b)],[`Cancel the ${b}`,M(fr(row(k*b,sq(b)),b),EQ,k,sq(b))],["Read off k",Mfin(k_,EQ,k)])};},
   ()=>{const b=pick(SQF_S);let s,t;do{s=ri(1,7);t=ri(1,7);}while(s===t);
        return{q:M(sq(b*s*s),PL,sq(b*t*t),EQ,k_,sq(b)),hint:"Find k",a:s+t,
-              w:W(`Write each as a multiple of √${b}:`,M(b*s*s,EQ,s*s,TM,b),M(b*t*t,EQ,t*t,TM,b))};},
+              w:W(`Write each as a multiple of √${b}:`,M(b*s*s,EQ,s*s,TM,b),M(b*t*t,EQ,t*t,TM,b)),
+         s:SOL([`Write the first as a multiple of √${b}`,M(sq(b*s*s),EQ,cx(s,sq(b)))],["Then the second",M(sq(b*t*t),EQ,cx(t,sq(b)))],["Add the multiples",M(cx(s,sq(b)),PL,cx(t,sq(b)),EQ,cx(s+t,sq(b)))],["Read off k",Mfin(k_,EQ,s+t)])};},
   ()=>{const b=pick(SQF_S),a=ri(2,9),wantP=coin();
        return{q:M(pw(par(a,PL,sq(b)),2),EQ,mi("p"),PL,mi("q"),sq(b)),hint:wantP?"Find p":"Find q",a:wantP?a*a+b:2*a,
-              w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`p is the part without a root; q is the number in front of √${b}.`)};},
+              w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`p is the part without a root; q is the number in front of √${b}.`),
+         s:SOL(["Expand the square",M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2))],["Work out each part",M(pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2),EQ,a*a,PL,cx(2*a,sq(b)),PL,b)],[`Collect the parts without √${b}`,M(pw(par(a,PL,sq(b)),2),EQ,a*a+b,PL,cx(2*a,sq(b)))],[wantP?"p is the part without a root":`q is the number in front of √${b}`,Mfin(mi(wantP?"p":"q"),EQ,wantP?a*a+b:2*a)])};},
  ],[
   ()=>{const b=pick(SQF_S);let s,t,u;do{s=ri(1,7);t=ri(1,7);u=ri(1,7);}while(s-t+u<=0||s===t||t===u||s===u);
        return{q:M(sq(b*s*s),MI,sq(b*t*t),PL,sq(b*u*u),EQ,k_,sq(b)),hint:"Find k",a:s-t+u,
-              w:W(`Write each as a multiple of √${b}:`,M(b*s*s,EQ,s*s,TM,b),M(b*t*t,EQ,t*t,TM,b),M(b*u*u,EQ,u*u,TM,b))};},
+              w:W(`Write each as a multiple of √${b}:`,M(b*s*s,EQ,s*s,TM,b),M(b*t*t,EQ,t*t,TM,b),M(b*u*u,EQ,u*u,TM,b)),
+         s:SOL([`Write the first as a multiple of √${b}`,M(sq(b*s*s),EQ,cx(s,sq(b)))],["Then the second",M(sq(b*t*t),EQ,cx(t,sq(b)))],["Then the third",M(sq(b*u*u),EQ,cx(u,sq(b)))],["Combine the multiples",M(cx(s,sq(b)),MI,cx(t,sq(b)),PL,cx(u,sq(b)),EQ,cx(s-t+u,sq(b)))],["Read off k",Mfin(k_,EQ,s-t+u)])};},
   ()=>{let a,b;do{a=pick(SQF_S);b=pick(SQF_S);}while(a<=b||a-b>6);const k=ri(1,6),c=k*(a-b);
        return{q:M(fr(c,row(sq(a),MI,sq(b))),EQ,k_,par(sq(a),PL,sq(b))),hint:"Find k",a:k,
-              w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b))};},
+              w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b)),
+         s:SOL([`Multiply top and bottom by √${a} + √${b}`,M(fr(c,row(sq(a),MI,sq(b))),EQ,fr(row(c,par(sq(a),PL,sq(b))),row(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)))))],["The bottom is a difference of two squares",M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b,EQ,a-b)],[`Divide the top by ${a-b}`,M(fr(row(c,par(sq(a),PL,sq(b))),a-b),EQ,cx(k,par(sq(a),PL,sq(b))))],["Read off k",Mfin(k_,EQ,k)])};},
   ()=>{const b=pick(SQF_S),a=ri(2,6),c=ri(1,12);
-       return{q:M(par(a,sq(b),PL,c),par(a,sq(b),MI,c)),a:a*a*b-c*c,w:W(`Difference of two squares:`,Mans(pw(par(a,sq(b)),2),MI,pw(c,2)),M(pw(par(a,sq(b)),2),EQ,pw(a,2),TM,b))};},
+       return{q:M(par(a,sq(b),PL,c),par(a,sq(b),MI,c)),a:a*a*b-c*c,w:W(`Difference of two squares:`,Mans(pw(par(a,sq(b)),2),MI,pw(c,2)),M(pw(par(a,sq(b)),2),EQ,pw(a,2),TM,b)),
+         s:SOL(["Difference of two squares",M(par(a,sq(b),PL,c),par(a,sq(b),MI,c),EQ,pw(par(a,sq(b)),2),MI,pw(c,2))],["Square the root term",M(pw(par(a,sq(b)),2),EQ,pw(a,2),TM,b,EQ,a*a*b)],["Square the number",M(pw(c,2),EQ,c*c)],["Subtract",Mfin(a*a*b,MI,c*c,EQ,a*a*b-c*c)])};},
   ()=>{const b=pick([2,3,5,7]),p=nz(-5,5),q=nz(-4,4),r=nz(-5,5),s=nz(-4,4),wantX=coin();
        const st=(u,v)=>row(u,mo(v<0?"−":"+"),Math.abs(v)===1?"":mnum(Math.abs(v)),sq(b));
        return{q:M(par(st(p,q)),par(st(r,s)),EQ,mi("X"),PL,mi("Y"),sq(b)),hint:wantX?"Find X":"Find Y",a:wantX?p*r+q*s*b:p*s+q*r,
               w:W(`Multiply every term by every term:`,M(par(st(p,q)),par(st(r,s)),EQ,pn(p),TM,pn(r),PL,pn(p),TM,pn(s),sq(b),PL,pn(q),TM,pn(r),sq(b),PL,pn(q),TM,pn(s),TM,b),
-                  `X collects the terms without √${b}; Y collects the numbers in front of √${b}.`)};},
+                  `X collects the terms without √${b}; Y collects the numbers in front of √${b}.`),
+         s:SOL(["Multiply every term by every term",M(par(st(p,q)),par(st(r,s)),EQ,pn(p),TM,pn(r),PL,pn(p),TM,pn(s),sq(b),PL,pn(q),TM,pn(r),sq(b),PL,pn(q),TM,pn(s),TM,b)],wantX?[`X collects the terms without √${b}`,M(mi("X"),EQ,pn(p),TM,pn(r),PL,pn(q),TM,pn(s),TM,b,EQ,p*r,PL,pn(q*s*b))]:[`Y collects the numbers in front of √${b}`,M(mi("Y"),EQ,pn(p),TM,pn(s),PL,pn(q),TM,pn(r),EQ,p*s,PL,pn(q*r))],["Add",Mfin(mi(wantX?"X":"Y"),EQ,wantX?p*r+q*s*b:p*s+q*r)])};},
   ()=>retry(()=>{const a=ri(2,12),b=pick(SQF),n=a*a*b;if(n>3000)return null;
-       return{q:M(sq(n),EQ,mi("a"),sq(b)),hint:"Find a",a,w:W(M(n,DV,b,EQ,a*a),`So √${n} = √${a*a} × √${b}.`)};}),
+       return{q:M(sq(n),EQ,mi("a"),sq(b)),hint:"Find a",a,w:W(M(n,DV,b,EQ,a*a),`So √${n} = √${a*a} × √${b}.`),
+         s:SOL([`Divide ${n} by ${b}`,M(n,DV,b,EQ,a*a)],[`So ${n} is a square times ${b}`,M(n,EQ,a*a,TM,b)],["Split the root",M(sq(n),EQ,sq(a*a),TM,sq(b),EQ,a,sq(b))],["Read off a",Mfin(mi("a"),EQ,a)])};}),
  ]]},
 
  indices:{name:"Indices",L:[[
   ()=>{const b=ri(2,12);let mx=2;while(b**(mx+1)<=5000)mx++;const e=ri(2,mx);
-       return{q:M(pw(b,e)),a:b**e,w:W(M(pw(b,e),EQ,pw1(b,e-1),TM,b,EQ,b**(e-1),TM,b))};},
-  ()=>{if(coin()){const r=ri(2,25);return{q:M(pw(r*r,fr(1,2))),a:r,w:W(M(pw(r*r,fr(1,2)),EQ,sq(r*r)),`Which number squared gives ${M(r*r)}?`)};}
-       const r=ri(2,10);return{q:M(pw(r**3,fr(1,3))),a:r,w:W(`The power ½ is a square root; the power ⅓ is a cube root.`,`Which number cubed gives ${M(r**3)}?`)};},
+       return{q:M(pw(b,e)),a:b**e,w:W(M(pw(b,e),EQ,pw1(b,e-1),TM,b,EQ,b**(e-1),TM,b)),
+         s:(()=>{const h=Math.floor(e/2);return SOL(["Split the power into two smaller ones",M(pw(b,e),EQ,pw1(b,h),TM,pw1(b,e-h))],h>1?[`${b} to the power ${h}`,M(pw(b,h),EQ,b**h)]:false,e-h>1?[`${b} to the power ${e-h}`,M(pw(b,e-h),EQ,b**(e-h))]:false,["Multiply",Mfin(b**h,TM,b**(e-h),EQ,b**e)]);})()};},
+  ()=>{if(coin()){const r=ri(2,25);return{q:M(pw(r*r,fr(1,2))),a:r,w:W(M(pw(r*r,fr(1,2)),EQ,sq(r*r)),`Which number squared gives ${M(r*r)}?`),
+         s:SOL(["A power of ½ is a square root",M(pw(r*r,fr(1,2)),EQ,sq(r*r))],[`Which number squared gives ${r*r}?`,M(pw(r,2),EQ,r*r)],["So the root is",Mfin(sq(r*r),EQ,r)])};}
+       const r=ri(2,10);return{q:M(pw(r**3,fr(1,3))),a:r,w:W(`The power ½ is a square root; the power ⅓ is a cube root.`,`Which number cubed gives ${M(r**3)}?`),
+         s:SOL([`A power of ⅓ is a cube root: which number cubed gives ${r**3}?`,M(pw(r,3),EQ,r**3)],["So the cube root is",Mfin(pw(r**3,fr(1,3)),EQ,r)])};},
   ()=>{const b=ri(2,9),m=ri(2,15),n=ri(2,15);
-       return coin()?{q:M(pw(b,m),TM,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m+n,w:W(`Multiplying powers of the same number: add the powers.`,Mans(m,PL,n))}
-                    :{q:M(pw(b,m+n),DV,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m,w:W(`Dividing powers of the same number: subtract the powers.`,Mans(m+n,MI,n))};},
-  ()=>{const b=ri(2,20),ex=b===7?3:7;return{q:M(pw(b,-1),EQ,fr(1,k_)),hint:"Find k",a:b,w:W(`A power of −1 means “one over”, for example`,M(pw(ex,-1),EQ,fr(1,ex)))};},
+       return coin()?{q:M(pw(b,m),TM,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m+n,w:W(`Multiplying powers of the same number: add the powers.`,Mans(m,PL,n)),
+         s:SOL(["Same number, multiplying: add the powers",M(pw(b,m),TM,pw(b,n),EQ,pw(b,row(m,PL,n)))],["Add",M(m,PL,n,EQ,m+n)],["Read off k",Mfin(k_,EQ,m+n)])}
+                    :{q:M(pw(b,m+n),DV,pw(b,n),EQ,pw(b,k_)),hint:"Find k",a:m,w:W(`Dividing powers of the same number: subtract the powers.`,Mans(m+n,MI,n)),
+         s:SOL(["Same number, dividing: subtract the powers",M(pw(b,m+n),DV,pw(b,n),EQ,pw(b,row(m+n,MI,n)))],["Subtract",M(m+n,MI,n,EQ,m)],["Read off k",Mfin(k_,EQ,m)])};},
+  ()=>{const b=ri(2,20),ex=b===7?3:7;return{q:M(pw(b,-1),EQ,fr(1,k_)),hint:"Find k",a:b,w:W(`A power of −1 means “one over”, for example`,M(pw(ex,-1),EQ,fr(1,ex))),
+         s:SOL(["A power of −1 means one over the number",M(pw(b,-1),EQ,fr(1,b))],["Compare with one over k",Mfin(k_,EQ,b)])};},
  ],[
   ()=>retry(()=>{const q=pick([2,3,4,5]),r=ri(2,{2:15,3:6,4:4,5:3}[q]),p=ri(1,q+3);if(gcd(p,q)!==1||r**p>10000)return null;
-       return{q:M(pw(r**q,fr(p,q))),a:r**p,w:W(`Root first, then the power:`,M(pw(r**q,fr(1,q)),EQ,r),Mans(pw(r,p)))};}),
+       return{q:M(pw(r**q,fr(p,q))),a:r**p,w:W(`Root first, then the power:`,M(pw(r**q,fr(1,q)),EQ,r),Mans(pw(r,p))),
+         s:p===1?SOL([`A power of 1/${q} is the ${ROOTN[q]} root: which number to the power ${q} gives ${r**q}?`,M(pw(r,q),EQ,r**q)],["So the root is",Mfin(pw(r**q,fr(1,q)),EQ,r)]):SOL(["Root first, then the power",M(pw(r**q,fr(p,q)),EQ,pw(par(pw(r**q,fr(1,q))),p))],[`The ${ROOTN[q]} root of ${r**q}`,M(pw(r**q,fr(1,q)),EQ,r)],[`Then to the power ${p}`,Mfin(pw(r,p),EQ,r**p)])};}),
   ()=>{const b=ri(2,10);let mx=2;while(b**(mx+1)<=10000)mx++;const e=ri(2,mx);
-       return{q:M(pw(b,-e),EQ,fr(1,k_)),hint:"Find k",a:b**e,w:W(M(pw(b,-e),EQ,fr(1,pw(b,e))),`So k is ${M(pw(b,e))}.`)};},
+       return{q:M(pw(b,-e),EQ,fr(1,k_)),hint:"Find k",a:b**e,w:W(M(pw(b,-e),EQ,fr(1,pw(b,e))),`So k is ${M(pw(b,e))}.`),
+         s:SOL(["A negative power means one over",M(pw(b,-e),EQ,fr(1,pw(b,e)))],["Work out the power",M(pw(b,e),EQ,b**e)],["Read off k",Mfin(k_,EQ,b**e)])};},
   ()=>retry(()=>{const q=pick([2,3]),r=ri(2,q===2?12:5),p=ri(1,4);if(gcd(p,q)!==1||r**p>5000)return null;
        return{q:M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,k_)),hint:"Find k",a:r**p,
-              w:W(M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,pw(r**q,fr(p,q)))),M(pw(r**q,fr(1,q)),EQ,r),Mans(pw(r,p)))};}),
+              w:W(M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,pw(r**q,fr(p,q)))),M(pw(r**q,fr(1,q)),EQ,r),Mans(pw(r,p))),
+         s:SOL(["The minus sign means one over",M(pw(r**q,row(MI,fr(p,q))),EQ,fr(1,pw(r**q,fr(p,q))))],[`The ${ROOTN[q]} root of ${r**q}`,M(pw(r**q,fr(1,q)),EQ,r)],p>1?[`Then to the power ${p}`,M(pw(r**q,fr(p,q)),EQ,pw(r,p),EQ,r**p)]:false,["Read off k",Mfin(k_,EQ,r**p)])};}),
   ()=>{const r=ri(2,9);let mx=2;while(r**(mx+1)<=10000)mx++;const e=ri(2,mx);
-       return{q:M(pw(par(fr(1,r)),-e)),a:r**e,w:W(`A negative power flips the fraction:`,Mans(pw(r,e)))};},
+       return{q:M(pw(par(fr(1,r)),-e)),a:r**e,w:W(`A negative power flips the fraction:`,Mans(pw(r,e))),
+         s:SOL(["A negative power flips the fraction",M(pw(par(fr(1,r)),-e),EQ,pw(r,e))],["Work out the power",Mfin(pw(r,e),EQ,r**e)])};},
   ()=>{const b=ri(2,7),m=ri(2,6),n=ri(2,5),j=ri(1,m*n+6);
-       return{q:M(pw(par(pw(b,m)),n),DV,pw1(b,j),EQ,pw(b,k_)),hint:"Find k",a:m*n-j,w:W(M(pw(par(pw(b,m)),n),EQ,pw(b,m*n)),`Then subtract the power you divide by.`)};},
+       return{q:M(pw(par(pw(b,m)),n),DV,pw1(b,j),EQ,pw(b,k_)),hint:"Find k",a:m*n-j,w:W(M(pw(par(pw(b,m)),n),EQ,pw(b,m*n)),`Then subtract the power you divide by.`),
+         s:SOL(["A power of a power: multiply the powers",M(pw(par(pw(b,m)),n),EQ,pw(b,m*n))],["Dividing: subtract the powers",M(pw(b,m*n),DV,pw1(b,j),EQ,pw(b,row(m*n,MI,j)))],["Read off k",Mfin(k_,EQ,m*n,MI,j,EQ,m*n-j)])};},
  ],[
   ()=>retry(()=>{const p=pick([2,3,5]),pows=[1,2,3,4].filter(i=>p**i<=625),i=pick(pows),j=pick(pows);if(i===j)return null;
        const m=ri(2,6),n=ri(2,6),div=coin();
        return{q:M(pw(p**i,m),div?DV:TM,pw(p**j,n),EQ,pw(p,k_)),hint:"Find k",a:div?i*m-j*n:i*m+j*n,
-              w:W(`Write both as powers of ${M(p)}:`,i>1?M(p**i,EQ,pw(p,i)):"",j>1?M(p**j,EQ,pw(p,j)):"",M(pw(p**i,m),EQ,pw(p,i*m)))};}),
+              w:W(`Write both as powers of ${M(p)}:`,i>1?M(p**i,EQ,pw(p,i)):"",j>1?M(p**j,EQ,pw(p,j)):"",M(pw(p**i,m),EQ,pw(p,i*m))),
+         s:SOL(i>1?[`Write ${p**i} as a power of ${p}`,M(p**i,EQ,pw(p,i))]:false,j>1?[`Write ${p**j} as a power of ${p}`,M(p**j,EQ,pw(p,j))]:false,i>1?["A power of a power: multiply the powers",M(pw(p**i,m),EQ,pw(par(pw(p,i)),m),EQ,pw(p,i*m))]:false,j>1?["The same for the second",M(pw(p**j,n),EQ,pw(par(pw(p,j)),n),EQ,pw(p,j*n))]:false,[div?"Dividing: subtract the powers":"Multiplying: add the powers",M(pw(p,i*m),div?DV:TM,pw(p,j*n),EQ,pw(p,row(i*m,div?MI:PL,j*n)))],["Read off k",Mfin(k_,EQ,div?i*m-j*n:i*m+j*n)])};}),
   ()=>retry(()=>{const p=pick([2,3]),top=p===2?5:3,i=ri(1,top),j=ri(1,top),x=ri(2,9),y=i*x/j;
        if(i===j||!Number.isInteger(y)||y<2)return null;
-       return{q:M(pw(p**i,x_),EQ,pw(p**j,y)),hint:"Find x",a:x,w:W(`Write both as powers of ${M(p)}:`,i>1?M(p**i,EQ,pw(p,i)):"",j>1?M(p**j,EQ,pw(p,j)):"",`Then compare the powers of ${M(p)} on each side.`)};}),
+       return{q:M(pw(p**i,x_),EQ,pw(p**j,y)),hint:"Find x",a:x,w:W(`Write both as powers of ${M(p)}:`,i>1?M(p**i,EQ,pw(p,i)):"",j>1?M(p**j,EQ,pw(p,j)):"",`Then compare the powers of ${M(p)} on each side.`),
+         s:SOL(i>1?[`Write ${p**i} as a power of ${p}`,M(p**i,EQ,pw(p,i))]:false,j>1?[`Write ${p**j} as a power of ${p}`,M(p**j,EQ,pw(p,j))]:false,[`Both sides as powers of ${p}: powers of powers multiply`,M(pw(p,cx(i,x_)),EQ,pw(p,row(j,TM,y)))],[`The powers of ${p} must be equal`,M(cx(i,x_),EQ,j,TM,y,EQ,j*y)],i>1?[`Divide by ${i}`,Mfin(x_,EQ,fr(j*y,i),EQ,x)]:["So",Mfin(x_,EQ,j*y)])};}),
   ()=>retry(()=>{const T=[[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[2,5]];
        const A=pick(T),B=pick(T),pa=ri(1,3),pb=ri(1,3);
        if(gcd(pa,A[1])!==1||gcd(pb,B[1])!==1||A[0]**A[1]===B[0]**B[1])return null;const v=A[0]**pa*B[0]**pb;if(v>5000)return null;
        return{q:M(pw(A[0]**A[1],fr(pa,A[1])),TM,pw(B[0]**B[1],fr(pb,B[1]))),a:v,
-              w:W(`Each one: root first, then the power.`,M(pw(A[0]**A[1],fr(1,A[1])),EQ,A[0]),M(pw(B[0]**B[1],fr(1,B[1])),EQ,B[0]),Mans(pw1(A[0],pa),TM,pw1(B[0],pb)))};}),
+              w:W(`Each one: root first, then the power.`,M(pw(A[0]**A[1],fr(1,A[1])),EQ,A[0]),M(pw(B[0]**B[1],fr(1,B[1])),EQ,B[0]),Mans(pw1(A[0],pa),TM,pw1(B[0],pb))),
+         s:SOL([`The ${ROOTN[A[1]]} root of ${A[0]**A[1]}${pa>1?`, then to the power ${pa}`:""}`,M(pw(A[0]**A[1],fr(pa,A[1])),EQ,pw1(A[0],pa),EQ,A[0]**pa)],[`The ${ROOTN[B[1]]} root of ${B[0]**B[1]}${pb>1?`, then to the power ${pb}`:""}`,M(pw(B[0]**B[1],fr(pb,B[1])),EQ,pw1(B[0],pb),EQ,B[0]**pb)],["Multiply",Mfin(A[0]**pa,TM,B[0]**pb,EQ,v)])};}),
   ()=>retry(()=>{const [a,b]=pick([[2,3],[3,2],[2,5],[5,2],[3,5],[5,3],[4,5],[5,4],[3,4],[4,3],[2,7]]),q=pick([2,3]),p=pick([1,2]);
        if(gcd(p,q)!==1||b**p>2000)return null;
        return{q:M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,fr(k_,a**p)),hint:"Find k",a:b**p,
-              w:W(`The minus sign flips the fraction:`,M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,pw(par(fr(b**q,a**q)),fr(p,q)),EQ,pw(par(fr(b,a)),p)))};}),
+              w:W(`The minus sign flips the fraction:`,M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,pw(par(fr(b**q,a**q)),fr(p,q)),EQ,pw(par(fr(b,a)),p))),
+         s:SOL(["The minus sign flips the fraction",M(pw(par(fr(a**q,b**q)),row(MI,fr(p,q))),EQ,pw(par(fr(b**q,a**q)),fr(p,q)))],[`The ${ROOTN[q]} root of the top and of the bottom`,M(pw(par(fr(b**q,a**q)),fr(1,q)),EQ,fr(b,a))],p>1?[`Then to the power ${p}`,M(pw(par(fr(b,a)),p),EQ,fr(b**p,a**p))]:false,[`Compare with k over ${a**p}`,Mfin(k_,EQ,b**p)])};}),
   ()=>{const p=pick([2,3]),a=ri(3,12),b=ri(1,6),c=ri(1,4);
        return{q:M(fr(row(pw(p,a),TM,pw1(p*p,b)),pw1(p**3,c)),EQ,pw(p,k_)),hint:"Find k",a:a+2*b-3*c,
-              w:W(`Write everything as a power of ${M(p)}:`,M(p*p,EQ,pw(p,2)),M(p**3,EQ,pw(p,3)),`Add the powers on top, subtract the one below.`)};},
+              w:W(`Write everything as a power of ${M(p)}:`,M(p*p,EQ,pw(p,2)),M(p**3,EQ,pw(p,3)),`Add the powers on top, subtract the one below.`),
+         s:SOL([`Write ${p*p} as a power of ${p}`,M(pw1(p*p,b),EQ,pw(p,2*b))],[`Write ${p**3} as a power of ${p}`,M(pw1(p**3,c),EQ,pw(p,3*c))],["Multiplying on top: add the powers",M(pw(p,a),TM,pw(p,2*b),EQ,pw(p,a+2*b))],["Dividing: subtract the power below",M(fr(pw(p,a+2*b),pw(p,3*c)),EQ,pw(p,row(a+2*b,MI,3*c)))],["Read off k",Mfin(k_,EQ,a+2*b-3*c)])};},
  ]]},
 
  ncr:{name:"Binomials & counting",L:[[
-  ()=>{const n=ri(4,25);return{q:M(bn(n,2)),a:nCr(n,2),w:W(Mans(fr(row(n,TM,n-1),2)))};},
-  ()=>{const n=ri(3,8);return{q:M(fac(n)),a:fact(n),w:W(Mans(...Array.from({length:n},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])))};},
-  ()=>{const n=ri(5,12);return{q:M(bn(n,3)),a:nCr(n,3),w:W(Mans(fr(row(n,TM,n-1,TM,n-2),row(3,TM,2,TM,1))),"Cancel before multiplying.")};},
-  ()=>{const n=ri(5,16);return{q:M(bn(n,n-2)),a:nCr(n,2),w:W(M(bn(n,n-2),EQ,bn(n,2)),Mans(fr(row(n,TM,n-1),2)))};},
-  ()=>{const n=ri(5,20);return{q:M(fr(fac(n),fac(n-2))),a:n*(n-1),w:W(`Everything from ${M(n-2)} down cancels:`,Mans(n,TM,n-1))};},
+  ()=>{const n=ri(4,25);return{q:M(bn(n,2)),a:nCr(n,2),w:W(Mans(fr(row(n,TM,n-1),2))),
+         s:SOL(["Use n(n − 1) ÷ 2",M(bn(n,2),EQ,fr(row(n,TM,n-1),2))],n%2===0?[`Halve ${n} first`,M(fr(row(n,TM,n-1),2),EQ,n/2,TM,n-1)]:[`Halve ${n-1} first`,M(fr(row(n,TM,n-1),2),EQ,n,TM,(n-1)/2)],["Multiply",Mfin(n%2===0?row(n/2,TM,n-1):row(n,TM,(n-1)/2),EQ,nCr(n,2))])};},
+  ()=>{const n=ri(3,8);return{q:M(fac(n)),a:fact(n),w:W(Mans(...Array.from({length:n},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v]))),
+         s:SOL(facLines(n))};},
+  ()=>{const n=ri(5,12);return{q:M(bn(n,3)),a:nCr(n,3),w:W(Mans(fr(row(n,TM,n-1,TM,n-2),row(3,TM,2,TM,1))),"Cancel before multiplying."),
+         s:SOL(["Use the formula",M(bn(n,3),EQ,fr(row(n,TM,n-1,TM,n-2),row(3,TM,2,TM,1)))],["Work out the top",M(n,TM,n-1,TM,n-2,EQ,n*(n-1)*(n-2))],["Divide by 3! = 6",Mfin(fr(n*(n-1)*(n-2),6),EQ,nCr(n,3))])};},
+  ()=>{const n=ri(5,16);return{q:M(bn(n,n-2)),a:nCr(n,2),w:W(M(bn(n,n-2),EQ,bn(n,2)),Mans(fr(row(n,TM,n-1),2))),
+         s:SOL([`Choosing ${n-2} to take is the same as choosing 2 to leave`,M(bn(n,n-2),EQ,bn(n,2))],["Use n(n − 1) ÷ 2",M(bn(n,2),EQ,fr(row(n,TM,n-1),2))],["Work it out",Mfin(fr(n*(n-1),2),EQ,nCr(n,2))])};},
+  ()=>{const n=ri(5,20);return{q:M(fr(fac(n),fac(n-2))),a:n*(n-1),w:W(`Everything from ${M(n-2)} down cancels:`,Mans(n,TM,n-1)),
+         s:SOL([`Write ${n}! down as far as ${n-2}!`,M(fac(n),EQ,n,TM,n-1,TM,fac(n-2))],[`Cancel the ${n-2}!`,M(fr(fac(n),fac(n-2)),EQ,n,TM,n-1)],["Multiply",Mfin(n,TM,n-1,EQ,n*(n-1))])};},
  ],[
   ()=>{const n=ri(7,12),r=ri(3,4),top=Array.from({length:r},(_,i)=>n-i),bot=Array.from({length:r},(_,i)=>r-i);
-       return{q:M(bn(n,r)),a:nCr(n,r),w:W(Mans(fr(row(...top.flatMap((v,i)=>i?[TM,v]:[v])),row(...bot.flatMap((v,i)=>i?[TM,v]:[v])))),"Cancel before multiplying.")};},
+       return{q:M(bn(n,r)),a:nCr(n,r),w:W(Mans(fr(row(...top.flatMap((v,i)=>i?[TM,v]:[v])),row(...bot.flatMap((v,i)=>i?[TM,v]:[v])))),"Cancel before multiplying."),
+         s:(()=>{const T=top.reduce((u,v)=>u*v,1),B=fact(r);return SOL(["Use the formula",M(bn(n,r),EQ,fr(prodML(top),prodML(bot)))],["Work out the bottom",M(prodML(bot),EQ,B)],["Work out the top",M(prodML(top),EQ,T)],["Divide",Mfin(fr(T,B),EQ,nCr(n,r))]);})()};},
   ()=>{const n=ri(6,15),r=ri(2,3);return{q:M(fr(fac(n),fac(n-r))),a:fact(n)/fact(n-r),
-       w:W(`Everything from ${M(n-r)} down cancels:`,Mans(...Array.from({length:r},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])))};},
+       w:W(`Everything from ${M(n-r)} down cancels:`,Mans(...Array.from({length:r},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v]))),
+         s:(()=>{const top=Array.from({length:r},(_,i)=>n-i),T=top.reduce((u,v)=>u*v,1);return SOL([`Write ${n}! down as far as ${n-r}!`,M(fac(n),EQ,prodML(top),TM,fac(n-r))],[`Cancel the ${n-r}!`,M(fr(fac(n),fac(n-r)),EQ,prodML(top))],["Multiply",Mfin(prodML(top),EQ,T)]);})()};},
   ()=>{const n=ri(5,12),k=ri(2,Math.min(4,n-1));return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(1,PL,x_),n))}`,a:nCr(n,k),
        w:W(`The coefficient of ${M(xp(k))} in ${M(pw(par(1,PL,x_),n))} is ${M(bn(n,k))}:`,
-           Mans(fr(row(...Array.from({length:k},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])),fac(k))))};},
+           Mans(fr(row(...Array.from({length:k},(_,i)=>n-i).flatMap((v,i)=>i?[TM,v]:[v])),fac(k)))),
+         s:(()=>{const top=Array.from({length:k},(_,i)=>n-i),T=top.reduce((u,v)=>u*v,1);return SOL([`In ${M(pw(par(1,PL,x_),n))} the coefficient of ${M(xp(k))} is ${M(bn(n,k))}`,M(bn(n,k),EQ,fr(prodML(top),fac(k)))],["Work out the top",M(prodML(top),EQ,T)],[`Divide by ${k}! = ${fact(k)}`,Mfin(fr(T,fact(k)),EQ,nCr(n,k))]);})()};},
   ()=>retry(()=>{const L=ri(4,7),kinds=ri(2,3),c=Array(kinds).fill(1);for(let i=kinds;i<L;i++)c[R(kinds)]++;
        if(Math.max(...c)<2)return null;const letters=c.flatMap((m,i)=>Array(m).fill("ABC"[i])).join(" ");
        return{q:`Arrangements of the letters <span class="letters">${letters}</span>`,a:fact(L)/c.reduce((s,m)=>s*fact(m),1),
               w:W(`${M(L)} letters, with repeats of ${c.join(", ")}:`,Mans(fr(fac(L),row(...c.flatMap((m,i)=>i?[TM,fac(m)]:[fac(m)])))),
-                  M(fac(L),EQ,fact(L)))};}),
+                  M(fac(L),EQ,fact(L))),
+         s:(()=>{const fs=c.filter((m)=>m>1),B=fs.reduce((u,m)=>u*fact(m),1);return SOL([`${L} letters: ${L}! orders if they were all different`,M(fac(L),EQ,fact(L))],["Swapping repeated letters changes nothing: divide by the factorial of each repeat",M(prodML(fs.map(fac)),EQ,B)],["Divide",Mfin(fr(fact(L),B),EQ,fact(L)/B)]);})()};}),
   ()=>{const n=ri(8,20);let a;do a=ri(2,n-2);while(2*a===n);
-       return{q:M(bn(n,a),EQ,bn(n,k_)),hint:`Find k ≠ ${a}`,a:n-a,w:W(`Choosing ${M(a)} to take is the same as choosing which to leave:`,Mans(n,MI,a))};},
+       return{q:M(bn(n,a),EQ,bn(n,k_)),hint:`Find k ≠ ${a}`,a:n-a,w:W(`Choosing ${M(a)} to take is the same as choosing which to leave:`,Mans(n,MI,a)),
+         s:SOL([`Choosing ${a} to take is the same as choosing ${n-a} to leave`,M(bn(n,a),EQ,bn(n,row(n,MI,a)))],["Subtract",M(n,MI,a,EQ,n-a)],["Read off k",Mfin(k_,EQ,n-a)])};},
  ],[
   ()=>{const c=pick([2,3,-2]),n=ri(4,8),k=ri(2,3);
        return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(1,c<0?MI:PL,Math.abs(c),x_),n))}`,a:nCr(n,k)*c**k,
-              w:W(`The ${M(xp(k))} term is ${M(bn(n,k),pw(par(c,x_),k))}, so the coefficient is`,Mans(bn(n,k),TM,pw(par(c),k)),M(bn(n,k),EQ,nCr(n,k)))};},
+              w:W(`The ${M(xp(k))} term is ${M(bn(n,k),pw(par(c,x_),k))}, so the coefficient is`,Mans(bn(n,k),TM,pw(par(c),k)),M(bn(n,k),EQ,nCr(n,k))),
+         s:SOL([`The ${M(xp(k))} term takes ${M(par(c,x_))} from ${k} of the ${n} brackets`,M(bn(n,k),pw(par(c,x_),k))],["So the coefficient is",M(bn(n,k),TM,pw(par(c),k))],["The binomial coefficient",M(bn(n,k),EQ,nCr(n,k))],["The power",M(pw(par(c),k),EQ,c**k)],["Multiply",Mfin(nCr(n,k),TM,pn(c**k),EQ,nCr(n,k)*c**k)])};},
   ()=>retry(()=>{const a=ri(2,3),b=pick([1,-1,2,-2]),n=ri(3,6),k=ri(1,n-1),v=nCr(n,k)*a**(n-k)*b**k;if(Math.abs(v)>5000)return null;
        return{q:`Coefficient of ${M(xp(k))} in ${M(pw(par(a,b<0?MI:PL,Math.abs(b)===1?"":mnum(Math.abs(b)),x_),n))}`,a:v,
-              w:W(`The coefficient is`,Mans(bn(n,k),TM,ppow(a,n-k),TM,pw(par(b),k)),M(bn(n,k),EQ,nCr(n,k)))};}),
+              w:W(`The coefficient is`,Mans(bn(n,k),TM,ppow(a,n-k),TM,pw(par(b),k)),M(bn(n,k),EQ,nCr(n,k))),
+         s:SOL([`The ${M(xp(k))} term takes the x part from ${k} of the ${n} brackets and ${tn(a)} from the rest`,M(bn(n,k),TM,ppow(a,n-k),TM,ppow(b,k))],["The binomial coefficient",M(bn(n,k),EQ,nCr(n,k))],n-k>1?[`${a} to the power ${n-k}`,M(pw(a,n-k),EQ,a**(n-k))]:false,k>1?[`${tn(b)} to the power ${k}`,M(pw(par(b),k),EQ,b**k)]:false,["Multiply",Mfin(nCr(n,k),TM,a**(n-k),TM,pn(b**k),EQ,v)])};}),
   ()=>{const n=ri(4,12);return{q:M(bn(n,0),PL,bn(n,1),PL,bn(n,2),PL,mo("⋯"),PL,bn(n,n)),a:2**n,
-       w:W(`This is ${M(pw(par(1,PL,x_),n))} with ${M(x_,EQ,1)}:`,Mans(pw(2,n)))};},
+       w:W(`This is ${M(pw(par(1,PL,x_),n))} with ${M(x_,EQ,1)}:`,Mans(pw(2,n))),
+         s:SOL([`The whole row adds to ${M(pw(par(1,PL,1),n))}: put x = 1 in ${M(pw(par(1,PL,x_),n))}`,M(pw(par(1,PL,1),n),EQ,pw(2,n))],["Work out the power",Mfin(pw(2,n),EQ,2**n)])};},
   ()=>{const n=ri(5,30);return{q:M(bn(mi("n"),2),EQ,nCr(n,2)),hint:"Find n",a:n,
-       w:W(M(bn(mi("n"),2),EQ,fr(row(mi("n"),par(mi("n"),MI,1)),2)),`So ${M(mi("n"),par(mi("n"),MI,1),EQ,2*nCr(n,2))}: two consecutive numbers with that product.`)};},
+       w:W(M(bn(mi("n"),2),EQ,fr(row(mi("n"),par(mi("n"),MI,1)),2)),`So ${M(mi("n"),par(mi("n"),MI,1),EQ,2*nCr(n,2))}: two consecutive numbers with that product.`),
+         s:SOL(["Use the formula",M(bn(mi("n"),2),EQ,fr(row(mi("n"),par(mi("n"),MI,1)),2))],["Multiply both sides by 2",M(mi("n"),par(mi("n"),MI,1),EQ,2*nCr(n,2))],["Two consecutive numbers with that product",M(n,TM,n-1,EQ,n*(n-1))],["Read off n",Mfin(mi("n"),EQ,n)])};},
   ()=>{const n=ri(10,16),r=ri(3,4),top=Array.from({length:r},(_,i)=>n-i),bot=Array.from({length:r},(_,i)=>r-i);
-       return{q:M(bn(n,r)),a:nCr(n,r),w:W(Mans(fr(row(...top.flatMap((v,i)=>i?[TM,v]:[v])),row(...bot.flatMap((v,i)=>i?[TM,v]:[v])))),"Cancel before multiplying.")};},
+       return{q:M(bn(n,r)),a:nCr(n,r),w:W(Mans(fr(row(...top.flatMap((v,i)=>i?[TM,v]:[v])),row(...bot.flatMap((v,i)=>i?[TM,v]:[v])))),"Cancel before multiplying."),
+         s:(()=>{const T=top.reduce((u,v)=>u*v,1),B=fact(r);return SOL(["Use the formula",M(bn(n,r),EQ,fr(prodML(top),prodML(bot)))],["Work out the bottom",M(prodML(bot),EQ,B)],["Work out the top",M(prodML(top),EQ,T)],["Divide",Mfin(fr(T,B),EQ,nCr(n,r))]);})()};},
  ]]},
 
  logs:{name:"Logarithms",L:[[
   ()=>{const b=ri(2,10);let mx=1;while(b**(mx+1)<=100000)mx++;const e=ri(0,Math.min(mx,6));
-       return{q:M(lg(b,b**e)),a:e,w:W(`Ask: ${M(b)} to what power gives ${M(b**e)}?`,M(pw(b,2),EQ,b*b),M(pw(b,3),EQ,b**3))};},
+       return{q:M(lg(b,b**e)),a:e,w:W(`Ask: ${M(b)} to what power gives ${M(b**e)}?`,M(pw(b,2),EQ,b*b),M(pw(b,3),EQ,b**3)),
+         s:SOL([`Write ${b**e} as a power of ${b}`,M(b**e,EQ,e===1?mnum(b):pw(b,e))],[`The log of a power of ${b} is the power`,Mfin(lg(b,b**e),EQ,e)])};},
   ()=>{const b=ri(2,10);let mx=2;while(b**(mx+1)<=100000)mx++;const e=ri(2,Math.min(mx,7));
-       return{q:M(pw(b,x_),EQ,b**e),hint:"Find x",a:e,w:W(`Count how many ${M(b)}s multiply to ${M(b**e)}:`,M(pw(b,2),EQ,b*b),M(pw(b,3),EQ,b**3))};},
+       return{q:M(pw(b,x_),EQ,b**e),hint:"Find x",a:e,w:W(`Count how many ${M(b)}s multiply to ${M(b**e)}:`,M(pw(b,2),EQ,b*b),M(pw(b,3),EQ,b**3)),
+         s:SOL([`Write ${b**e} as a power of ${b}`,M(b**e,EQ,pw(b,e))],["So the powers match",Mfin(x_,EQ,e)])};},
   ()=>{const b=ri(2,10);let mx=1;while(b**(mx+1)<=10000)mx++;const e=ri(1,mx);
-       return{q:M(lg(b,fr(1,b**e))),a:-e,w:W(`One over a power is a negative power, for example`,M(fr(1,pw(b,2)),EQ,pw(b,-2)),`So first write ${M(b**e)} as a power of ${M(b)}.`)};},
+       return{q:M(lg(b,fr(1,b**e))),a:-e,w:W(`One over a power is a negative power, for example`,M(fr(1,pw(b,2)),EQ,pw(b,-2)),`So first write ${M(b**e)} as a power of ${M(b)}.`),
+         s:SOL([`Write ${b**e} as a power of ${b}`,M(b**e,EQ,pw1(b,e))],["One over a power is a negative power",M(fr(1,b**e),EQ,pw(b,-e))],["So the log is that power",Mfin(lg(b,fr(1,b**e)),EQ,-e)])};},
  ],[
   ()=>retry(()=>{const b=pick([6,10,12,15,20]),k=ri(2,3),N=b**k;if(N>10000)return null;const divs=[];
        for(let d=2;d<N;d++)if(N%d===0&&!isPowOf(d,b)&&!isPowOf(N/d,b))divs.push(d);if(!divs.length)return null;const x=pick(divs);
-       return{q:M(lg(b,x),PL,lg(b,N/x)),a:k,w:W(`Adding logs multiplies the numbers:`,M(lg(b,x),PL,lg(b,N/x),EQ,lg(b,par(x,TM,N/x)),EQ,lg(b,N)))};}),
+       return{q:M(lg(b,x),PL,lg(b,N/x)),a:k,w:W(`Adding logs multiplies the numbers:`,M(lg(b,x),PL,lg(b,N/x),EQ,lg(b,par(x,TM,N/x)),EQ,lg(b,N))),
+         s:SOL(["Adding logs multiplies the numbers",M(lg(b,x),PL,lg(b,N/x),EQ,lg(b,par(x,TM,N/x)))],["Multiply",M(x,TM,N/x,EQ,N)],[`Write ${N} as a power of ${b}`,M(N,EQ,pw(b,k))],["So the log is that power",Mfin(lg(b,N),EQ,k)])};}),
   ()=>retry(()=>{const b=ri(2,10),k=ri(1,3),y=ri(2,9),x=y*b**k;if(x>20000||isPowOf(y,b))return null;
-       return{q:M(lg(b,x),MI,lg(b,y)),a:k,w:W(`Subtracting logs divides the numbers:`,M(lg(b,x),MI,lg(b,y),EQ,lg(b,fr(x,y)),EQ,lg(b,x/y)))};}),
+       return{q:M(lg(b,x),MI,lg(b,y)),a:k,w:W(`Subtracting logs divides the numbers:`,M(lg(b,x),MI,lg(b,y),EQ,lg(b,fr(x,y)),EQ,lg(b,x/y))),
+         s:SOL(["Subtracting logs divides the numbers",M(lg(b,x),MI,lg(b,y),EQ,lg(b,fr(x,y)))],["Divide",M(fr(x,y),EQ,x/y)],[`Write ${x/y} as a power of ${b}`,M(x/y,EQ,pw1(b,k))],["So the log is that power",Mfin(lg(b,x/y),EQ,k)])};}),
   ()=>{const b=ri(2,5),c=ri(2,5);let mx=1;while(b**(mx+1)<=1000)mx++;const e=ri(1,mx);
-       return{q:M(c,lg(b,b**e)),a:c*e,w:W(`First the log on its own:`,M(b**e,EQ,pw1(b,e)),`then multiply by ${M(c)}.`)};},
+       return{q:M(c,lg(b,b**e)),a:c*e,w:W(`First the log on its own:`,M(b**e,EQ,pw1(b,e)),`then multiply by ${M(c)}.`),
+         s:SOL([`Write ${b**e} as a power of ${b}`,M(b**e,EQ,pw1(b,e))],["The log on its own is that power",M(lg(b,b**e),EQ,e)],[`Multiply by ${c}`,Mfin(c,TM,e,EQ,c*e)])};},
   ()=>retry(()=>{const b=pick([2,3,5]),p=ri(2,3),m=ri(1,4);if(b**(p*m)>100000)return null;
-       return{q:M(lg(b**p,b**(p*m))),a:m,w:W(`Write both as powers of ${M(b)}:`,M(b**p,EQ,pw(b,p)),M(b**(p*m),EQ,pw1(b,p*m)),`How many lots of ${M(pw(b,p))} make ${M(pw1(b,p*m))}?`)};}),
+       return{q:M(lg(b**p,b**(p*m))),a:m,w:W(`Write both as powers of ${M(b)}:`,M(b**p,EQ,pw(b,p)),M(b**(p*m),EQ,pw1(b,p*m)),`How many lots of ${M(pw(b,p))} make ${M(pw1(b,p*m))}?`),
+         s:SOL([`Write the base as a power of ${b}`,M(b**p,EQ,pw(b,p))],["Write the number as a power of the base",M(b**(p*m),EQ,pw1(b,p*m),EQ,pw1(par(pw(b,p)),m))],["So the log is that power",Mfin(lg(b**p,b**(p*m)),EQ,m)])};}),
   ()=>retry(()=>{const b=ri(2,10),m=ri(1,4);if(b**(2*m)>100000)return null;
-       return{q:M(lg(b,sq(b**(2*m)))),a:m,w:W(M(b**(2*m),EQ,pw(b,2*m)),`and a square root halves the power.`)};}),
+       return{q:M(lg(b,sq(b**(2*m)))),a:m,w:W(M(b**(2*m),EQ,pw(b,2*m)),`and a square root halves the power.`),
+         s:SOL([`Write ${b**(2*m)} as a power of ${b}`,M(b**(2*m),EQ,pw(b,2*m))],["A square root halves the power",M(sq(b**(2*m)),EQ,pw1(b,m))],["So the log is that power",Mfin(lg(b,sq(b**(2*m))),EQ,m)])};}),
  ],[
   ()=>retry(()=>{const b=ri(2,6),k=ri(1,3),x=ri(2,15),y=x*x/b**k;if(!Number.isInteger(y)||y<2)return null;
-       return{q:M(2,lg(b,x),MI,lg(b,y)),a:k,w:W(M(2,lg(b,x),EQ,lg(b,pw(x,2)),EQ,lg(b,x*x)),M(lg(b,x*x),MI,lg(b,y),EQ,lg(b,fr(x*x,y)),EQ,lg(b,x*x/y)))};}),
+       return{q:M(2,lg(b,x),MI,lg(b,y)),a:k,w:W(M(2,lg(b,x),EQ,lg(b,pw(x,2)),EQ,lg(b,x*x)),M(lg(b,x*x),MI,lg(b,y),EQ,lg(b,fr(x*x,y)),EQ,lg(b,x*x/y))),
+         s:SOL(["A number in front of a log becomes a power",M(2,lg(b,x),EQ,lg(b,pw(x,2)),EQ,lg(b,x*x))],["Subtracting logs divides the numbers",M(lg(b,x*x),MI,lg(b,y),EQ,lg(b,fr(x*x,y)),EQ,lg(b,x*x/y))],[`Write ${x*x/y} as a power of ${b}`,M(x*x/y,EQ,pw1(b,k))],["So the log is that power",Mfin(lg(b,x*x/y),EQ,k)])};}),
   ()=>retry(()=>{const p=pick([2,3,5,7]),q=pick([2,3,5,7]);if(p===q)return null;const m=ri(1,4),n=ri(1,4);
        if(q**m>3000||p**n>3000)return null;
-       return{q:M(lg(p,q**m),TM,lg(q,p**n)),a:m*n,w:W(M(lg(p,q**m),EQ,coefx(m,lg(p,q))),M(lg(q,p**n),EQ,coefx(n,lg(q,p))),M(lg(p,q),TM,lg(q,p),EQ,1))};}),
+       return{q:M(lg(p,q**m),TM,lg(q,p**n)),a:m*n,w:W(M(lg(p,q**m),EQ,coefx(m,lg(p,q))),M(lg(q,p**n),EQ,coefx(n,lg(q,p))),M(lg(p,q),TM,lg(q,p),EQ,1)),
+         s:SOL(["Bring the power to the front",M(lg(p,q**m),EQ,cx(m,lg(p,q)))],["The same in the second",M(lg(q,p**n),EQ,cx(n,lg(q,p)))],[`${M(lg(p,q))} and ${M(lg(q,p))} multiply to 1`,M(lg(p,q),TM,lg(q,p),EQ,1)],["So only the numbers in front are left",Mfin(m,TM,n,EQ,m*n)])};}),
   ()=>{const b=ri(2,10),n=ri(2,9),c=ri(1,3);
-       return{q:M(pw(b,row(c===1?"":mnum(c),lg(b,n)))),a:n**c,w:W(c===1?"":M(c,lg(b,n),EQ,lg(b,pw(n,c))),`and ${M(b)} to the power ${M(lg(b,mi("N")))} is just N.`,c===1?"":Mans(pw1(n,c)))};},
+       return{q:M(pw(b,row(c===1?"":mnum(c),lg(b,n)))),a:n**c,w:W(c===1?"":M(c,lg(b,n),EQ,lg(b,pw(n,c))),`and ${M(b)} to the power ${M(lg(b,mi("N")))} is just N.`,c===1?"":Mans(pw1(n,c))),
+         s:SOL(c>1?["A number in front of the log becomes a power",M(c,lg(b,n),EQ,lg(b,pw(n,c)))]:false,[`${b} to the power ${M(lg(b,mi("N")))} is just N`,M(pw(b,lg(b,pw1(n,c))),EQ,pw1(n,c))],["Work it out",Mfin(pw1(n,c),EQ,n**c)])};},
   ()=>retry(()=>{const b=ri(2,5),e=ri(1,4),c=nz(-9,9),v=b**e-c;if(v<=0)return null;
-       return{q:M(lg(b,par(x_,c<0?MI:PL,Math.abs(c))),EQ,e),hint:"Find x",a:v,w:W(`Undo the log:`,M(par(x_,c<0?MI:PL,Math.abs(c)),EQ,pw(b,e),EQ,b**e))};}),
+       return{q:M(lg(b,par(x_,c<0?MI:PL,Math.abs(c))),EQ,e),hint:"Find x",a:v,w:W(`Undo the log:`,M(par(x_,c<0?MI:PL,Math.abs(c)),EQ,pw(b,e),EQ,b**e)),
+         s:SOL(["Undo the log: the inside equals the base to that power",M(par(x_,c<0?MI:PL,Math.abs(c)),EQ,pw1(b,e))],["Work out the power",M(pw1(b,e),EQ,b**e)],[c<0?`Add ${-c}`:`Subtract ${c}`,Mfin(x_,EQ,b**e,c<0?PL:MI,Math.abs(c),EQ,v)])};}),
   ()=>retry(()=>{const B=ri(2,9),k=ri(2,4),N=B**k;if(N>100000)return null;
        return{q:M(fr(row(mi("log"),SP,mnum(N)),row(mi("log"),SP,mnum(B)))),a:k,
-              w:W(`Write ${M(N)} as a power of ${M(B)}, then use ${M(mi("log"),SP,pw(mi("a"),mi("n")),EQ,mi("n"),mi("log"),SP,mi("a"))}.`,M(pw(B,2),EQ,B*B))};}),
+              w:W(`Write ${M(N)} as a power of ${M(B)}, then use ${M(mi("log"),SP,pw(mi("a"),mi("n")),EQ,mi("n"),mi("log"),SP,mi("a"))}.`,M(pw(B,2),EQ,B*B)),
+         s:SOL([`Write ${N} as a power of ${B}`,M(N,EQ,pw(B,k))],["A power comes to the front of a log",M(mi("log"),SP,pw(B,k),EQ,k,mi("log"),SP,mnum(B))],[`Cancel the log ${B}`,Mfin(fr(row(k,mi("log"),SP,mnum(B)),row(mi("log"),SP,mnum(B))),EQ,k)])};}),
  ]]},
 
  trig:{name:"Exact trig",L:[[
   ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick([0,30,45,60,90]),q=tvq(fn,d,1);if(!q)return null;const c=q[1]*ri(1,6);
-       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1],w:W(trigVal(fn,d),c===1?"":`then multiply by ${M(c)}.`)};}),
+       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1],w:W(trigVal(fn,d),c===1?"":`then multiply by ${M(c)}.`),
+         s:c===1?SOL([`The exact value of ${fn} ${d}°`,Mfin(tf(fn,d),EQ,q[0]/q[1])]):SOL([`The exact value of ${fn} ${d}°`,M(tf(fn,d),EQ,valML(tv(fn,d),false))],[`Multiply by ${c}`,Mfin(c,TM,qP(q[0],q[1]),EQ,c*q[0]/q[1])])};}),
   ()=>trigInv([30,45,60,90]),
   ()=>{const fn=pick(["sin","cos","tan"]),d=pick([30,45,60]),q=tvq(fn,d,2),c=q[1]*ri(1,4);
-       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1],w:W(trigVal(fn,d),`Square it${c===1?"":`, then multiply by ${M(c)}`}.`)};},
+       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1],w:W(trigVal(fn,d),`Square it${c===1?"":`, then multiply by ${M(c)}`}.`),
+         s:SOL([`The exact value of ${fn} ${d}°`,M(tf(fn,d),EQ,valML(tv(fn,d),false))],["Square it",M(tf(fn,d,2),EQ,pw(par(valML(tv(fn,d),false)),2),EQ,qML(q[0],q[1]))],c===1?["So",Mfin(tf(fn,d,2),EQ,q[0]/q[1])]:[`Multiply by ${c}`,Mfin(c,TM,qML(q[0],q[1]),EQ,c*q[0]/q[1])])};},
  ],[
   ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG.filter(a=>a>90)),q=tvq(fn,d,1);if(!q)return null;const c=q[1]*ri(1,6);
-       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1],w:W(reduceTrig(fn,d),c===1?"":`then multiply by ${M(c)}.`)};}),
+       return{q:M(c===1?"":mnum(c),tf(fn,d)),a:c*q[0]/q[1],w:W(reduceTrig(fn,d),c===1?"":`then multiply by ${M(c)}.`),
+         s:SOL(trigLines(fn,d),c===1?["So",Mfin(tf(fn,d),EQ,q[0]/q[1])]:[`Multiply by ${c}`,Mfin(c,TM,qP(q[0],q[1]),EQ,c*q[0]/q[1])])};}),
   ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG),q=tvq(fn,d,2);if(!q||q[0]===0)return null;const c=q[1]*ri(1,4);
-       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1],w:W(reduceTrig(fn,d),`Squaring removes the sign${c===1?"":`; then multiply by ${M(c)}`}.`)};}),
+       return{q:M(c===1?"":mnum(c),tf(fn,d,2)),a:c*q[0]/q[1],w:W(reduceTrig(fn,d),`Squaring removes the sign${c===1?"":`; then multiply by ${M(c)}`}.`),
+         s:SOL(trigLines(fn,d),["Square it: the sign goes",M(tf(fn,d,2),EQ,qML(q[0],q[1]))],c===1?["So",Mfin(tf(fn,d,2),EQ,q[0]/q[1])]:[`Multiply by ${c}`,Mfin(c,TM,qML(q[0],q[1]),EQ,c*q[0]/q[1])])};}),
   ()=>trigInv(ANG.filter(a=>a>0)),
  ],[
   ()=>retry(()=>{const t1=[pick(["sin","cos","tan"]),pick(ANG),pick([1,2])],t2=[pick(["sin","cos","tan"]),pick(ANG),pick([1,2])];
        const q1=tvq(...t1),q2=tvq(...t2);if(!q1||!q2||q1[0]===0||q2[0]===0)return null;
        const c1=q1[1]*ri(1,3),c2=q2[1]*ri(1,3)*pick([1,-1]);
        return{q:M(c1===1?"":mnum(c1),tf(...t1),c2<0?MI:PL,Math.abs(c2)===1?"":mnum(Math.abs(c2)),tf(...t2)),
-              a:c1*q1[0]/q1[1]+c2*q2[0]/q2[1],w:W(`Each value on its own:`,reduceTrig(t1[0],t1[1]),reduceTrig(t2[0],t2[1]))};}),
+              a:c1*q1[0]/q1[1]+c2*q2[0]/q2[1],w:W(`Each value on its own:`,reduceTrig(t1[0],t1[1]),reduceTrig(t2[0],t2[1])),
+         s:SOL(trigLines(t1[0],t1[1]),t1[2]===2?["Square it",M(tf(...t1),EQ,qML(q1[0],q1[1]))]:false,trigLines(t2[0],t2[1]),t2[2]===2?["Square it",M(tf(...t2),EQ,qML(q2[0],q2[1]))]:false,["Put them together",Mfin(c1===1?qML(q1[0],q1[1]):row(c1,TM,qP(q1[0],q1[1])),c2<0?MI:PL,Math.abs(c2)===1?qP(q2[0],q2[1]):row(Math.abs(c2),TM,qP(q2[0],q2[1])),EQ,c1*q1[0]/q1[1]+c2*q2[0]/q2[1])])};}),
   ()=>retry(()=>{const A=[pick(["sin","cos","tan"]),pick(ANG)],B=[pick(["sin","cos","tan"]),pick(ANG)],u=tv(...A),w=tv(...B);
        if(!u||!w||u.n===0||w.n===0||u.r!==w.r)return null;const num=u.n*w.n*u.r,den=u.d*w.d,c=den/gcd(Math.abs(num),den);if(c>12)return null;
-       return{q:M(c===1?"":mnum(c),tf(...A),SP,tf(...B)),a:c*num/den,w:W(`Each value on its own:`,reduceTrig(...A),reduceTrig(...B))};}),
+       return{q:M(c===1?"":mnum(c),tf(...A),SP,tf(...B)),a:c*num/den,w:W(`Each value on its own:`,reduceTrig(...A),reduceTrig(...B)),
+         s:SOL(trigLines(...A),trigLines(...B),c===1?["Multiply the two values: the roots multiply to a whole number",Mfin(tf(...A),SP,tf(...B),EQ,num/den)]:["Multiply the two values: the roots multiply to a whole number",M(tf(...A),SP,tf(...B),EQ,qML(num,den))],c===1?false:[`Multiply by ${c}`,Mfin(c,TM,qP(num,den),EQ,c*num/den)])};}),
   ()=>retry(()=>{const fn=pick(["sin","cos","tan"]),d=pick(ANG),v=tv(fn,d);if(!v)return null;const top=pick([180,360,540,720]);
        let n=0;for(let e=0;e<top;e+=15){if(e%30&&e%45)continue;const w=tv(fn,e);if(w&&w.n===v.n&&(v.n===0||(w.d===v.d&&w.r===v.r)))n++;}
        const first=[];for(let e=0;e<(fn==="tan"?180:360);e+=15){if(e%30&&e%45)continue;const w=tv(fn,e);if(w&&w.n===v.n&&(v.n===0||(w.d===v.d&&w.r===v.r)))first.push(e);}
        return{q:`Number of solutions of ${M(mi(fn),SP,x_,EQ,valML(v,coin()))} for ${M(DEG(0),mo("≤"),x_,mo("&lt;"),DEG(top))}`,a:n,
-              w:W(`In one ${fn==="tan"?"180°":"360°"} cycle the solutions are ${first.map((e)=>M(DEG(e))).join(", ")}.`,`They repeat every ${fn==="tan"?"180°":"360°"}: count those below ${M(DEG(top))}.`)};}),
+              w:W(`In one ${fn==="tan"?"180°":"360°"} cycle the solutions are ${first.map((e)=>M(DEG(e))).join(", ")}.`,`They repeat every ${fn==="tan"?"180°":"360°"}: count those below ${M(DEG(top))}.`),
+         s:(()=>{const per=fn==="tan"?180:360,all=[];for(let e=0;e<top;e+=15){if(e%30&&e%45)continue;const u=tv(fn,e);if(u&&u.n===v.n&&(v.n===0||(u.d===v.d&&u.r===v.r)))all.push(e);}
+  return SOL([`The solutions in one ${per}° cycle`,first.map((e)=>M(x_,EQ,DEG(e))).join(", ")],all.length?[`They repeat every ${per}°: all of them below ${top}°`,all.map((e)=>M(DEG(e))).join(", ")]:[`Even the first is not below ${top}°`,M(DEG(first[0]),mo("≥"),DEG(top))],["Count them",Mfin(mi("n"),EQ,n)]);})()};}),
   ()=>{const a=ri(2,12),b=ri(2,12),C=pick([60,90,120]);
        return{q:`Triangle with ${M(mi("a"),EQ,a)}, ${M(mi("b"),EQ,b)} and angle ${M(mi("C"),EQ,DEG(C))} between them`,hint:"Find c² (c is the third side)",
-              a:a*a+b*b-{60:a*b,90:0,120:-a*b}[C],w:W(`Cosine rule:`,Mans(pw(a,2),PL,pw(b,2),MI,2,TM,a,TM,b,TM,mi("cos"),SP,DEG(C)),trigVal("cos",C))};},
+              a:a*a+b*b-{60:a*b,90:0,120:-a*b}[C],w:W(`Cosine rule:`,Mans(pw(a,2),PL,pw(b,2),MI,2,TM,a,TM,b,TM,mi("cos"),SP,DEG(C)),trigVal("cos",C)),
+         s:(()=>{const t={60:a*b,90:0,120:-a*b}[C];return SOL(["The cosine rule",M(pw(mi("c"),2),EQ,pw(mi("a"),2),PL,pw(mi("b"),2),MI,2,mi("a"),mi("b"),SP,mi("cos"),SP,mi("C"))],["Substitute",M(pw(mi("c"),2),EQ,pw(a,2),PL,pw(b,2),MI,2,TM,a,TM,b,TM,mi("cos"),SP,DEG(C))],[`The exact value of cos ${C}°`,trigVal("cos",C)],["So the last term is",M(2,TM,a,TM,b,TM,mi("cos"),SP,DEG(C),EQ,t)],["Add up",Mfin(pw(mi("c"),2),EQ,a*a,PL,b*b,MI,pn(t),EQ,a*a+b*b-t)]);})()};},
   ()=>retry(()=>{const a=ri(2,16),b=ri(2,16),C=pick([30,150,90]),A=C===90?a*b/2:a*b/4;if(!Number.isInteger(A))return null;
        return{q:`Area of a triangle with sides ${M(a)} and ${M(b)} and included angle ${M(DEG(C))}`,a:A,
-              w:W(Mans(fr(1,2),TM,a,TM,b,TM,mi("sin"),SP,DEG(C)),trigVal("sin",C))};}),
+              w:W(Mans(fr(1,2),TM,a,TM,b,TM,mi("sin"),SP,DEG(C)),trigVal("sin",C)),
+         s:SOL(["Area = ½ ab sin C",M(mi("Area"),EQ,fr(1,2),TM,a,TM,b,TM,mi("sin"),SP,DEG(C))],[`The exact value of sin ${C}°`,trigVal("sin",C)],["Multiply",Mfin(fr(1,2),TM,a,TM,b,TM,qML(tv("sin",C).n,tv("sin",C).d),EQ,A)])};}),
  ]]},
 
  number:{name:"Number theory",L:[[
   ()=>retry(()=>{const g=ri(2,15),x=ri(2,12),y=ri(2,12);if(x===y||gcd(x,y)!==1)return null;
-       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g,w:W(M(g*x,EQ,factML(g*x)),M(g*y,EQ,factML(g*y)),"Multiply the primes they share.")};}),
+       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g,w:W(M(g*x,EQ,factML(g*x)),M(g*y,EQ,factML(g*y)),"Multiply the primes they share."),
+         s:SOL(factLine(g*x),factLine(g*y),["Take each prime they share, to the lower power",Mfin(mi("HCF"),EQ,factML(g),EQ,g)])};}),
   ()=>retry(()=>{const a=ri(4,30),b=ri(4,30);if(a===b||a%b===0||b%a===0)return null;const l=lcm(a,b);if(l>500)return null;
-       return{q:M(mi("LCM"),par(a,mo(","),b)),a:l,w:W(M(a,EQ,factML(a)),M(b,EQ,factML(b)),"Take the highest power of every prime that appears.")};}),
-  ()=>{const n=ri(12,100);return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply.")};},
+       return{q:M(mi("LCM"),par(a,mo(","),b)),a:l,w:W(M(a,EQ,factML(a)),M(b,EQ,factML(b)),"Take the highest power of every prime that appears."),
+         s:SOL(factLine(a),factLine(b),["Take every prime that appears, to the higher power",Mfin(mi("LCM"),EQ,factML(l),EQ,l)])};}),
+  ()=>{const n=ri(12,100);return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply."),
+         s:SOL(divCount(n))};},
   ()=>retry(()=>{const p=pick([3,5,7,11,13,17,19,23,29,31]),q=pick(PRIMES.filter(v=>v>=p)),n=p*q;if(n>999)return null;
        const ds=String(n).split("").reduce((s,d)=>s+ +d,0);
-       return{q:`Smallest prime factor of ${M(n)}`,a:p,w:W(`It is odd, so not 2. Digit sum ${M(ds)}: ${ds%3?"not":""} a multiple of 3.`,`Then try 5, 7, 11, 13 … — you only need primes up to about ${M(Math.floor(Math.sqrt(n)))}.`)};}),
+       return{q:`Smallest prime factor of ${M(n)}`,a:p,w:W(`It is odd, so not 2. Digit sum ${M(ds)}: ${ds%3?"not":""} a multiple of 3.`,`Then try 5, 7, 11, 13 … — you only need primes up to about ${M(Math.floor(Math.sqrt(n)))}.`),
+         s:(()=>{const L=[];for(const t of PRIMES){if(t>=p)break;L.push([`${t} does not divide it: remainder ${n%t}`,M(n,EQ,t,TM,Math.floor(n/t),PL,n%t)]);}
+  L.push([`${p} divides it exactly`,M(n,EQ,p,TM,n/p)]);L.push(["So the smallest prime factor is",Mfin(mi("p"),EQ,p)]);return SOL(L);})()};}),
  ],[
   ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11])n*=p**ri(0,p<=3?4:p===5?2:1);if(n<30||n>3000||ndiv(n)<6)return null;
-       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply.")};}),
+       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply."),
+         s:SOL(divCount(n))};}),
   ()=>retry(()=>{const a=ri(2,20),b=ri(2,20),c=ri(2,20);if(new Set([a,b,c]).size<3)return null;const l=lcm(lcm(a,b),c);
        if(l>1000||l===Math.max(a,b,c))return null;
-       return{q:M(mi("LCM"),par(a,mo(","),b,mo(","),c)),a:l,w:W([a,b,c].map((v)=>M(v,EQ,factML(v))).join(" &nbsp; "),"Take the highest power of every prime that appears.")};}),
+       return{q:M(mi("LCM"),par(a,mo(","),b,mo(","),c)),a:l,w:W([a,b,c].map((v)=>M(v,EQ,factML(v))).join(" &nbsp; "),"Take the highest power of every prime that appears."),
+         s:SOL([a,b,c].map(factLine),["Take every prime that appears, to the highest power",Mfin(mi("LCM"),EQ,factML(l),EQ,l)])};}),
   ()=>retry(()=>{const k=ri(3,5),ps=Array.from({length:k},()=>pick([2,3,5,7,11,13])),n=ps.reduce((s,p)=>s*p,1);if(n>2000)return null;
        const p0=Math.min(...ps);
-       return{q:`Sum of the prime factors of ${M(n)}, counted with repeats`,a:ps.reduce((s,p)=>s+p,0),w:W(`Start dividing by the smallest prime:`,M(n,EQ,p0,TM,n/p0),`Keep going on ${M(n/p0)}.`)};}),
+       return{q:`Sum of the prime factors of ${M(n)}, counted with repeats`,a:ps.reduce((s,p)=>s+p,0),w:W(`Start dividing by the smallest prime:`,M(n,EQ,p0,TM,n/p0),`Keep going on ${M(n/p0)}.`),
+         s:(()=>{const q=[...ps].sort((u,v)=>u-v);return SOL(["Divide out primes, smallest first",M(n,EQ,prodML(q))],["Add them, repeats included",Mfin(sumML(q),EQ,q.reduce((u,v)=>u+v,0))]);})()};}),
   ()=>{const b=ri(6,13),a=ri(200,9999);let T=Math.floor(a/b/10)*10;if(T*b===a||T===0)T=Math.max(0,T-10);
-       return{q:`Remainder when ${M(a)} is divided by ${M(b)}`,a:a%b,w:W(M(a,EQ,b,TM,T,PL,a-b*T),`Now the remainder of ${M(a-b*T)} on dividing by ${M(b)}.`)};},
+       return{q:`Remainder when ${M(a)} is divided by ${M(b)}`,a:a%b,w:W(M(a,EQ,b,TM,T,PL,a-b*T),`Now the remainder of ${M(a-b*T)} on dividing by ${M(b)}.`),
+         s:SOL([`Take off ${T} lots of ${b}`,M(a,EQ,b,TM,T,PL,a-b*T)],[`Divide what is left, ${a-b*T}, by ${b}`,M(a-b*T,EQ,b,TM,Math.floor((a-b*T)/b),PL,a%b)],["What is left over is the remainder",Mfin(mi("r"),EQ,a%b)])};},
   ()=>retry(()=>{const g=ri(6,40),x=ri(3,25),y=ri(3,25);if(x===y||gcd(x,y)!==1||g*x>999||g*y>999||g*x<100||g*y<100)return null;
-       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g,w:W(M(g*x,EQ,factML(g*x)),M(g*y,EQ,factML(g*y)),"Multiply the primes they share.")};}),
+       return{q:M(mi("HCF"),par(g*x,mo(","),g*y)),a:g,w:W(M(g*x,EQ,factML(g*x)),M(g*y,EQ,factML(g*y)),"Multiply the primes they share."),
+         s:SOL(factLine(g*x),factLine(g*y),["Take each prime they share, to the lower power",Mfin(mi("HCF"),EQ,factML(g),EQ,g)])};}),
  ],[
   ()=>retry(()=>{const ps=[2,3,5,7,11].filter(()=>R(3)!==0);if(ps.length<2)return null;const es=ps.map(()=>ri(1,5)),parts=[];
        if(es.reduce((s,e)=>s*(e+1),1)<8)return null;
        ps.forEach((p,i)=>{if(parts.length)parts.push(TM);parts.push(es[i]===1?mnum(p):pw(p,es[i]));});
        return{q:`Number of positive divisors of ${M(...parts)}`,a:es.reduce((s,e)=>s*(e+1),1),
-              w:W(`Add one to each power and multiply:`,Mans(...es.flatMap((e,i)=>i?[TM,par(e,PL,1)]:[par(e,PL,1)])))};}),
+              w:W(`Add one to each power and multiply:`,Mans(...es.flatMap((e,i)=>i?[TM,par(e,PL,1)]:[par(e,PL,1)]))),
+         s:SOL(["Each divisor takes every prime to a power from 0 up to its own: that is one more choice than the power",M(prodML(es.map((e)=>par(e,PL,1))),EQ,prodML(es.map((e)=>e+1)))],["Multiply",Mfin(prodML(es.map((e)=>e+1)),EQ,es.reduce((u,e)=>u*(e+1),1))])};}),
   ()=>retry(()=>{let n=1;for(const p of [2,3,5,7,11,13])n*=p**ri(0,p<=3?5:p<=7?2:1);if(n<500||n>10000||ndiv(n)<12)return null;
-       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply.")};}),
+       return{q:`Number of positive divisors of ${M(n)}`,a:ndiv(n),w:W(M(n,EQ,factML(n)),"Add one to each power and multiply."),
+         s:SOL(divCount(n))};}),
   ()=>{const n=ri(20,200);let z=0;const ps=[];for(let p=5;p<=n;p*=5){z+=Math.floor(n/p);ps.push(p);}
-       return{q:`Number of zeros at the end of ${M(fac(n))}`,a:z,w:W(`Each zero needs a factor 5. Count multiples of ${ps.join(", ")}:`,Mans(...ps.flatMap((p,i)=>i?[PL,FL(fr(n,p))]:[FL(fr(n,p))])))};},
+       return{q:`Number of zeros at the end of ${M(fac(n))}`,a:z,w:W(`Each zero needs a factor 5. Count multiples of ${ps.join(", ")}:`,Mans(...ps.flatMap((p,i)=>i?[PL,FL(fr(n,p))]:[FL(fr(n,p))]))),
+         s:SOL(ps.map((q)=>[`Multiples of ${q} up to ${n}${q>5?`, each with an extra 5`:""}`,M(FL(fr(n,q)),EQ,Math.floor(n/q))]),["Add: each 5 pairs with a 2 to make one zero",Mfin(sumML(ps.map((q)=>Math.floor(n/q))),EQ,z)])};},
   ()=>{const p=pick([2,3,5,7]),n=ri(10,60);let e=0;const ps=[];for(let q=p;q<=n;q*=p){e+=Math.floor(n/q);ps.push(q);}
-       return{q:`Largest ${M(k_)} such that ${M(pw(p,k_))} divides ${M(fac(n))}`,a:e,w:W(`Count multiples of ${ps.join(", ")} up to ${M(n)}:`,Mans(...ps.flatMap((q,i)=>i?[PL,FL(fr(n,q))]:[FL(fr(n,q))])))};},
+       return{q:`Largest ${M(k_)} such that ${M(pw(p,k_))} divides ${M(fac(n))}`,a:e,w:W(`Count multiples of ${ps.join(", ")} up to ${M(n)}:`,Mans(...ps.flatMap((q,i)=>i?[PL,FL(fr(n,q))]:[FL(fr(n,q))]))),
+         s:SOL(ps.map((q)=>[`Multiples of ${q} up to ${n}${q>p?`, each with an extra ${p}`:""}`,M(FL(fr(n,q)),EQ,Math.floor(n/q))]),[`Add: each one is a factor ${p}`,Mfin(sumML(ps.map((q)=>Math.floor(n/q))),EQ,e)])};},
   ()=>{const a=ri(2,9),n=ri(11,99);let d=1;for(let i=0;i<n;i++)d=d*a%10;const cyc=[];let v=a%10;for(let i=0;i<4;i++){cyc.push(v);v=v*a%10;}
-       return{q:`Last digit of ${M(pw(a,n))}`,a:d,w:W(`Last digits of ${M(a)}, ${M(pw(a,2))}, ${M(pw(a,3))}, ${M(pw(a,4))}: ${cyc.join(", ")} — then the pattern repeats.`,M(n,EQ,4,TM,Math.floor(n/4),PL,n%4))};},
+       return{q:`Last digit of ${M(pw(a,n))}`,a:d,w:W(`Last digits of ${M(a)}, ${M(pw(a,2))}, ${M(pw(a,3))}, ${M(pw(a,4))}: ${cyc.join(", ")} — then the pattern repeats.`,M(n,EQ,4,TM,Math.floor(n/4),PL,n%4)),
+         s:SOL([`Last digits of the powers of ${a}`,cyc.map((v,i)=>M(pw1(a,i+1),mo("→"),v)).join(", ")],[`The pattern repeats every 4: divide ${n} by 4`,M(n,EQ,4,TM,Math.floor(n/4),PL,n%4)],[`Remainder ${n%4}, so it is the ${ORD(n%4||4)} in the pattern`,Mfin(mi("d"),EQ,d)])};},
   ()=>retry(()=>{const a=ri(2,9),b=ri(2,9),N=ri(50,500);if(a===b||a%b===0||b%a===0)return null;const l=lcm(a,b);
        return{q:`How many of ${M(1,mo(","),2,mo(","),3,mo(","),mo("…"),mo(","),N)} are divisible by ${M(a)} or ${M(b)}?`,
-              a:Math.floor(N/a)+Math.floor(N/b)-Math.floor(N/l),w:W(`Multiples of ${M(a)}, plus multiples of ${M(b)}, minus those counted twice (multiples of ${M(l)}):`,Mans(FL(fr(N,a)),PL,FL(fr(N,b)),MI,FL(fr(N,l))))};}),
+              a:Math.floor(N/a)+Math.floor(N/b)-Math.floor(N/l),w:W(`Multiples of ${M(a)}, plus multiples of ${M(b)}, minus those counted twice (multiples of ${M(l)}):`,Mans(FL(fr(N,a)),PL,FL(fr(N,b)),MI,FL(fr(N,l)))),
+         s:SOL([`Multiples of ${a}`,M(FL(fr(N,a)),EQ,Math.floor(N/a))],[`Multiples of ${b}`,M(FL(fr(N,b)),EQ,Math.floor(N/b))],[`Multiples of both, which are multiples of ${l}`,M(FL(fr(N,l)),EQ,Math.floor(N/l))],["Add the first two and take away the overlap",Mfin(Math.floor(N/a),PL,Math.floor(N/b),MI,Math.floor(N/l),EQ,Math.floor(N/a)+Math.floor(N/b)-Math.floor(N/l))])};}),
  ]]},
 
  quadratics:{name:"Quadratics",L:[[
-  ()=>{const b=nz(-12,12),c=nz(-20,20);return{q:`Discriminant of ${M(poly([1,b,c]))}`,a:b*b-4*c,w:W(`Here a = 1, b = ${M(b)}, c = ${M(c)}:`,Mans(pw(pn(b),2),MI,4,TM,1,TM,pn(c)))};},
-  ()=>{const p=nz(-12,12);return{q:`${M(poly([1,2*p,0]),PL,mi("c"))} is a perfect square`,hint:"Find c",a:p*p,w:W(`Halve the number in front of x, then square it:`,Mans(pw(par(fr(2*p,2)),2)))};},
+  ()=>{const b=nz(-12,12),c=nz(-20,20);return{q:`Discriminant of ${M(poly([1,b,c]))}`,a:b*b-4*c,w:W(`Here a = 1, b = ${M(b)}, c = ${M(c)}:`,Mans(pw(pn(b),2),MI,4,TM,1,TM,pn(c))),
+         s:SOL([`Here a = 1, b = ${tn(b)}, c = ${tn(c)}`,M(pw(mi("b"),2),MI,4,mi("a"),mi("c"))],["Substitute",M(pw(pn(b),2),MI,4,TM,1,TM,pn(c),EQ,b*b,MI,pn(4*c))],["Work it out",Mfin(b*b,MI,pn(4*c),EQ,b*b-4*c)])};},
+  ()=>{const p=nz(-12,12);return{q:`${M(poly([1,2*p,0]),PL,mi("c"))} is a perfect square`,hint:"Find c",a:p*p,w:W(`Halve the number in front of x, then square it:`,Mans(pw(par(fr(2*p,2)),2))),
+         s:SOL([`A perfect square (x + p)² has p half of the x coefficient, ${tn(2*p)}`,M(mi("p"),EQ,fr(2*p,2),EQ,p)],["So the square is",Mid(pw(par(poly([1,p])),2),EQ,poly([1,2*p,p*p]))],["c is the number on the end",Mfin(mi("c"),EQ,pw(pn(p),2),EQ,p*p)])};},
   ()=>retry(()=>{const b=nz(-12,12),c=nz(-20,20);if(b*b-4*c<0)return null;
-       return{q:`Sum of the roots of ${M(poly([1,b,c]),EQ,0)}`,a:-b,w:W(`For ${M(pw(x_,2),PL,mi("b"),x_,PL,mi("c"),EQ,0)} the roots add to −b. Here b = ${M(b)}.`)};}),
+       return{q:`Sum of the roots of ${M(poly([1,b,c]),EQ,0)}`,a:-b,w:W(`For ${M(pw(x_,2),PL,mi("b"),x_,PL,mi("c"),EQ,0)} the roots add to −b. Here b = ${M(b)}.`),
+         s:SOL(["For x² + bx + c = 0 the roots add to −b",M(mi("α"),PL,mi("β"),EQ,MI,mi("b"))],[`Here b = ${tn(b)}`,Mfin(mi("α"),PL,mi("β"),EQ,MI,pn(b),EQ,-b)])};}),
   ()=>retry(()=>{const r=ri(-9,9),s=ri(-9,9);if(r===s)return null;
-       return{q:`Larger root of ${M(poly([1,-(r+s),r*s]),EQ,0)}`,a:Math.max(r,s),w:W(`Two numbers with product ${M(r*s)} and sum ${M(-(r+s))}; the roots are those numbers with their signs changed.`)};}),
+       return{q:`Larger root of ${M(poly([1,-(r+s),r*s]),EQ,0)}`,a:Math.max(r,s),w:W(`Two numbers with product ${M(r*s)} and sum ${M(-(r+s))}; the roots are those numbers with their signs changed.`),
+         s:SOL([`Two numbers with product ${tn(r*s)} and sum ${tn(-(r+s))}: ${tn(-r)} and ${tn(-s)}`,Mid(poly([1,-(r+s),r*s]),EQ,lin(r),lin(s))],["Either bracket can be zero",`${M(x_,EQ,r)} or ${M(x_,EQ,s)}`],["The larger root",Mfin(x_,EQ,Math.max(r,s))])};}),
  ],[
   ()=>{const a=pick([-5,-4,-3,-2,2,3,4,5]),b=ri(-12,12),c=nz(-12,12);
-       return{q:`Discriminant of ${M(poly([a,b,c]))}`,a:b*b-4*a*c,w:W(`Here a = ${M(a)}, b = ${M(b)}, c = ${M(c)}:`,Mans(pw(pn(b),2),MI,4,TM,pn(a),TM,pn(c)))};},
+       return{q:`Discriminant of ${M(poly([a,b,c]))}`,a:b*b-4*a*c,w:W(`Here a = ${M(a)}, b = ${M(b)}, c = ${M(c)}:`,Mans(pw(pn(b),2),MI,4,TM,pn(a),TM,pn(c))),
+         s:SOL([`Here a = ${tn(a)}, b = ${tn(b)}, c = ${tn(c)}`,M(pw(mi("b"),2),MI,4,mi("a"),mi("c"))],["Substitute",M(pw(pn(b),2),MI,4,TM,pn(a),TM,pn(c),EQ,b*b,MI,pn(4*a*c))],["Work it out",Mfin(b*b,MI,pn(4*a*c),EQ,b*b-4*a*c)])};},
   ()=>{const p=nz(-12,12),c=ri(-30,30);
-       return{q:M(poly([1,2*p,c]),mo("≡"),pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-p*p,w:W(Mid(pw(par(poly([1,p])),2),EQ,poly([1,2*p,p*p])),`so q makes up the difference:`,Mans(c,MI,pn(p*p)))};},
+       return{q:M(poly([1,2*p,c]),mo("≡"),pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-p*p,w:W(Mid(pw(par(poly([1,p])),2),EQ,poly([1,2*p,p*p])),`so q makes up the difference:`,Mans(c,MI,pn(p*p))),
+         s:SOL(["Expand the bracket",Mid(pw(par(poly([1,p])),2),EQ,poly([1,2*p,p*p]))],["The numbers on the end must match",M(p*p,PL,mi("q"),EQ,c)],[`Take ${p*p} from both sides`,Mfin(mi("q"),EQ,c,MI,p*p,EQ,c-p*p)])};},
   ()=>{const p=nz(-12,12),c=ri(-30,40);
-       return{q:`Minimum value of ${M(poly([1,2*p,c]))}`,a:c-p*p,w:W(Mid(poly([1,2*p,c]),EQ,pw(par(poly([1,p])),2),PL,c-p*p===0?"":row(c<p*p?MI:PL,Math.abs(c-p*p))),`The bracket is never negative — so the smallest value is when it is 0.`)};},
+       return{q:`Minimum value of ${M(poly([1,2*p,c]))}`,a:c-p*p,w:W(Mid(poly([1,2*p,c]),EQ,pw(par(poly([1,p])),2),PL,c-p*p===0?"":row(c<p*p?MI:PL,Math.abs(c-p*p))),`The bracket is never negative — so the smallest value is when it is 0.`),
+         s:SOL(["Complete the square",Mid(poly([1,2*p,c]),EQ,pw(par(poly([1,p])),2),c-p*p===0?"":row(c<p*p?MI:PL,Math.abs(c-p*p)))],["A square is never negative, so the least value is when the bracket is 0",Mfin(mi("min"),EQ,c,MI,p*p,EQ,c-p*p)])};},
   ()=>retry(()=>{const a=ri(2,6),r=ri(-6,6),s=ri(-6,6);if(r===s)return null;const wantP=coin(),b=-a*(r+s),c=a*r*s;
        return{q:`${wantP?"Product":"Sum"} of the roots of ${M(poly([a,b,c]),EQ,0)}`,a:wantP?r*s:r+s,
-              w:W(`For ${M(mi("a"),pw(x_,2),PL,mi("b"),x_,PL,mi("c"))}: sum of roots ${M(MI,fr(mi("b"),mi("a")))}, product ${M(fr(mi("c"),mi("a")))}.`,wantP?Mans(fr(c,a)):Mans(MI,fr(pn(b),a)))};}),
+              w:W(`For ${M(mi("a"),pw(x_,2),PL,mi("b"),x_,PL,mi("c"))}: sum of roots ${M(MI,fr(mi("b"),mi("a")))}, product ${M(fr(mi("c"),mi("a")))}.`,wantP?Mans(fr(c,a)):Mans(MI,fr(pn(b),a))),
+         s:SOL([`Here a = ${tn(a)}, b = ${tn(b)}, c = ${tn(c)}`,wantP?M(mi("α"),mi("β"),EQ,fr(mi("c"),mi("a"))):M(mi("α"),PL,mi("β"),EQ,MI,fr(mi("b"),mi("a")))],["Substitute",wantP?Mfin(mi("α"),mi("β"),EQ,fr(c,a),EQ,r*s):Mfin(mi("α"),PL,mi("β"),EQ,MI,fr(pn(b),a),EQ,r+s)])};}),
  ],[
   ()=>{const m=ri(2,20),pos=coin();
        return{q:`${M(pw(x_,2),PL,k_,x_,PL,m*m,EQ,0)} has a repeated root and ${M(k_,mo(pos?"&gt;":"&lt;"),0)}`,hint:"Find k",a:pos?2*m:-2*m,
-              w:W(`Repeated root: discriminant = 0.`,M(pw(k_,2),MI,4,TM,m*m,EQ,0),`so ${M(pw(k_,2),EQ,4*m*m)}.`)};},
+              w:W(`Repeated root: discriminant = 0.`,M(pw(k_,2),MI,4,TM,m*m,EQ,0),`so ${M(pw(k_,2),EQ,4*m*m)}.`),
+         s:SOL(["A repeated root means the discriminant is 0",M(pw(k_,2),MI,4,TM,1,TM,m*m,EQ,0)],["Rearrange",M(pw(k_,2),EQ,4*m*m)],["Square-root: there are two signs",M(k_,EQ,mo("±"),2*m)],[`Take the ${pos?"positive":"negative"} one`,Mfin(k_,EQ,pos?2*m:-2*m)])};},
   ()=>{const c=nz(-6,6),s=ri(1,4),b=2*c*s*pick([1,-1]);
        return{q:`${M(k_,pw(x_,2),signed(b,x_),signed(c,""),EQ,0)} has a repeated root`,hint:"Find k",a:c*s*s,
-              w:W(`Repeated root: discriminant = 0.`,M(pw(pn(b),2),MI,4,TM,k_,TM,pn(c),EQ,0),`so ${M(4,TM,pn(c),TM,k_,EQ,b*b)}.`)};},
+              w:W(`Repeated root: discriminant = 0.`,M(pw(pn(b),2),MI,4,TM,k_,TM,pn(c),EQ,0),`so ${M(4,TM,pn(c),TM,k_,EQ,b*b)}.`),
+         s:SOL(["A repeated root means the discriminant is 0",M(pw(pn(b),2),MI,4,TM,k_,TM,pn(c),EQ,0)],["Work out the numbers",M(b*b,signed(-4*c,k_),EQ,0)],[`Solve for k`,Mfin(k_,EQ,fr(b*b,pn(4*c)),EQ,c*s*s)])};},
   ()=>{const a=ri(2,5),p=nz(-6,6),c=ri(-20,30);
        return{q:M(poly([a,2*a*p,c]),mo("≡"),a,pw(par(poly([1,p])),2),PL,mi("q")),hint:"Find q",a:c-a*p*p,
-              w:W(Mid(a,pw(par(poly([1,p])),2),EQ,poly([a,2*a*p,a*p*p])),`so q makes up the difference:`,Mans(c,MI,pn(a*p*p)))};},
+              w:W(Mid(a,pw(par(poly([1,p])),2),EQ,poly([a,2*a*p,a*p*p])),`so q makes up the difference:`,Mans(c,MI,pn(a*p*p))),
+         s:SOL(["Expand the bracket",Mid(a,pw(par(poly([1,p])),2),EQ,poly([a,2*a*p,a*p*p]))],["The numbers on the end must match",M(a*p*p,PL,mi("q"),EQ,c)],[`Take ${a*p*p} from both sides`,Mfin(mi("q"),EQ,c,MI,a*p*p,EQ,c-a*p*p)])};},
   ()=>retry(()=>{const S=ri(-9,9),P=ri(-20,20);if(S*S-4*P<0)return null;
        return{q:`${M(mi("α"),mo(","),mi("β"))} are the roots of ${M(poly([1,-S,P]),EQ,0)}. Find ${M(pw(mi("α"),2),PL,pw(mi("β"),2))}`,a:S*S-2*P,
-              w:W(`${M(mi("α"),PL,mi("β"),EQ,S)} and ${M(mi("α"),mi("β"),EQ,P)}.`,M(pw(mi("α"),2),PL,pw(mi("β"),2),EQ,pw(par(mi("α"),PL,mi("β")),2),MI,2,mi("α"),mi("β")),Mans(pw(pn(S),2),MI,2,TM,pn(P)))};}),
+              w:W(`${M(mi("α"),PL,mi("β"),EQ,S)} and ${M(mi("α"),mi("β"),EQ,P)}.`,M(pw(mi("α"),2),PL,pw(mi("β"),2),EQ,pw(par(mi("α"),PL,mi("β")),2),MI,2,mi("α"),mi("β")),Mans(pw(pn(S),2),MI,2,TM,pn(P))),
+         s:SOL(["The sum and the product of the roots",`${M(mi("α"),PL,mi("β"),EQ,S)} and ${M(mi("α"),mi("β"),EQ,P)}`],["Use the identity",M(pw(mi("α"),2),PL,pw(mi("β"),2),EQ,pw(par(mi("α"),PL,mi("β")),2),MI,2,mi("α"),mi("β"))],["Substitute",M(pw(pn(S),2),MI,2,TM,pn(P),EQ,S*S,MI,pn(2*P))],["Work it out",Mfin(S*S,MI,pn(2*P),EQ,S*S-2*P)])};}),
   ()=>{const r=ri(-10,10),s=r+ri(2,9);
        return{q:`How many integers ${M(x_)} satisfy ${M(poly([1,-(r+s),r*s]),mo("&lt;"),0)}?`,a:s-r-1,
-              w:W(Mid(poly([1,-(r+s),r*s]),EQ,lin(r),lin(s)),`It is negative strictly between the roots ${M(r)} and ${M(s)}: count the integers in between.`)};},
+              w:W(Mid(poly([1,-(r+s),r*s]),EQ,lin(r),lin(s)),`It is negative strictly between the roots ${M(r)} and ${M(s)}: count the integers in between.`),
+         s:SOL(["Factorise",Mid(poly([1,-(r+s),r*s]),EQ,lin(r),lin(s))],["A positive quadratic is negative strictly between its roots",M(r,mo("&lt;"),x_,mo("&lt;"),s)],[`Count the integers from ${tn(r+1)} to ${tn(s-1)}: last − first + 1`,Mfin(par(s-1),MI,par(r+1),PL,1,EQ,s-r-1)])};},
   ()=>{const a=pick([-4,-3,-2,-1,1,2,3,4]),h=nz(-8,8),c=ri(-20,20),b=-2*a*h;
-       return{q:`${M(x_)}-coordinate of the turning point of ${M(y_,EQ,poly([a,b,c]))}`,a:h,w:W(`The turning point is at ${M(x_,EQ,MI,fr(mi("b"),row(2,mi("a"))))}.`,Mans(MI,fr(pn(b),row(2,TM,pn(a)))))};},
+       return{q:`${M(x_)}-coordinate of the turning point of ${M(y_,EQ,poly([a,b,c]))}`,a:h,w:W(`The turning point is at ${M(x_,EQ,MI,fr(mi("b"),row(2,mi("a"))))}.`,Mans(MI,fr(pn(b),row(2,TM,pn(a))))),
+         s:SOL(["The turning point is at x = −b ÷ 2a",M(x_,EQ,MI,fr(mi("b"),row(2,mi("a"))))],["Substitute",Mfin(x_,EQ,MI,fr(pn(b),row(2,TM,pn(a))),EQ,h)])};},
  ]]},
 
  stdform:{name:"Standard form",L:[[
   ()=>retry(()=>{const d=ri(11,999);if(d%10===0)return null;const ds=String(d),c=ds[0]+(ds.length>1?"."+ds.slice(1):"");
        if(coin()){const s=String(d)+"0".repeat(ri(2,7));
-         return{q:M(mnum(Number(s)),EQ,SFR),hint:SFH,a:s.length-1,w:W(`Here c = ${M(mn(c))}. Count how many places the decimal point moves left to get there.`)};}
-       const z=ri(1,6);return{q:M(mn("0."+"0".repeat(z)+d),EQ,SFR),hint:SFH,a:-(z+1),w:W(`Here c = ${M(mn(c))}. Count how many places the decimal point moves right — k is minus that.`)};}),
+         return{q:M(mnum(Number(s)),EQ,SFR),hint:SFH,a:s.length-1,w:W(`Here c = ${M(mn(c))}. Count how many places the decimal point moves left to get there.`),
+         s:SOL([`The point moves ${s.length-1} places left, to sit after the first digit`,M(mnum(Number(s)),EQ,mn(c),TM,pw(10,s.length-1))],["The power counts those places",Mfin(k_,EQ,s.length-1)])};}
+       const z=ri(1,6);return{q:M(mn("0."+"0".repeat(z)+d),EQ,SFR),hint:SFH,a:-(z+1),w:W(`Here c = ${M(mn(c))}. Count how many places the decimal point moves right — k is minus that.`),
+         s:SOL([`The point moves ${z+1} places right, to sit after the first non-zero digit`,M(mn("0."+"0".repeat(z)+d),EQ,mn(c),TM,pw(10,-(z+1)))],["Moving right makes the power negative",Mfin(k_,EQ,-(z+1))])};}),
   ()=>{const A=ri(11,99),B=ri(11,99),m=nz(-6,9),n=nz(-6,9);
        return{q:M(par(sfm(A,m)),par(sfm(B,n)),EQ,SFR),hint:SFH,a:m+n+(A*B>=1000?1:0),
-              w:W(M(par(sfm(A,m)),par(sfm(B,n)),EQ,par(mn(tenth(A)),TM,mn(tenth(B))),TM,pw(10,m+n)),M(mn(tenth(A)),TM,mn(tenth(B)),EQ,mn(String(A*B/100))),`If that is 10 or more, the power goes up by one.`)};},
+              w:W(M(par(sfm(A,m)),par(sfm(B,n)),EQ,par(mn(tenth(A)),TM,mn(tenth(B))),TM,pw(10,m+n)),M(mn(tenth(A)),TM,mn(tenth(B)),EQ,mn(String(A*B/100))),`If that is 10 or more, the power goes up by one.`),
+         s:(()=>{const P=A*B/100,big=A*B>=1000;return SOL(["Multiply the front numbers and add the powers",M(par(sfm(A,m)),par(sfm(B,n)),EQ,par(mn(tenth(A)),TM,mn(tenth(B))),TM,pw(10,m+n))],["The front numbers",M(mn(tenth(A)),TM,mn(tenth(B)),EQ,mn(String(P)))],big?["10 or more: move the point one place left and add 1 to the power",M(mn(String(P)),TM,pw(10,m+n),EQ,mn(String(A*B/1000)),TM,pw(10,m+n+1))]:["Already between 1 and 10",M(mn(String(P)),TM,pw(10,m+n))],["Read off k",Mfin(k_,EQ,m+n+(big?1:0))]);})()};},
  ],[
   ()=>{const A=ri(11,99),B=ri(11,99),m=nz(-6,9),n=nz(-6,9);
        return{q:M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,SFR),hint:SFH,a:m-n-(A<B?1:0),
-              w:W(M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,fr(mn(tenth(A)),mn(tenth(B))),TM,pw(10,m-n)),`If the fraction is less than 1, the power goes down by one.`)};},
+              w:W(M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,fr(mn(tenth(A)),mn(tenth(B))),TM,pw(10,m-n)),`If the fraction is less than 1, the power goes down by one.`),
+         s:(()=>{const f=A/B,f3=Number(f.toPrecision(3));return SOL(["Divide the front numbers and subtract the powers",M(par(sfm(A,m)),DV,par(sfm(B,n)),EQ,fr(mn(tenth(A)),mn(tenth(B))),TM,pw(10,m-n))],[A<B?"The fraction is less than 1":"The fraction is between 1 and 10",M(fr(mn(tenth(A)),mn(tenth(B))),mo("≈"),mn(String(f3)))],A<B?["Move the point one place right and take 1 off the power",M(mn(String(f3)),TM,pw(10,m-n),mo("≈"),mn(String(Number((f*10).toPrecision(3)))),TM,pw(10,m-n-1))]:false,["Read off k",Mfin(k_,EQ,m-n-(A<B?1:0))]);})()};},
   ()=>{const A=ri(11,99),B=ri(11,99),m=ri(2,8),n=m-ri(0,2),V=A*10**(m-n)+B;
        const Bm=Number((B/10/10**(m-n)).toPrecision(6));
        return{q:M(sfm(A,m),PL,sfm(B,n),EQ,SFR),hint:SFH,a:flog(V,1)+n-1,
-              w:W(m===n?`Same power already — add the front numbers.`:M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m)),`Add, then check whether the front number is still under 10.`)};},
+              w:W(m===n?`Same power already — add the front numbers.`:M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m)),`Add, then check whether the front number is still under 10.`),
+         s:(()=>{const sm=Number((A/10+Bm).toPrecision(8)),big=sm>=10;return SOL(m!==n?["Write the second with the same power of 10 as the first",M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m))]:false,["Add the front numbers",M(mn(tenth(A)),PL,mn(String(Bm)),EQ,mn(String(sm)))],big?["10 or more: move the point one place left and add 1 to the power",M(mn(String(sm)),TM,pw(10,m),EQ,mn(String(Number((sm/10).toPrecision(8)))),TM,pw(10,m+1))]:["Still between 1 and 10, so the power stays",M(mn(String(sm)),TM,pw(10,m))],["Read off k",Mfin(k_,EQ,big?m+1:m)]);})()};},
   ()=>{const s=ri(2,9),j=nz(-5,8),V=s*s;
        const inner=V>=10?row(mn(String(V/10)),TM,pw(10,2*j+1)):row(mn(String(V)),TM,pw(10,2*j));
-       return{q:M(sq(inner),EQ,SFR),hint:SFH,a:j,w:W(`Make the power even first:`,M(inner,EQ,V,TM,pw(10,2*j)),`and halve the power when you square-root.`)};},
+       return{q:M(sq(inner),EQ,SFR),hint:SFH,a:j,w:W(`Make the power even first:`,M(inner,EQ,V,TM,pw(10,2*j)),`and halve the power when you square-root.`),
+         s:SOL(V>=10?["Make the power even first",M(inner,EQ,V,TM,pw(10,2*j))]:false,["Square-root each part: the root of a power of 10 halves the power",M(sq(row(V,TM,pw(10,2*j))),EQ,sq(V),TM,pw(10,j),EQ,s,TM,pw(10,j))],["Read off k",Mfin(k_,EQ,j)])};},
   ()=>{const A=ri(11,99),m=nz(-4,6),p=pick([2,3]),P=A**p;
        return{q:M(pw(par(sfm(A,m)),p),EQ,SFR),hint:SFH,a:m*p+String(P).length-1-p,
-              w:W(M(pw(par(sfm(A,m)),p),EQ,pw(mn(tenth(A)),p),TM,pw(10,m*p)),M(pw(mn(tenth(A)),p),EQ,mn(String(Number((P/10**p).toPrecision(8))))),`Re-normalise if the front number is 10 or more.`)};},
+              w:W(M(pw(par(sfm(A,m)),p),EQ,pw(mn(tenth(A)),p),TM,pw(10,m*p)),M(pw(mn(tenth(A)),p),EQ,mn(String(Number((P/10**p).toPrecision(8))))),`Re-normalise if the front number is 10 or more.`),
+         s:(()=>{const f0=Number((P/10**p).toPrecision(8)),Ln=String(P).length,sh=Ln-1-p,nf=Number((P/10**(Ln-1)).toPrecision(8));return SOL(["Raise each part to the power",M(pw(par(sfm(A,m)),p),EQ,pw(mn(tenth(A)),p),TM,pw(10,m*p))],["The front number",M(pw(mn(tenth(A)),p),EQ,mn(String(f0)))],sh>0?[`Move the point ${sh} place${sh>1?"s":""} left and add ${sh} to the power`,M(mn(String(f0)),TM,pw(10,m*p),EQ,mn(String(nf)),TM,pw(10,m*p+sh))]:["Already between 1 and 10",M(mn(String(f0)),TM,pw(10,m*p))],["Read off k",Mfin(k_,EQ,m*p+sh)]);})()};},
  ],[
   ()=>{const A=pick([12,15,16,20,25,32,40,50,64,80]),m=nz(-6,9);
-       return{q:M(fr(1,sfm(A,m)),EQ,SFR),hint:SFH,a:-m-1,w:W(M(fr(1,sfm(A,m)),EQ,fr(1,mn(tenth(A))),TM,pw(10,-m)),`and ${M(fr(1,mn(tenth(A))))} is between 0.1 and 1.`)};},
+       return{q:M(fr(1,sfm(A,m)),EQ,SFR),hint:SFH,a:-m-1,w:W(M(fr(1,sfm(A,m)),EQ,fr(1,mn(tenth(A))),TM,pw(10,-m)),`and ${M(fr(1,mn(tenth(A))))} is between 0.1 and 1.`),
+         s:SOL(["Split the reciprocal",M(fr(1,sfm(A,m)),EQ,fr(1,mn(tenth(A))),TM,pw(10,-m))],[`One over ${tenth(A)}`,M(fr(1,mn(tenth(A))),EQ,fr(10,A))],["That is less than 1: multiply it by 10 and take 1 off the power",M(fr(10,A),TM,pw(10,-m),EQ,fr(100,A),TM,pw(10,-m-1))],["Read off k",Mfin(k_,EQ,-m-1)])};},
   ()=>{const b=ri(3,15),j=ri(0,10),twoHeavy=coin(),extra=twoHeavy?2**j:5**j;
        return{q:`Number of digits in ${M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j))}`,a:b+String(extra).length,
-              w:W(`Pair each 2 with a 5 to make a 10:`,M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j),EQ,pw1(twoHeavy?2:5,j),TM,pw(10,b)),`so count the digits of ${M(pw1(twoHeavy?2:5,j))} and add ${M(b)} zeros.`)};},
+              w:W(`Pair each 2 with a 5 to make a 10:`,M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j),EQ,pw1(twoHeavy?2:5,j),TM,pw(10,b)),`so count the digits of ${M(pw1(twoHeavy?2:5,j))} and add ${M(b)} zeros.`),
+         s:(()=>{const base=twoHeavy?2:5;return SOL(["Pair each 2 with a 5 to make a 10",M(pw(2,twoHeavy?b+j:b),TM,pw(5,twoHeavy?b:b+j),EQ,pw1(base,j),TM,pw(10,b))],["Work out the leftover power",M(pw1(base,j),EQ,extra)],[`Its digits, then ${b} zeros`,Mfin(String(extra).length,PL,b,EQ,b+String(extra).length)]);})()};},
   ()=>{const A=ri(11,99),B=ri(11,99),C=ri(11,99),m=nz(-5,8),n=nz(-5,8),p=nz(-5,8);
        return{q:M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,SFR),hint:SFH,a:m+n-p+flog(A*B,10*C),
-              w:W(M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,fr(row(mn(tenth(A)),TM,mn(tenth(B))),mn(tenth(C))),TM,pw(10,m+n-p)),`Estimate the fraction, then re-normalise.`)};},
+              w:W(M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,fr(row(mn(tenth(A)),TM,mn(tenth(B))),mn(tenth(C))),TM,pw(10,m+n-p)),`Estimate the fraction, then re-normalise.`),
+         s:(()=>{const f=flog(A*B,10*C),v=A*B/(10*C);return SOL(["Collect the front numbers and the powers",M(fr(row(par(sfm(A,m)),par(sfm(B,n))),sfm(C,p)),EQ,fr(row(mn(tenth(A)),TM,mn(tenth(B))),mn(tenth(C))),TM,pw(10,m+n-p))],["Estimate the front number",M(fr(row(mn(tenth(A)),TM,mn(tenth(B))),mn(tenth(C))),mo("≈"),mn(String(Number(v.toPrecision(3)))))],[f<0?"Less than 1: take 1 off the power":f>0?"10 or more: add 1 to the power":"Already between 1 and 10: the power stays",Mfin(k_,EQ,f===0?mnum(m+n-p):row(m+n-p,f<0?MI:PL,1),EQ,m+n-p+f)]);})()};},
   ()=>retry(()=>{const A=ri(11,99),B=ri(11,99),m=ri(2,8),n=m-ri(0,1),V=A*10**(m-n)-B;if(V<=0)return null;
        const Bm=Number((B/10/10**(m-n)).toPrecision(6));
        return{q:M(sfm(A,m),MI,sfm(B,n),EQ,SFR),hint:SFH,a:flog(V,1)+n-1,
-              w:W(m===n?`Same power already — subtract the front numbers.`:M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m)),`Subtract, then check whether the front number fell below 1.`)};}),
+              w:W(m===n?`Same power already — subtract the front numbers.`:M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m)),`Subtract, then check whether the front number fell below 1.`),
+         s:(()=>{const df=Number((A/10-Bm).toPrecision(8)),small=df<1;return SOL(m!==n?["Write the second with the same power of 10 as the first",M(sfm(B,n),EQ,mn(String(Bm)),TM,pw(10,m))]:false,["Subtract the front numbers",M(mn(tenth(A)),MI,mn(String(Bm)),EQ,mn(String(df)))],small?["Less than 1: move the point one place right and take 1 off the power",M(mn(String(df)),TM,pw(10,m),EQ,mn(String(Number((df*10).toPrecision(8)))),TM,pw(10,m-1))]:["Still between 1 and 10, so the power stays",M(mn(String(df)),TM,pw(10,m))],["Read off k",Mfin(k_,EQ,small?m-1:m)]);})()};}),
  ]]},
 
  series:{name:"Sequences & series",L:[[
-  ()=>{const n=ri(10,100);return{q:M(1,PL,2,PL,3,PL,mo("⋯"),PL,n),a:n*(n+1)/2,w:W(`Pair the first and last: each pair makes ${M(n+1)}, and there are ${M(fr(n,2))} pairs.`,Mans(fr(n,2),TM,par(n+1)))};},
+  ()=>{const n=ri(10,100);return{q:M(1,PL,2,PL,3,PL,mo("⋯"),PL,n),a:n*(n+1)/2,w:W(`Pair the first and last: each pair makes ${M(n+1)}, and there are ${M(fr(n,2))} pairs.`,Mans(fr(n,2),TM,par(n+1))),
+         s:SOL(["Use n(n + 1) ÷ 2",M(mi("S"),EQ,fr(row(n,TM,n+1),2))],[n%2===0?`Halve ${n} first`:`Halve ${n+1} first`,M(fr(row(n,TM,n+1),2),EQ,n%2===0?row(n/2,TM,n+1):row(n,TM,(n+1)/2))],["Multiply",Mfin(n%2===0?row(n/2,TM,n+1):row(n,TM,(n+1)/2),EQ,n*(n+1)/2)])};},
   ()=>{const a=ri(-10,20),d=nz(-7,9),n=ri(10,40);
        return{q:`The ${ORD(n)} term of ${M(a,mo(","),a+d,mo(","),a+2*d,mo(","),mo("…"))}`,a:a+(n-1)*d,
-              w:W(`It goes up by ${M(d)} each time. The ${ORD(n)} term is ${M(n-1)} steps after the first:`,Mans(a,PL,n-1,TM,pn(d)))};},
-  ()=>{const n=ri(5,30);return{q:M(1,PL,3,PL,5,PL,mo("⋯"),PL,2*n-1),a:n*n,w:W(`The sum of the first n odd numbers is ${M(pw(mi("n"),2))}. Here the last one is ${M(2*n-1)}, so n = ${M(fr(row(2*n-1,PL,1),2))}.`)};},
+              w:W(`It goes up by ${M(d)} each time. The ${ORD(n)} term is ${M(n-1)} steps after the first:`,Mans(a,PL,n-1,TM,pn(d))),
+         s:SOL(["The common difference",M(mi("d"),EQ,a+d,MI,pn(a),EQ,d)],[`The ${ORD(n)} term is ${n-1} steps after the first`,M(sb(mi("u"),n),EQ,a,PL,n-1,TM,pn(d))],["Multiply",M(n-1,TM,pn(d),EQ,(n-1)*d)],["Add",Mfin(a,PL,pn((n-1)*d),EQ,a+(n-1)*d)])};},
+  ()=>{const n=ri(5,30);return{q:M(1,PL,3,PL,5,PL,mo("⋯"),PL,2*n-1),a:n*n,w:W(`The sum of the first n odd numbers is ${M(pw(mi("n"),2))}. Here the last one is ${M(2*n-1)}, so n = ${M(fr(row(2*n-1,PL,1),2))}.`),
+         s:SOL([`How many odd numbers? The last one is ${2*n-1}`,M(mi("n"),EQ,fr(row(2*n-1,PL,1),2),EQ,n)],["The first n odd numbers add to n²",Mfin(pw(n,2),EQ,n*n)])};},
  ],[
   ()=>{const a=ri(1,20),d=ri(2,9),n=ri(6,30),l=a+(n-1)*d;
-       return{q:M(a,PL,a+d,PL,a+2*d,PL,mo("⋯"),PL,l),a:n*(a+l)/2,w:W(`Number of terms:`,M(fr(row(l,MI,a),d),PL,1,EQ,n),Mans(fr(n,2),TM,par(a,PL,l)))};},
+       return{q:M(a,PL,a+d,PL,a+2*d,PL,mo("⋯"),PL,l),a:n*(a+l)/2,w:W(`Number of terms:`,M(fr(row(l,MI,a),d),PL,1,EQ,n),Mans(fr(n,2),TM,par(a,PL,l))),
+         s:SOL([`Number of terms: steps of ${d} from ${a} to ${l}, plus one`,M(fr(row(l,MI,a),d),PL,1,EQ,n)],["Sum = half the number of terms × (first + last)",M(mi("S"),EQ,fr(n,2),TM,par(a,PL,l))],["Work it out",Mfin(fr(n,2),TM,a+l,EQ,n*(a+l)/2)])};},
   ()=>retry(()=>{const a=ri(1,5)*pick([1,-1]),r=pick([2,3,-2,-3,4,5]),n=ri(4,8),v=a*r**(n-1);if(Math.abs(v)>50000)return null;
-       return{q:`The ${ORD(n)} term of ${M(a,mo(","),a*r,mo(","),a*r*r,mo(","),mo("…"))}`,a:v,w:W(`Each term is ${M(pn(r))} times the last:`,Mans(pn(a),TM,pw(par(r),n-1)))};}),
+       return{q:`The ${ORD(n)} term of ${M(a,mo(","),a*r,mo(","),a*r*r,mo(","),mo("…"))}`,a:v,w:W(`Each term is ${M(pn(r))} times the last:`,Mans(pn(a),TM,pw(par(r),n-1))),
+         s:SOL(["The ratio: a term divided by the one before",M(mi("r"),EQ,fr(a*r,pn(a)),EQ,r)],[`The ${ORD(n)} term`,M(sb(mi("u"),n),EQ,pn(a),TM,pw(par(r),n-1))],["Work out the power",M(pw(par(r),n-1),EQ,r**(n-1))],["Multiply",Mfin(pn(a),TM,pn(r**(n-1)),EQ,v)])};}),
   ()=>retry(()=>{const p=nz(-3,3),q=ri(-5,5),c=ri(-4,6),N=pick([4,5]);let v=c;for(let i=1;i<N;i++)v=p*v+q;if(Math.abs(v)>5000)return null;
        return{q:`${M(sb(x_,row(mi("n"),PL,1)),EQ,terms([{c:p,t:sb(x_,mi("n"))},{c:q,t:""}]))} and ${M(sb(x_,1),EQ,c)}. Find ${M(sb(x_,N))}`,a:v,
-              w:W(`One step at a time:`,M(pn(p),TM,pn(c),PL,pn(q),EQ,p*c+q),`That is ${M(sb(x_,2))}; carry on to ${M(sb(x_,N))}.`)};}),
+              w:W(`One step at a time:`,M(pn(p),TM,pn(c),PL,pn(q),EQ,p*c+q),`That is ${M(sb(x_,2))}; carry on to ${M(sb(x_,N))}.`),
+         s:(()=>{const L=[];let v0=c;for(let i=1;i<N;i++){const nv=p*v0+q;L.push([`Use the rule to get the ${ORD(i+1)} term`,(i===N-1?Mfin:M)(sb(x_,i+1),EQ,pn(p),TM,pn(v0),PL,pn(q),EQ,nv)]);v0=nv;}return SOL(L);})()};}),
   ()=>{const k=ri(3,9),N=ri(50,200),m=Math.floor((N-1)/k);
-       return{q:`Sum of the positive multiples of ${M(k)} less than ${M(N)}`,a:k*m*(m+1)/2,w:W(`The biggest is ${M(k,TM,m,EQ,k*m)}, so it is ${M(k)} × (1 + 2 + … + ${m}):`,Mans(k,TM,fr(row(m,TM,par(m+1)),2)))};},
+       return{q:`Sum of the positive multiples of ${M(k)} less than ${M(N)}`,a:k*m*(m+1)/2,w:W(`The biggest is ${M(k,TM,m,EQ,k*m)}, so it is ${M(k)} × (1 + 2 + … + ${m}):`,Mans(k,TM,fr(row(m,TM,par(m+1)),2))),
+         s:SOL([`The biggest multiple of ${k} below ${N}`,M(k,TM,m,EQ,k*m)],[`Take out the ${k}`,M(mi("S"),EQ,k,TM,par(1,PL,2,PL,mo("⋯"),PL,m))],[`1 + 2 + … + ${m} = n(n + 1) ÷ 2`,M(fr(row(m,TM,par(m+1)),2),EQ,m*(m+1)/2)],[`Multiply by ${k}`,Mfin(k,TM,m*(m+1)/2,EQ,k*m*(m+1)/2)])};},
  ],[
   ()=>retry(()=>{const a=ri(1,5),r=pick([2,3]),n=ri(4,8),v=a*(r**n-1)/(r-1);if(v>20000)return null;
-       return{q:M(a,PL,a*r,PL,a*r*r,PL,mo("⋯"),PL,a*r**(n-1)),a:v,w:W(`First term ${M(a)}, ratio ${M(r)}, ${M(n)} terms:`,Mans(fr(row(a,par(pw(r,n),MI,1)),row(r,MI,1))))};}),
+       return{q:M(a,PL,a*r,PL,a*r*r,PL,mo("⋯"),PL,a*r**(n-1)),a:v,w:W(`First term ${M(a)}, ratio ${M(r)}, ${M(n)} terms:`,Mans(fr(row(a,par(pw(r,n),MI,1)),row(r,MI,1)))),
+         s:SOL([`First term ${a}, ratio ${r}, ${n} terms`,M(sb(mi("S"),mi("n")),EQ,fr(row(mi("a"),par(pw(mi("r"),mi("n")),MI,1)),row(mi("r"),MI,1)))],["Substitute",M(fr(row(a,par(pw(r,n),MI,1)),row(r,MI,1)),EQ,fr(row(a,TM,r**n-1),r-1))],["Work it out",Mfin(fr(a*(r**n-1),r-1),EQ,v)])};}),
   ()=>retry(()=>{const [nu,de]=pick([[1,2],[1,3],[1,4],[-1,2],[2,3],[3,4],[-1,3],[-2,3]]),a=de*de*ri(1,4),S=a*de/(de-nu);
        if(!Number.isInteger(S))return null;const t=[a,a*nu/de,a*nu*nu/(de*de)],next=nu<0?-1:1;
        return{q:`Sum to infinity of ${M(t[0],signed(t[1],""),signed(t[2],""),mo(next<0?"−":"+"),mo("⋯"))}`,a:S,
-              w:W(`Ratio:`,M(fr(pn(t[1]),t[0]),EQ,fr(nu,de)),Mans(fr(a,row(1,MI,par(fr(nu,de))))))};}),
+              w:W(`Ratio:`,M(fr(pn(t[1]),t[0]),EQ,fr(nu,de)),Mans(fr(a,row(1,MI,par(fr(nu,de)))))),
+         s:SOL(["The ratio",M(mi("r"),EQ,fr(pn(t[1]),t[0]),EQ,fr(nu,de))],["Sum to infinity = first term ÷ (1 − r)",M(fr(a,row(1,MI,par(fr(nu,de)))),EQ,fr(a,fr(de-nu,de)))],["Dividing by a fraction: flip it and multiply",Mfin(a,TM,fr(de,de-nu),EQ,S)])};}),
   ()=>{const p=ri(1,6),q=ri(-5,9),n=ri(5,30);
        return{q:M(`<munderover><mo>∑</mo>${row(mi("r"),EQ,1)}${row(n)}</munderover>`,par(terms([{c:p,t:mi("r")},{c:q,t:""}]))),a:p*n*(n+1)/2+q*n,
-              w:W(`Split it: ${M(p)} × (1 + 2 + … + ${n}) plus ${M(pn(q))} added ${M(n)} times:`,Mans(p,TM,fr(row(n,TM,n+1),2),PL,pn(q),TM,n))};},
+              w:W(`Split it: ${M(p)} × (1 + 2 + … + ${n}) plus ${M(pn(q))} added ${M(n)} times:`,Mans(p,TM,fr(row(n,TM,n+1),2),PL,pn(q),TM,n)),
+         s:SOL([`Split it: ${p} × (1 + 2 + … + ${n}), plus ${tn(q)} added ${n} times. First 1 + 2 + … + ${n}`,M(fr(row(n,TM,n+1),2),EQ,n*(n+1)/2)],[`${p} lots of it`,M(p,TM,n*(n+1)/2,EQ,p*n*(n+1)/2)],[`${tn(q)} added ${n} times`,M(pn(q),TM,n,EQ,q*n)],["Add",Mfin(p*n*(n+1)/2,PL,pn(q*n),EQ,p*n*(n+1)/2+q*n)])};},
   ()=>{const a=ri(-10,20),d=nz(-6,8),i=ri(2,5),j=i+ri(2,6),n=ri(12,30),ui=a+(i-1)*d,uj=a+(j-1)*d;
        return{q:`Arithmetic sequence with ${M(sb(mi("u"),i),EQ,ui)} and ${M(sb(mi("u"),j),EQ,uj)}. Find ${M(sb(mi("u"),n))}`,a:a+(n-1)*d,
-              w:W(`${M(j-i)} steps take it from ${M(ui)} to ${M(uj)}, so one step is`,M(fr(row(uj,MI,pn(ui)),j-i),EQ,d),`Then ${M(n-j)} more steps from ${M(sb(mi("u"),j))}.`)};},
+              w:W(`${M(j-i)} steps take it from ${M(ui)} to ${M(uj)}, so one step is`,M(fr(row(uj,MI,pn(ui)),j-i),EQ,d),`Then ${M(n-j)} more steps from ${M(sb(mi("u"),j))}.`),
+         s:SOL([`${j-i} steps from the ${ORD(i)} term to the ${ORD(j)}, so one step is`,M(mi("d"),EQ,fr(row(uj,MI,pn(ui)),j-i),EQ,d)],[`From the ${ORD(j)} term to the ${ORD(n)} is ${n-j} more steps`,M(n,MI,j,EQ,n-j)],["Add those steps",Mfin(sb(mi("u"),n),EQ,uj,PL,n-j,TM,pn(d),EQ,a+(n-1)*d)])};},
  ]]},
 
  poly:{name:"Polynomials",L:[[
   ()=>{const deg=pick([2,3]),c=Array.from({length:deg+1},(_,i)=>i===0?nz(-3,4):ri(-6,6)),t=nz(-3,3);
-       return{q:`${M(fx,EQ,poly(c))}. Find ${M(mi("f"),par(t))}`,a:evalP(c,t),w:W(`Put ${M(x_,EQ,t)} into every term:`,substML(c,t))};},
+       return{q:`${M(fx,EQ,poly(c))}. Find ${M(mi("f"),par(t))}`,a:evalP(c,t),w:W(`Put ${M(x_,EQ,t)} into every term:`,substML(c,t)),
+         s:SOL(subLines(c,t,row(mi("f"),par(t))))};},
   ()=>{const b=ri(-6,6),c=ri(-9,9),a=nz(-4,4);
-       return{q:`Remainder when ${M(poly([1,b,c]))} is divided by ${M(lin(a))}`,a:a*a+b*a+c,w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,substML([1,b,c],a))};},
+       return{q:`Remainder when ${M(poly([1,b,c]))} is divided by ${M(lin(a))}`,a:a*a+b*a+c,w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,substML([1,b,c],a)),
+         s:SOL([`The remainder on dividing by ${M(lin(a))} is the value at x = ${tn(a)}`,M(mi("R"),EQ,mi("f"),par(a))],subLines([1,b,c],a,row(mi("f"),par(a))))};},
  ],[
   ()=>{const c=[nz(-3,3),ri(-6,6),ri(-6,6),ri(-9,9)],a=nz(-3,4);
-       return{q:`Remainder when ${M(poly(c))} is divided by ${M(lin(a))}`,a:evalP(c,a),w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,substML(c,a))};},
+       return{q:`Remainder when ${M(poly(c))} is divided by ${M(lin(a))}`,a:evalP(c,a),w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,substML(c,a)),
+         s:SOL([`The remainder on dividing by ${M(lin(a))} is the value at x = ${tn(a)}`,M(mi("R"),EQ,mi("f"),par(a))],subLines(c,a,row(mi("f"),par(a))))};},
   ()=>{const b=ri(-6,6),c=ri(-9,9),a=nz(-3,3);
        return{q:`${M(lin(a))} is a factor of ${M(pw(x_,3),signed(b,pw(x_,2)),signed(c,x_),PL,k_)}`,hint:"Find k",a:-(a**3+b*a*a+c*a),
-              w:W(`A factor means the value at ${M(x_,EQ,a)} is 0. Without k, the value is`,substML([1,b,c,0],a,false),`and k must cancel it.`)};},
+              w:W(`A factor means the value at ${M(x_,EQ,a)} is 0. Without k, the value is`,substML([1,b,c,0],a,false),`and k must cancel it.`),
+         s:(()=>{const v0=a**3+b*a*a+c*a,parts=[pw(par(a),3),b?row(pn(b),TM,pw(par(a),2)):"",c?row(pn(c),TM,pn(a)):""].filter(Boolean);return SOL([`A factor means the value at x = ${tn(a)} is 0`,M(mi("f"),par(a),EQ,0)],["Substitute",M(sumML(parts),PL,k_,EQ,0)],["Work out the numbers",M(pn(v0),PL,k_,EQ,0)],["Solve for k",Mfin(k_,EQ,-v0)]);})()};},
   ()=>{const n=ri(3,9),a=pick([-2,-1,1,2]),c=nz(-9,9);
-       return{q:`Remainder when ${M(pw(x_,n),signed(c,""))} is divided by ${M(lin(a))}`,a:a**n+c,w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,Mans(pw(par(a),n),PL,pn(c)))};},
+       return{q:`Remainder when ${M(pw(x_,n),signed(c,""))} is divided by ${M(lin(a))}`,a:a**n+c,w:W(`The remainder is the value at ${M(x_,EQ,a)}:`,Mans(pw(par(a),n),PL,pn(c))),
+         s:SOL([`The remainder is the value at x = ${tn(a)}`,M(mi("R"),EQ,mi("f"),par(a))],["Substitute",M(pw(par(a),n),PL,pn(c),EQ,a**n,PL,pn(c))],["Add",Mfin(a**n,PL,pn(c),EQ,a**n+c)])};},
  ],[
   ()=>retry(()=>{const c=[nz(-4,4),ri(-6,6),ri(-6,6),ri(-9,9)],s=pick([1,-1]),v=(c[0]*s**3+2*c[1]*s*s+4*c[2]*s+8*c[3])/8;
        if(!Number.isInteger(v))return null;
        return{q:`Remainder when ${M(poly(c))} is divided by ${M(par(poly([2,-s])))}`,a:v,
               w:W(`${M(par(poly([2,-s])))} is zero at ${M(x_,EQ,fr(s,2))}, so the remainder is the value there:`,
-                  Mans(...c.flatMap((a,i)=>{const p=3-i;if(a===0)return[];const t=p===0?pn(a):row(pn(a),TM,pw1(par(fr(s,2)),p));return[PL,t];}).slice(1)))};}),
+                  Mans(...c.flatMap((a,i)=>{const p=3-i;if(a===0)return[];const t=p===0?pn(a):row(pn(a),TM,pw1(par(fr(s,2)),p));return[PL,t];}).slice(1))),
+         s:(()=>{const parts=[],vals=[];c.forEach((u,i)=>{const p=3-i;if(u===0)return;parts.push(p===0?pn(u):row(pn(u),TM,pw1(par(fr(s,2)),p)));vals.push([u*s**p,2**p]);});
+  const show=vals.map(([n,d])=>qP(n,d));
+  return SOL([`${M(par(poly([2,-s])))} is zero at x = ${s<0?"−":""}½, so the remainder is the value there`,M(x_,EQ,fr(s,2))],["Put that value into every term",M(mi("f"),par(fr(s,2)),EQ,sumML(parts))],["Work out each term",M(sumML(parts),EQ,sumML(show))],["Add them up",Mfin(sumML(show),EQ,v)]);})()};}),
   ()=>{const k=nz(-6,6),c=ri(-9,9),a=nz(-3,3),d=-(a**3+k*a*a+c*a);
        return{q:`${M(lin(a))} is a factor of ${M(pw(x_,3),PL,k_,pw(x_,2),signed(c,x_),signed(d,""))}`,hint:"Find k",a:k,
-              w:W(`A factor means the value at ${M(x_,EQ,a)} is 0:`,M(pw(par(a),3),PL,k_,TM,pw(par(a),2),PL,pn(c),TM,pn(a),PL,pn(d),EQ,0),`Solve for k.`)};},
+              w:W(`A factor means the value at ${M(x_,EQ,a)} is 0:`,M(pw(par(a),3),PL,k_,TM,pw(par(a),2),PL,pn(c),TM,pn(a),PL,pn(d),EQ,0),`Solve for k.`),
+         s:(()=>{const v0=a**3+c*a+d;return SOL([`A factor means the value at x = ${tn(a)} is 0`,M(pw(par(a),3),PL,k_,TM,pw(par(a),2),PL,pn(c),TM,pn(a),PL,pn(d),EQ,0)],["Collect the numbers",M(cx(a*a,k_),PL,pn(v0),EQ,0)],a*a===1?["Solve for k",Mfin(k_,EQ,-v0)]:[`Divide by ${a*a}`,Mfin(k_,EQ,fr(-v0,a*a),EQ,k)]);})()};},
   ()=>{const p=ri(-8,8),q=ri(-10,10);
        return{q:`${M(fx,EQ,pw(x_,2),PL,mi("p"),x_,PL,mi("q"))}, with ${M(mi("f"),par(1),EQ,1+p+q)} and ${M(mi("f"),par(2),EQ,4+2*p+q)}`,hint:"Find p",a:p,
-              w:W(M(1,PL,mi("p"),PL,mi("q"),EQ,1+p+q),M(4,PL,2,mi("p"),PL,mi("q"),EQ,4+2*p+q),`Subtract the first from the second to get rid of q.`)};},
+              w:W(M(1,PL,mi("p"),PL,mi("q"),EQ,1+p+q),M(4,PL,2,mi("p"),PL,mi("q"),EQ,4+2*p+q),`Subtract the first from the second to get rid of q.`),
+         s:SOL([`Write out ${M(mi("f"),par(1))}`,M(1,PL,mi("p"),PL,mi("q"),EQ,1+p+q)],[`Write out ${M(mi("f"),par(2))}`,M(4,PL,2,mi("p"),PL,mi("q"),EQ,4+2*p+q)],["Subtract the first from the second: q cancels",M(3,PL,mi("p"),EQ,3+p)],["Take away 3",Mfin(mi("p"),EQ,3+p,MI,3,EQ,p)])};},
  ]]},
 
  calculus:{name:"Calculus",L:[[
   ()=>{const c=ri(1,6),n=ri(2,4),t=nz(-3,3);
-       return{q:`${M(y_,EQ,coefx(c,pw(x_,n)))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:c*n*t**(n-1),w:W(`Bring the power down and reduce it by one:`,Mid(dydx,EQ,c*n,pw1(x_,n-1)),`Now put ${M(x_,EQ,t)} in:`,Mans(c*n,TM,ppow(t,n-1)))};},
+       return{q:`${M(y_,EQ,coefx(c,pw(x_,n)))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:c*n*t**(n-1),w:W(`Bring the power down and reduce it by one:`,Mid(dydx,EQ,c*n,pw1(x_,n-1)),`Now put ${M(x_,EQ,t)} in:`,Mans(c*n,TM,ppow(t,n-1))),
+         s:SOL(["Bring the power down and reduce it by one",M(dydx,EQ,cx(c*n,pw1(x_,n-1)))],[`Put x = ${tn(t)} in`,M(c*n,TM,ppow(t,n-1),EQ,c*n,TM,pn(t**(n-1)))],["Multiply",Mfin(c*n,TM,pn(t**(n-1)),EQ,c*n*t**(n-1))])};},
   ()=>{const c=[nz(-5,5),ri(-9,9),ri(-9,9)],t=ri(-4,4);
-       return{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:2*c[0]*t+c[1],w:W(`Differentiate term by term:`,M(mi("f"),prime("′"),par(x_),EQ,poly([2*c[0],c[1]])),`then put ${M(x_,EQ,t)} in.`)};},
+       return{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:2*c[0]*t+c[1],w:W(`Differentiate term by term:`,M(mi("f"),prime("′"),par(x_),EQ,poly([2*c[0],c[1]])),`then put ${M(x_,EQ,t)} in.`),
+         s:SOL(["Differentiate term by term",M(fp(x_),EQ,poly([2*c[0],c[1]]))],[`Put x = ${tn(t)} in`,M(fp(t),EQ,2*c[0],TM,pn(t),PL,pn(c[1]))],["Work it out",Mfin(2*c[0]*t,PL,pn(c[1]),EQ,2*c[0]*t+c[1])])};},
   ()=>retry(()=>{const a=nz(-6,6),b=ri(-6,6),t=ri(1,6),v=a*t*t/2+b*t;if(!Number.isInteger(v))return null;
-       return{q:M(intg(0,t),par(poly([a,b])),dx),a:v,w:W(`Integrate:`,M(mi("F"),par(x_),EQ,fr(a,2),pw(x_,2),b===0?"":row(b<0?MI:PL,Math.abs(b)===1?"":mnum(Math.abs(b)),x_)),`then F(${t}) − F(0).`)};}),
+       return{q:M(intg(0,t),par(poly([a,b])),dx),a:v,w:W(`Integrate:`,M(mi("F"),par(x_),EQ,fr(a,2),pw(x_,2),b===0?"":row(b<0?MI:PL,Math.abs(b)===1?"":mnum(Math.abs(b)),x_)),`then F(${t}) − F(0).`),
+         s:SOL(["Integrate: raise each power by one and divide by the new power",M(mi("F"),par(x_),EQ,fterms([{n:a,d:2,t:pw(x_,2)},{n:b,t:x_}]))],["The top limit",M(mi("F"),par(t),EQ,fr(a,2),TM,pw(t,2),PL,pn(b),TM,t,EQ,v)],["The bottom limit",M(mi("F"),par(0),EQ,0)],["Top minus bottom",Mfin(v,MI,0,EQ,v)])};}),
  ],[
   ()=>{const c=[nz(-4,4),ri(-6,6),ri(-6,6),ri(-9,9)],t=nz(-3,3);
-       return R(3)===0?{q:`${M(fx,EQ,poly(c))}. Find ${M(fpp(t))}`,a:6*c[0]*t+2*c[1],w:W(`Differentiate twice:`,M(mi("f"),prime("″"),par(x_),EQ,poly([6*c[0],2*c[1]])),`then put ${M(x_,EQ,t)} in.`)}
-                      :{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:3*c[0]*t*t+2*c[1]*t+c[2],w:W(`Differentiate term by term:`,M(mi("f"),prime("′"),par(x_),EQ,poly([3*c[0],2*c[1],c[2]])),`then put ${M(x_,EQ,t)} in.`)};},
+       return R(3)===0?{q:`${M(fx,EQ,poly(c))}. Find ${M(fpp(t))}`,a:6*c[0]*t+2*c[1],w:W(`Differentiate twice:`,M(mi("f"),prime("″"),par(x_),EQ,poly([6*c[0],2*c[1]])),`then put ${M(x_,EQ,t)} in.`),
+         s:SOL(["Differentiate once",M(fp(x_),EQ,poly([3*c[0],2*c[1],c[2]]))],["Differentiate again",M(fpp(x_),EQ,poly([6*c[0],2*c[1]]))],[`Put x = ${tn(t)} in`,Mfin(fpp(t),EQ,6*c[0],TM,pn(t),PL,pn(2*c[1]),EQ,6*c[0]*t+2*c[1])])}
+                      :{q:`${M(fx,EQ,poly(c))}. Find ${M(fp(t))}`,a:3*c[0]*t*t+2*c[1]*t+c[2],w:W(`Differentiate term by term:`,M(mi("f"),prime("′"),par(x_),EQ,poly([3*c[0],2*c[1],c[2]])),`then put ${M(x_,EQ,t)} in.`),
+         s:SOL(["Differentiate term by term",M(fp(x_),EQ,poly([3*c[0],2*c[1],c[2]]))],[`Put x = ${tn(t)} in`,M(fp(t),EQ,3*c[0],TM,pw(par(t),2),PL,pn(2*c[1]),TM,pn(t),PL,pn(c[2]))],["Work out each term",M(3*c[0],TM,pw(par(t),2),PL,pn(2*c[1]),TM,pn(t),PL,pn(c[2]),EQ,3*c[0]*t*t,PL,pn(2*c[1]*t),PL,pn(c[2]))],["Add",Mfin(3*c[0]*t*t,PL,pn(2*c[1]*t),PL,pn(c[2]),EQ,3*c[0]*t*t+2*c[1]*t+c[2])])};},
   ()=>retry(()=>{const q=pick([2,3]),p=pick([1,2,3,4,5,7]),r=ri(2,4);if(gcd(p,q)!==1||p===q||r**q>100)return null;
        let num=p,den=q;if(p>=q)num*=r**(p-q);else den*=r**(q-p);const g=gcd(num,den);num/=g;den/=g;const c=den*ri(1,3);
        return{q:`${M(y_,EQ,coefx(c,pw(x_,fr(p,q))))}. Find ${M(dydx)} at ${M(x_,EQ,r**q)}`,a:c*num/den,
-              w:W(Mid(dydx,EQ,c,TM,fr(p,q),TM,pw(x_,fr(p-q,q))),M(pw(r**q,fr(1,q)),EQ,r),`So ${M(pw(r**q,fr(p-q,q)),EQ,pw(r,p-q))}.`)};}),
+              w:W(Mid(dydx,EQ,c,TM,fr(p,q),TM,pw(x_,fr(p-q,q))),M(pw(r**q,fr(1,q)),EQ,r),`So ${M(pw(r**q,fr(p-q,q)),EQ,pw(r,p-q))}.`),
+         s:(()=>{const e1=p-q,val=e1>=0?mnum(r**e1):fr(1,r**(-e1));return SOL(["Bring the power down and reduce it by one",Mid(dydx,EQ,c,TM,fr(p,q),TM,pw(x_,fr(p-q,q)))],[`The ${ROOTN[q]} root of ${r**q}`,M(pw(r**q,fr(1,q)),EQ,r)],[`So x to the power ${M(fr(p-q,q))} is`,M(pw(r**q,fr(p-q,q)),EQ,pw(r,p-q),EQ,val)],["Multiply",Mfin(c,TM,fr(p,q),TM,val,EQ,c*num/den)]);})()};}),
   ()=>retry(()=>{const k=ri(1,6),a=ri(0,3),b=a+ri(1,3),v=k*(b**3-a**3)/3;if(!Number.isInteger(v))return null;
-       return{q:M(intg(a,b),coefx(k,pw(x_,2)),dx),a:v,w:W(`Integrate:`,Mid(mi("F"),par(x_),EQ,fr(k,3),pw(x_,3)),Mans(fr(k,3),TM,par(pw(b,3),MI,pw(a,3))))};}),
+       return{q:M(intg(a,b),coefx(k,pw(x_,2)),dx),a:v,w:W(`Integrate:`,Mid(mi("F"),par(x_),EQ,fr(k,3),pw(x_,3)),Mans(fr(k,3),TM,par(pw(b,3),MI,pw(a,3)))),
+         s:SOL(["Integrate",Mid(mi("F"),par(x_),EQ,fr(k,3),pw(x_,3))],["Top minus bottom",M(fr(k,3),TM,par(pw(b,3),MI,pw(a,3)),EQ,fr(k,3),TM,b**3-a**3)],["Work it out",Mfin(fr(k*(b**3-a**3),3),EQ,v)])};}),
   ()=>retry(()=>{const c=ri(1,8),t=ri(1,4),v=c*t**4/4;if(!Number.isInteger(v))return null;
-       return{q:M(intg(0,t),coefx(c,pw(x_,3)),dx),a:v,w:W(`Integrate:`,Mid(mi("F"),par(x_),EQ,fr(c,4),pw(x_,4)),Mans(fr(c,4),TM,pw(t,4)))};}),
+       return{q:M(intg(0,t),coefx(c,pw(x_,3)),dx),a:v,w:W(`Integrate:`,Mid(mi("F"),par(x_),EQ,fr(c,4),pw(x_,4)),Mans(fr(c,4),TM,pw(t,4))),
+         s:SOL(["Integrate",Mid(mi("F"),par(x_),EQ,fr(c,4),pw(x_,4))],[`The top limit; F(0) is 0`,M(fr(c,4),TM,pw(t,4),EQ,fr(c,4),TM,t**4)],["Work it out",Mfin(fr(c*t**4,4),EQ,v)])};}),
  ],[
   ()=>retry(()=>{const c=[ri(-4,4),ri(-6,6),ri(-6,6)],t=ri(2,4),v6=2*c[0]*(t**3-1)+3*c[1]*(t*t-1)+6*c[2]*(t-1);
        if(v6%6!==0||c[0]===0)return null;
-       return{q:M(intg(1,t),par(poly(c)),dx),a:v6/6,w:W(`Integrate each term:`,Mid(mi("F"),par(x_),EQ,fr(c[0],3),pw(x_,3),PL,fr(c[1],2),pw(x_,2),PL,pn(c[2]),x_),`then F(${t}) − F(1).`)};}),
+       return{q:M(intg(1,t),par(poly(c)),dx),a:v6/6,w:W(`Integrate each term:`,Mid(mi("F"),par(x_),EQ,fr(c[0],3),pw(x_,3),PL,fr(c[1],2),pw(x_,2),PL,pn(c[2]),x_),`then F(${t}) − F(1).`),
+         s:(()=>{const F6=(u)=>2*c[0]*u**3+3*c[1]*u*u+6*c[2]*u,Ft=F6(t),F1=F6(1);return SOL(["Integrate each term: raise the power by one, divide by the new power",M(mi("F"),par(x_),EQ,fterms([{n:c[0],d:3,t:pw(x_,3)},{n:c[1],d:2,t:pw(x_,2)},{n:c[2],t:x_}]))],[`Put x = ${t} in`,M(mi("F"),par(t),EQ,qML(Ft,6))],["Put x = 1 in",M(mi("F"),par(1),EQ,qML(F1,6))],["Top minus bottom",Mfin(qML(Ft,6),MI,qP(F1,6),EQ,v6/6)]);})()};}),
   ()=>{const s=ri(2,6),k=ri(1,6);
-       return{q:M(intg(1,s*s),fr(k,sq(x_)),dx),a:2*k*(s-1),w:W(Mid(fr(k,sq(x_)),EQ,k,pw(x_,row(MI,fr(1,2)))),`which integrates to ${M(2*k,sq(x_))}:`,Mans(2*k,par(sq(s*s),MI,sq(1))))};},
+       return{q:M(intg(1,s*s),fr(k,sq(x_)),dx),a:2*k*(s-1),w:W(Mid(fr(k,sq(x_)),EQ,k,pw(x_,row(MI,fr(1,2)))),`which integrates to ${M(2*k,sq(x_))}:`,Mans(2*k,par(sq(s*s),MI,sq(1)))),
+         s:SOL(["Write it as a power of x",Mid(fr(k,sq(x_)),EQ,k,pw(x_,row(MI,fr(1,2))))],["Integrate: the power goes up to ½, then divide by ½",Mid(mi("F"),par(x_),EQ,2*k,sq(x_))],["Top minus bottom",M(2*k,par(sq(s*s),MI,sq(1)),EQ,2*k,TM,par(s,MI,1))],["Multiply",Mfin(2*k,TM,s-1,EQ,2*k*(s-1))])};},
   ()=>{if(coin()){const m=ri(1,6),c=ri(-9,9);
          return{q:`Positive ${M(x_)}-coordinate of a stationary point of ${M(y_,EQ,poly([1,0,-3*m*m,c]))}`,a:m,
-                w:W(Mid(dydx,EQ,poly([3,0,-3*m*m])),`Set it to 0: ${M(pw(x_,2),EQ,m*m)}.`)};}
+                w:W(Mid(dydx,EQ,poly([3,0,-3*m*m])),`Set it to 0: ${M(pw(x_,2),EQ,m*m)}.`),
+         s:SOL(["Differentiate",Mid(dydx,EQ,poly([3,0,-3*m*m]))],["Stationary points: set it to 0",M(poly([3,0,-3*m*m]),EQ,0)],["Divide by 3",M(pw(x_,2),EQ,m*m)],["The positive root",Mfin(x_,EQ,m)])};}
        const p=ri(-4,4),q=p+ri(1,5),c=ri(-9,9);
        return{q:`Larger ${M(x_)}-coordinate of the stationary points of ${M(y_,EQ,poly([2,-3*(p+q),6*p*q,c]))}`,a:q,
-              w:W(Mid(dydx,EQ,poly([6,-6*(p+q),6*p*q])),`Set it to 0 and divide by 6: ${M(poly([1,-(p+q),p*q]),EQ,0)}.`)};},
+              w:W(Mid(dydx,EQ,poly([6,-6*(p+q),6*p*q])),`Set it to 0 and divide by 6: ${M(poly([1,-(p+q),p*q]),EQ,0)}.`),
+         s:SOL(["Differentiate",Mid(dydx,EQ,poly([6,-6*(p+q),6*p*q]))],["Set it to 0 and divide by 6",M(poly([1,-(p+q),p*q]),EQ,0)],["Factorise",Mid(poly([1,-(p+q),p*q]),EQ,lin(p),lin(q))],["The larger root",Mfin(x_,EQ,q)])};},
   ()=>{const t=nz(-4,4),m=nz(-3,3),a=m*t*t;
        return{q:`${M(y_,EQ,fr(poly([1,0,a]),x_))}. Find ${M(dydx)} at ${M(x_,EQ,t)}`,a:1-m,
-              w:W(`Split the fraction first:`,Mid(fr(poly([1,0,a]),x_),EQ,x_,PL,pn(a),pw(x_,-1)),Mans(1,MI,fr(pn(a),pw(par(t),2))))};},
+              w:W(`Split the fraction first:`,Mid(fr(poly([1,0,a]),x_),EQ,x_,PL,pn(a),pw(x_,-1)),Mans(1,MI,fr(pn(a),pw(par(t),2)))),
+         s:SOL(["Split the fraction",Mid(fr(poly([1,0,a]),x_),EQ,x_,PL,pn(a),pw(x_,-1))],["Differentiate each term",Mid(dydx,EQ,1,MI,pn(a),pw(x_,-2))],[`Put x = ${tn(t)} in`,M(1,MI,fr(pn(a),pw(par(t),2)),EQ,1,MI,fr(a,t*t))],["Simplify",Mfin(1,MI,pn(m),EQ,1-m)])};},
  ]]},
 
  fractions:{name:"Fractions & ratio",L:[[
   ()=>retry(()=>{const d=ri(3,12),n=ri(1,2*d);if(gcd(n,d)!==1||n===d)return null;const amt=d*ri(2,30);
-       return{q:M(fr(n,d),TM,amt),a:n*amt/d,w:W(`Divide by the bottom first:`,Mans(n,TM,par(amt,DV,d)))};}),
+       return{q:M(fr(n,d),TM,amt),a:n*amt/d,w:W(`Divide by the bottom first:`,Mans(n,TM,par(amt,DV,d))),
+         s:SOL([`Divide by the bottom number, ${d}`,M(amt,DV,d,EQ,amt/d)],[`Multiply by the top number, ${n}`,Mfin(n,TM,amt/d,EQ,n*amt/d)])};}),
   ()=>retry(()=>{const v=ri(2,12),c=ri(1,9),d=ri(2,9);if(gcd(c,d)!==1)return null;let a=v*c,b=d;const g=gcd(a,b);a/=g;b/=g;if(b===1)return null;
-       return{q:M(fr(a,b),DV,fr(c,d)),a:v,w:W(`Flip the second fraction and multiply:`,Mans(fr(a,b),TM,fr(d,c)))};}),
+       return{q:M(fr(a,b),DV,fr(c,d)),a:v,w:W(`Flip the second fraction and multiply:`,Mans(fr(a,b),TM,fr(d,c))),
+         s:SOL(["Flip the second fraction and multiply",M(fr(a,b),DV,fr(c,d),EQ,fr(a,b),TM,fr(d,c))],["Multiply the tops and the bottoms",M(fr(a,b),TM,fr(d,c),EQ,fr(a*d,b*c))],["Simplify",Mfin(fr(a*d,b*c),EQ,v)])};}),
   ()=>retry(()=>{const q=pick([2,4,5,10,20,25,50]),p=ri(1,2*q);if(gcd(p,q)!==1)return null;
-       return{q:M(fr(p,q),EQ,k_,mo("%")),hint:"Find k",a:100*p/q,w:W(`Make the bottom 100:`,M(fr(p,q),EQ,fr(row(p,TM,100/q),row(q,TM,100/q))))};}),
+       return{q:M(fr(p,q),EQ,k_,mo("%")),hint:"Find k",a:100*p/q,w:W(`Make the bottom 100:`,M(fr(p,q),EQ,fr(row(p,TM,100/q),row(q,TM,100/q)))),
+         s:SOL([`Make the bottom 100: multiply top and bottom by ${100/q}`,M(fr(p,q),EQ,fr(row(p,TM,100/q),row(q,TM,100/q)),EQ,fr(100*p/q,100))],["Hundredths are percent",Mfin(k_,EQ,100*p/q)])};}),
   ()=>{const parts=[ri(1,5),ri(1,5),ri(1,5)].slice(0,pick([2,3])),s=parts.reduce((a,b)=>a+b,0),N=s*ri(3,40);
        return{q:`Share ${M(N)} in the ratio ${M(...parts.flatMap((v,i)=>i?[mo(":"),v]:[v]))}. The largest share?`,a:Math.max(...parts)*N/s,
-              w:W(`There are ${M(s)} parts in total, so one part is ${M(N,DV,s)}.`,`The largest share is ${M(Math.max(...parts))} parts.`)};},
+              w:W(`There are ${M(s)} parts in total, so one part is ${M(N,DV,s)}.`,`The largest share is ${M(Math.max(...parts))} parts.`),
+         s:(()=>{const big=Math.max(...parts);return SOL(["Add the ratio numbers to get the total parts",M(sumML(parts),EQ,s)],["One part",M(N,DV,s,EQ,N/s)],[`The largest share is ${big} parts`,Mfin(big,TM,N/s,EQ,big*N/s)]);})()};},
  ],[
   ()=>retry(()=>{const b=ri(2,12),d=ri(2,12),a=ri(1,b*2),c=ri(1,d*2);if(gcd(a,b)!==1||gcd(c,d)!==1||b===d)return null;
        const sub=R(3)===0;let n=sub?a*d-c*b:a*d+c*b,m=b*d;if(n<=0)return null;const g=gcd(n,m);n/=g;m/=g;if(m===1)return null;const wantQ=coin();
        return{q:`${M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n,
-              w:W(M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(row(a,TM,d,sub?MI:PL,c,TM,b),row(b,TM,d))),`then cancel by the highest common factor.`)};}),
+              w:W(M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(row(a,TM,d,sub?MI:PL,c,TM,b),row(b,TM,d))),`then cancel by the highest common factor.`),
+         s:(()=>{const nR=n*g,mR=m*g;return SOL(["Use a common denominator",M(fr(a,b),sub?MI:PL,fr(c,d),EQ,fr(row(a,TM,d,sub?MI:PL,c,TM,b),row(b,TM,d)))],["Work out the top and the bottom",M(fr(row(a,TM,d,sub?MI:PL,c,TM,b),row(b,TM,d)),EQ,fr(nR,mR))],g>1?[`Cancel by the highest common factor, ${g}`,M(fr(nR,mR),EQ,fr(n,m))]:false,[wantQ?"q is the bottom":"p is the top",Mfin(mi(wantQ?"q":"p"),EQ,wantQ?m:n)]);})()};}),
   ()=>retry(()=>{const a=ri(0,9),b=ri(0,9);if(a===b)return null;let n=10*a+b,m=99;const g=gcd(n,m);n/=g;m/=g;const wantQ=R(3)!==0;
        return{q:`${M(rec("",`${a}${b}`),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n,
-              w:W(`Two repeating digits go over 99:`,M(rec("",`${a}${b}`),EQ,fr(10*a+b,99)),`then cancel.`)};}),
+              w:W(`Two repeating digits go over 99:`,M(rec("",`${a}${b}`),EQ,fr(10*a+b,99)),`then cancel.`),
+         s:(()=>{const N0=10*a+b;return SOL(["Call it x. Two digits repeat, so 100x − x leaves just those digits",M(99,mi("x"),EQ,N0)],["Divide by 99",M(rec("",`${a}${b}`),EQ,fr(N0,99))],g>1?[`Cancel by ${g}`,M(fr(N0,99),EQ,fr(n,m))]:false,[wantQ?"q is the bottom":"p is the top",Mfin(mi(wantQ?"q":"p"),EQ,wantQ?m:n)]);})()};}),
   ()=>retry(()=>{const q1=ri(2,5),q2=ri(2,5),w1=ri(1,3),w2=ri(1,3),r1=ri(1,q1-1),r2=ri(1,q2-1);if(gcd(r1,q1)!==1||gcd(r2,q2)!==1)return null;
        const prod=(w1*q1+r1)*(w2*q2+r2)/(q1*q2);if(!Number.isInteger(prod))return null;
-       return{q:M(mixed(w1,r1,q1),TM,mixed(w2,r2,q2)),a:prod,w:W(`Make them top-heavy:`,M(mixed(w1,r1,q1),EQ,fr(w1*q1+r1,q1)),M(mixed(w2,r2,q2),EQ,fr(w2*q2+r2,q2)),`then multiply and cancel.`)};}),
+       return{q:M(mixed(w1,r1,q1),TM,mixed(w2,r2,q2)),a:prod,w:W(`Make them top-heavy:`,M(mixed(w1,r1,q1),EQ,fr(w1*q1+r1,q1)),M(mixed(w2,r2,q2),EQ,fr(w2*q2+r2,q2)),`then multiply and cancel.`),
+         s:SOL(["Make the first top-heavy",M(mixed(w1,r1,q1),EQ,fr(w1*q1+r1,q1))],["Make the second top-heavy",M(mixed(w2,r2,q2),EQ,fr(w2*q2+r2,q2))],["Multiply the tops and the bottoms",M(fr(w1*q1+r1,q1),TM,fr(w2*q2+r2,q2),EQ,fr((w1*q1+r1)*(w2*q2+r2),q1*q2))],["Simplify",Mfin(fr((w1*q1+r1)*(w2*q2+r2),q1*q2),EQ,prod)])};}),
   ()=>retry(()=>{const a=ri(2,12),b=a+ri(1,8),v=a*b/(b-a);if(!Number.isInteger(v))return null;
-       return{q:M(fr(1,row(fr(1,a),MI,fr(1,b)))),a:v,w:W(`The bottom first:`,M(fr(1,a),MI,fr(1,b),EQ,fr(b-a,a*b)),`then flip it.`)};}),
+       return{q:M(fr(1,row(fr(1,a),MI,fr(1,b)))),a:v,w:W(`The bottom first:`,M(fr(1,a),MI,fr(1,b),EQ,fr(b-a,a*b)),`then flip it.`),
+         s:SOL(["The bottom first: use a common denominator",M(fr(1,a),MI,fr(1,b),EQ,fr(row(b,MI,a),row(a,TM,b)),EQ,fr(b-a,a*b))],["One over a fraction flips it",M(fr(1,fr(b-a,a*b)),EQ,fr(a*b,b-a))],["Divide",Mfin(fr(a*b,b-a),EQ,v)])};}),
  ],[
   ()=>retry(()=>{let pre,rep,n,m;if(coin()){pre=String(ri(1,9));rep=String(ri(10,99));if(rep[0]===rep[1]||pre===rep[1])return null;
          const all=Number(pre+rep);n=all-Number(pre);m=990;}
        else{pre=String(ri(10,99));rep=String(ri(1,8));if(pre[1]===rep)return null;n=Number(pre+rep)-Number(pre);m=900;}
        const n0=n,g=gcd(n,m);n/=g;const m0=m;m/=g;const wantQ=coin();
        return{q:`${M(rec(pre,rep),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantQ?"Find q":"Find p",a:wantQ?m:n,
-              w:W(`All the digits, minus the part that does not repeat, over ${M(m0)}:`,M(rec(pre,rep),EQ,fr(row(Number(pre+rep),MI,Number(pre)),m0),EQ,fr(n0,m0)),`then cancel.`)};}),
+              w:W(`All the digits, minus the part that does not repeat, over ${M(m0)}:`,M(rec(pre,rep),EQ,fr(row(Number(pre+rep),MI,Number(pre)),m0),EQ,fr(n0,m0)),`then cancel.`),
+         s:SOL([m0===990?"All the digits, minus the part that does not repeat, over 990: one 9 per repeating digit, one 0 per digit before":"All the digits, minus the part that does not repeat, over 900: one 9 per repeating digit, one 0 per digit before",M(rec(pre,rep),EQ,fr(row(Number(pre+rep),MI,Number(pre)),m0),EQ,fr(n0,m0))],g>1?[`Cancel by ${g}`,M(fr(n0,m0),EQ,fr(n,m))]:false,[wantQ?"q is the bottom":"p is the top",Mfin(mi(wantQ?"q":"p"),EQ,wantQ?m:n)])};}),
   ()=>{const k=ri(2,12),divs=[];for(let d=1;d<=k;d++)if((k*k)%d===0)divs.push(d);const d=pick(divs),a=k+d,b=k+k*k/d;
-       return coin()?{q:M(fr(1,a),PL,fr(1,b),EQ,fr(1,k_)),hint:"Find k",a:k,w:W(M(fr(1,a),PL,fr(1,b),EQ,fr(a+b,a*b)),`then flip it — k is the bottom over the top.`)}
-                    :{q:M(fr(1,a),PL,fr(1,k_),EQ,fr(1,k)),hint:"Find k",a:b,w:W(M(fr(1,k),MI,fr(1,a),EQ,fr(a-k,a*k)),`then flip it — k is the bottom over the top.`)};},
+       return coin()?{q:M(fr(1,a),PL,fr(1,b),EQ,fr(1,k_)),hint:"Find k",a:k,w:W(M(fr(1,a),PL,fr(1,b),EQ,fr(a+b,a*b)),`then flip it — k is the bottom over the top.`),
+         s:SOL(["Add the fractions",M(fr(1,a),PL,fr(1,b),EQ,fr(row(b,PL,a),row(a,TM,b)),EQ,fr(a+b,a*b))],["Flip both sides: k is the bottom over the top",Mfin(k_,EQ,fr(a*b,a+b),EQ,k)])}
+                    :{q:M(fr(1,a),PL,fr(1,k_),EQ,fr(1,k)),hint:"Find k",a:b,w:W(M(fr(1,k),MI,fr(1,a),EQ,fr(a-k,a*k)),`then flip it — k is the bottom over the top.`),
+         s:SOL([`Take ${M(fr(1,a))} from both sides`,M(fr(1,k_),EQ,fr(1,k),MI,fr(1,a))],["Use a common denominator",M(fr(1,k),MI,fr(1,a),EQ,fr(row(a,MI,k),row(a,TM,k)),EQ,fr(a-k,a*k))],["Flip both sides",Mfin(k_,EQ,fr(a*k,a-k),EQ,b)])};},
   ()=>retry(()=>{const a=ri(1,5),b=ri(1,5),c=ri(2,6);let n=a*(b*c+1)+c,m=b*c+1;const g=gcd(n,m);n/=g;m/=g;if(m===1)return null;const wantP=coin();
        return{q:`${M(a,PL,fr(1,row(b,PL,fr(1,c))),EQ,fr(mi("p"),mi("q")))} in lowest terms`,hint:wantP?"Find p":"Find q",a:wantP?n:m,
-              w:W(`Inside out:`,M(b,PL,fr(1,c),EQ,fr(b*c+1,c)),`so the fraction is ${M(fr(c,b*c+1))}; then add ${M(a)}.`)};}),
+              w:W(`Inside out:`,M(b,PL,fr(1,c),EQ,fr(b*c+1,c)),`so the fraction is ${M(fr(c,b*c+1))}; then add ${M(a)}.`),
+         s:(()=>{const nR=n*g,mR=m*g;return SOL(["Work from the inside out",M(b,PL,fr(1,c),EQ,fr(b*c+1,c))],["One over a fraction flips it",M(fr(1,fr(b*c+1,c)),EQ,fr(c,b*c+1))],[`Add ${a}`,M(a,PL,fr(c,b*c+1),EQ,fr(nR,mR))],g>1?[`Cancel by ${g}`,M(fr(nR,mR),EQ,fr(n,m))]:false,[wantP?"p is the top":"q is the bottom",Mfin(mi(wantP?"p":"q"),EQ,wantP?n:m)]);})()};}),
  ]]},
 
  coord:{name:"Coordinate geometry",L:[[
   ()=>{const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[6,8,10],[9,12,15],[9,40,41]]),s=pick([1,1,2]),
          x1=ri(-9,9),y1=ri(-9,9),sw=coin(),ddx=(sw?a:b)*s*pick([1,-1]),ddy=(sw?b:a)*s*pick([1,-1]);
        return{q:`Distance from ${M(pt(x1,y1))} to ${M(pt(x1+ddx,y1+ddy))}`,a:c*s,
-              w:W(`Across ${M(Math.abs(ddx))}, up or down ${M(Math.abs(ddy))}:`,Mans(sq(row(pw(Math.abs(ddx),2),PL,pw(Math.abs(ddy),2)))))};},
+              w:W(`Across ${M(Math.abs(ddx))}, up or down ${M(Math.abs(ddy))}:`,Mans(sq(row(pw(Math.abs(ddx),2),PL,pw(Math.abs(ddy),2))))),
+         s:SOL(["Across",M(x1+ddx,MI,pn(x1),EQ,ddx)],["Up or down",M(y1+ddy,MI,pn(y1),EQ,ddy)],["Pythagoras",M(mi("d"),EQ,sq(row(pw(pn(ddx),2),PL,pw(pn(ddy),2))),EQ,sq(ddx*ddx+ddy*ddy))],["Square-root",Mfin(sq(ddx*ddx+ddy*ddy),EQ,c*s)])};},
   ()=>{const m=nz(-6,6),d=nz(-5,5),x1=ri(-9,9),y1=ri(-9,9);
-       return{q:`Gradient of the line through ${M(pt(x1,y1))} and ${M(pt(x1+d,y1+m*d))}`,a:m,w:W(`Change in y over change in x:`,Mans(fr(row(y1+m*d,MI,pn(y1)),row(x1+d,MI,pn(x1)))))};},
+       return{q:`Gradient of the line through ${M(pt(x1,y1))} and ${M(pt(x1+d,y1+m*d))}`,a:m,w:W(`Change in y over change in x:`,Mans(fr(row(y1+m*d,MI,pn(y1)),row(x1+d,MI,pn(x1))))),
+         s:SOL(["Change in y",M(y1+m*d,MI,pn(y1),EQ,m*d)],["Change in x",M(x1+d,MI,pn(x1),EQ,d)],["Gradient = change in y ÷ change in x",Mfin(fr(m*d,d),EQ,m)])};},
   ()=>retry(()=>{const x1=ri(-12,12),y1=ri(-12,12),x2=ri(-12,12),y2=ri(-12,12),wantX=coin(),v=wantX?(x1+x2)/2:(y1+y2)/2;
        if(!Number.isInteger(v)||(x1===x2&&y1===y2))return null;
        return{q:`${M(wantX?x_:y_)}-coordinate of the midpoint of ${M(pt(x1,y1))} and ${M(pt(x2,y2))}`,a:v,
-              w:W(`Average the two ${wantX?"x":"y"}-coordinates:`,Mans(fr(row(wantX?x1:y1,PL,pn(wantX?x2:y2)),2)))};}),
+              w:W(`Average the two ${wantX?"x":"y"}-coordinates:`,Mans(fr(row(wantX?x1:y1,PL,pn(wantX?x2:y2)),2))),
+         s:(()=>{const u=wantX?x1:y1,w2=wantX?x2:y2;return SOL([`Add the two ${wantX?"x":"y"}-coordinates`,M(u,PL,pn(w2),EQ,u+w2)],["Halve",Mfin(fr(u+w2,2),EQ,v)]);})()};}),
  ],[
   ()=>{const a=ri(-8,8),b=ri(-8,8),r=ri(1,12),F=a*a+b*b-r*r;
        return{q:`Radius of the circle ${M(pw(x_,2),PL,pw(y_,2),signed(-2*a,x_),signed(-2*b,y_),signed(F,""),EQ,0)}`,a:r,
-              w:W(`Centre ${M(pt(a,b))}, half of each x and y number with the sign changed.`,`${M(pw(mi("r"),2))} is the centre’s squares minus the constant:`,M(pw(a,2),PL,pw(b,2),MI,pn(F),EQ,r*r))};},
+              w:W(`Centre ${M(pt(a,b))}, half of each x and y number with the sign changed.`,`${M(pw(mi("r"),2))} is the centre’s squares minus the constant:`,M(pw(a,2),PL,pw(b,2),MI,pn(F),EQ,r*r)),
+         s:SOL([`The centre is (${tn(a)}, ${tn(b)}): half of each x and y number, with the sign changed`,M(pt(a,b))],["r² = (centre x)² + (centre y)² − the number on its own",M(pw(mi("r"),2),EQ,pw(pn(a),2),PL,pw(pn(b),2),MI,pn(F),EQ,r*r)],["Square-root",Mfin(mi("r"),EQ,sq(r*r),EQ,r)])};},
   ()=>{const m=nz(-5,5),t=nz(-4,4),x1=ri(-8,8),y1=ri(-8,8);
        return{q:`Gradient of a line perpendicular to the line through ${M(pt(x1,y1))} and ${M(pt(x1+m*t,y1-t))}`,a:m,
-              w:W(`The line’s gradient:`,M(fr(-t,m*t),EQ,fr(-1,m)),`A perpendicular gradient is −1 divided by it.`)};},
+              w:W(`The line’s gradient:`,M(fr(-t,m*t),EQ,fr(-1,m)),`A perpendicular gradient is −1 divided by it.`),
+         s:SOL(["The line’s gradient: change in y ÷ change in x",M(fr(row(y1-t,MI,pn(y1)),row(x1+m*t,MI,pn(x1))),EQ,fr(-t,m*t),EQ,fr(-1,m))],["Perpendicular: −1 divided by that gradient",Mfin(fr(-1,par(fr(-1,m))),EQ,m)])};},
   ()=>{const m=nz(-5,5),p=ri(-6,6),q=ri(-9,9);
-       return{q:`${M(y_)}-intercept of the line through ${M(pt(p,q))} with gradient ${M(m)}`,a:q-m*p,w:W(`Walk back to ${M(x_,EQ,0)}: that is ${M(p)} steps of gradient ${M(m)}:`,Mans(q,MI,pn(m),TM,pn(p)))};},
+       return{q:`${M(y_)}-intercept of the line through ${M(pt(p,q))} with gradient ${M(m)}`,a:q-m*p,w:W(`Walk back to ${M(x_,EQ,0)}: that is ${M(p)} steps of gradient ${M(m)}:`,Mans(q,MI,pn(m),TM,pn(p))),
+         s:SOL(["The line through the point with that gradient",M(y_,MI,pn(q),EQ,m,par(x_,MI,pn(p)))],["The y-intercept is where x = 0",M(y_,EQ,q,PL,pn(m),TM,par(0,MI,pn(p)))],["Work it out",Mfin(y_,EQ,q,MI,pn(m*p),EQ,q-m*p)])};},
   ()=>{const a=nz(-6,6),b=nz(-6,6),k=nz(-9,9);
        return{q:`The line ${M(terms([{c:a,t:x_},{c:b,t:y_}]),EQ,a*k)} meets the ${M(x_)}-axis at ${M(pt(k_,0))}`,hint:"Find k",a:k,
-              w:W(`On the x-axis ${M(y_,EQ,0)}:`,M(coefx(a,x_),EQ,a*k))};},
+              w:W(`On the x-axis ${M(y_,EQ,0)}:`,M(coefx(a,x_),EQ,a*k)),
+         s:SOL(["On the x-axis y = 0",M(cx(a,x_),EQ,a*k)],[`Divide by ${tn(a)}: that x is k`,Mfin(k_,EQ,fr(a*k,pn(a)),EQ,k)])};},
  ],[
   ()=>{const a=nz(-8,8),b=nz(-8,8),r=ri(1,10),wantA=coin();
        return{q:`The circle ${M(pw(x_,2),PL,pw(y_,2),signed(-2*a,x_),signed(-2*b,y_),signed(a*a+b*b-r*r,""),EQ,0)} has centre ${M(pt(mi("p"),mi("q")))}`,
-              hint:wantA?"Find p":"Find q",a:wantA?a:b,w:W(`The centre is half the ${wantA?"x":"y"} coefficient, with the sign changed:`,Mans(MI,fr(pn(wantA?-2*a:-2*b),2)))};},
+              hint:wantA?"Find p":"Find q",a:wantA?a:b,w:W(`The centre is half the ${wantA?"x":"y"} coefficient, with the sign changed:`,Mans(MI,fr(pn(wantA?-2*a:-2*b),2))),
+         s:SOL([`Read off the number in front of ${wantA?"x":"y"}`,M(mi(wantA?"D":"E"),EQ,wantA?-2*a:-2*b)],["The centre is minus half of it",Mfin(mi(wantA?"p":"q"),EQ,MI,fr(pn(wantA?-2*a:-2*b),2),EQ,wantA?a:b)])};},
   ()=>retry(()=>{const m1=nz(-5,5),m2=nz(-5,5),x0=ri(-6,6),c1=ri(-9,9);if(m1===m2)return null;const c2=m1*x0+c1-m2*x0;if(Math.abs(c2)>20)return null;
        return{q:`${M(x_)}-coordinate where ${M(y_,EQ,terms([{c:m1,t:x_},{c:c1,t:""}]))} meets ${M(y_,EQ,terms([{c:m2,t:x_},{c:c2,t:""}]))}`,a:x0,
-              w:W(`Set them equal and collect x on one side:`,M(coefx(m1-m2,x_),EQ,c2-c1))};}),
+              w:W(`Set them equal and collect x on one side:`,M(coefx(m1-m2,x_),EQ,c2-c1)),
+         s:SOL(["Set the two expressions for y equal",M(terms([{c:m1,t:x_},{c:c1,t:""}]),EQ,terms([{c:m2,t:x_},{c:c2,t:""}]))],["Collect x on the left and the numbers on the right",M(cx(m1-m2,x_),EQ,c2-c1)],[`Divide by ${tn(m1-m2)}`,Mfin(x_,EQ,fr(c2-c1,pn(m1-m2)),EQ,x0)])};}),
   ()=>retry(()=>{const P=[0,1,2].map(()=>[ri(-6,6),ri(-6,6)]),det=(P[1][0]-P[0][0])*(P[2][1]-P[0][1])-(P[2][0]-P[0][0])*(P[1][1]-P[0][1]);
        if(det===0||det%2!==0)return null;const [A,B,C]=P;
        return{q:`Area of the triangle with vertices ${M(pt(...P[0]))}, ${M(pt(...P[1]))} and ${M(pt(...P[2]))}`,a:Math.abs(det)/2,
               w:W(`Shoelace formula — half of`,M(pn(A[0]),par(B[1],MI,pn(C[1])),PL,pn(B[0]),par(C[1],MI,pn(A[1])),PL,pn(C[0]),par(A[1],MI,pn(B[1])),EQ,
-                    A[0]*(B[1]-C[1])+B[0]*(C[1]-A[1])+C[0]*(A[1]-B[1])),`ignoring its sign.`)};}),
+                    A[0]*(B[1]-C[1])+B[0]*(C[1]-A[1])+C[0]*(A[1]-B[1])),`ignoring its sign.`),
+         s:(()=>{const e=A[0]*(B[1]-C[1])+B[0]*(C[1]-A[1])+C[0]*(A[1]-B[1]);return SOL(["The shoelace formula: x₁(y₂ − y₃) + x₂(y₃ − y₁) + x₃(y₁ − y₂)",M(pn(A[0]),par(B[1],MI,pn(C[1])),PL,pn(B[0]),par(C[1],MI,pn(A[1])),PL,pn(C[0]),par(A[1],MI,pn(B[1])),EQ,e)],["Halve it and ignore the sign",Mfin(fr(Math.abs(e),2),EQ,Math.abs(det)/2)]);})()};}),
   ()=>retry(()=>{const a=nz(-6,6),b=nz(-6,6),r=ri(1,9);if(b-r>0||b+r<=0)return null;
        return{q:`The line ${M(y_,EQ,k_)} is a tangent to ${M(pw(lin(a),2),PL,pw(par(terms([{c:1,t:y_},{c:-b,t:""}])),2),EQ,r*r)} and ${M(k_,mo("&gt;"),0)}`,
-              hint:"Find k",a:b+r,w:W(`Centre ${M(pt(a,b))}, radius ${M(sq(r*r),EQ,r)}.`,`A flat line touches the top or the bottom of the circle.`)};}),
+              hint:"Find k",a:b+r,w:W(`Centre ${M(pt(a,b))}, radius ${M(sq(r*r),EQ,r)}.`,`A flat line touches the top or the bottom of the circle.`),
+         s:SOL([`Centre (${tn(a)}, ${tn(b)}); the radius`,M(mi("r"),EQ,sq(r*r),EQ,r)],[`A flat line touches the top or the bottom of the circle`,`${M(k_,EQ,b,PL,r)} or ${M(k_,EQ,b,MI,r)}`],[`The bottom, ${tn(b-r)}, is not positive, so take the top`,Mfin(k_,EQ,b,PL,r,EQ,b+r)])};}),
  ]]},
 };
 
@@ -1150,58 +1430,72 @@ function addShape(cat,lv,tip,fn){GEN[cat].L[lv-1].push(fn);TIPMAP[cat][lv-1].pus
 const sgnStr=(v)=>v<0?`-${-v}`:`+${v}`;
 addShape("calculus",1,"diffPower",()=>{const c=[nz(-5,5),ri(-8,8),ri(-9,9),ri(-9,9)];
   return{q:`Differentiate ${M(y_,EQ,poly(c))}`,hint:`${EXH} for dy/dx`,e:polyStr([3*c[0],2*c[1],c[2]]),mode:"expr",
-         w:W(`Each term: bring the power down and reduce it by one; a number on its own disappears.`,`For example ${M(terms([{c:c[0],t:pw(x_,3)}]))} becomes ${M(terms([{c:3*c[0],t:pw(x_,2)}]))}.`)};});
+         w:W(`Each term: bring the power down and reduce it by one; a number on its own disappears.`,`For example ${M(terms([{c:c[0],t:pw(x_,3)}]))} becomes ${M(terms([{c:3*c[0],t:pw(x_,2)}]))}.`),
+         s:(()=>{const T=[[c[0],3],[c[1],2],[c[2],1],[c[3],0]].filter(([u])=>u!==0);return SOL(T.map(([u,p])=>[p===0?"A number on its own disappears":"Bring the power down and reduce it by one",M(terms([{c:u,t:p===0?"":pw1(x_,p)}]),mo("→"),p===0?mnum(0):terms([{c:u*p,t:p===1?"":pw1(x_,p-1)}]))]),["Put the terms together",Mfinx(dydx,EQ,poly([3*c[0],2*c[1],c[2]]))]);})()};});
 addShape("calculus",2,"diffPower",()=>{const k=nz(-5,5),b=nz(-9,9);   // y = 2k√x + b/x  ->  k x^(-1/2) − b x^(-2)
   return{q:`Differentiate ${M(y_,EQ,coefx(2*k,sq(x_)),b<0?MI:PL,fr(Math.abs(b),x_))}`,hint:`${EXH} for dy/dx`,
          e:`${k===1?"":k===-1?"-":k}x^(-1/2)${sgnStr(-b)}x^(-2)`,mode:"expr",
-         w:W(`Rewrite as powers first:`,Mid(sq(x_),EQ,pw(x_,fr(1,2))),Mid(fr(1,x_),EQ,pw(x_,-1)),`then bring each power down and reduce it by one.`)};});
+         w:W(`Rewrite as powers first:`,Mid(sq(x_),EQ,pw(x_,fr(1,2))),Mid(fr(1,x_),EQ,pw(x_,-1)),`then bring each power down and reduce it by one.`),
+         s:SOL(["Rewrite both terms as powers of x",Mid(cx(2*k,sq(x_)),b<0?MI:PL,fr(Math.abs(b),x_),EQ,cx(2*k,pw(x_,fr(1,2))),signed(b,pw(x_,-1)))],["The root term: bring the ½ down, the power goes to −½",M(cx(2*k,pw(x_,fr(1,2))),mo("→"),cx(k,pw(x_,row(MI,fr(1,2)))))],["The other term: bring the −1 down, the power goes to −2",M(cx(b,pw(x_,-1)),mo("→"),cx(-b,pw(x_,-2)))],["Put the terms together",Mfinx(dydx,EQ,cx(k,pw(x_,row(MI,fr(1,2)))),signed(-b,pw(x_,-2)))])};});
 addShape("calculus",2,"integratePower",()=>{const a=3*nz(-3,3),b=2*ri(-4,4),c=ri(-9,9);
   return{q:`Find ${M(`<mo>∫</mo>`,par(poly([a,b,c])),row(SP,mi("d"),x_))}`,hint:`${EXH} — + c is optional`,
          e:polyStr([a/3,b/2,c,0]),mode:"anti",
-         w:W(`Raise each power by one and divide by the new power.`,`For example ${M(terms([{c:a,t:pw(x_,2)}]))} becomes ${M(fr(a,3),pw(x_,3))}, and a number ${M(mi("c"))} becomes ${M(mi("c"),x_)}.`)};});
+         w:W(`Raise each power by one and divide by the new power.`,`For example ${M(terms([{c:a,t:pw(x_,2)}]))} becomes ${M(fr(a,3),pw(x_,3))}, and a number ${M(mi("c"))} becomes ${M(mi("c"),x_)}.`),
+         s:(()=>{const T=[[a,2],[b,1],[c,0]].filter(([u])=>u!==0);return SOL(T.map(([u,p])=>[`Raise the power by one to ${p+1}, then divide by ${p+1}`,M(terms([{c:u,t:p===0?"":pw1(x_,p)}]),mo("→"),terms([{c:u/(p+1),t:pw1(x_,p+1)}]))]),["Put the terms together; add + c for the constant",Mfinx(poly([a/3,b/2,c,0]))]);})()};});
 addShape("calculus",3,"integratePower",()=>{const m=nz(-3,3),c=nz(-8,8);   // ∫ 3m√x + c/x² dx = 2m x^(3/2) − c/x
   return{q:`Find ${M(`<mo>∫</mo>`,par(coefx(3*m,sq(x_)),c<0?MI:PL,fr(Math.abs(c),pw(x_,2))),row(SP,mi("d"),x_))}`,
          hint:`${EXH} — + c is optional`,e:`${2*m}x^(3/2)${sgnStr(-c)}x^(-1)`,mode:"anti",
-         w:W(`Rewrite as powers first:`,Mid(sq(x_),EQ,pw(x_,fr(1,2))),Mid(fr(1,pw(x_,2)),EQ,pw(x_,-2)),`then raise each power by one and divide by the new power.`)};});
+         w:W(`Rewrite as powers first:`,Mid(sq(x_),EQ,pw(x_,fr(1,2))),Mid(fr(1,pw(x_,2)),EQ,pw(x_,-2)),`then raise each power by one and divide by the new power.`),
+         s:SOL(["Rewrite both terms as powers of x",Mid(cx(3*m,sq(x_)),c<0?MI:PL,fr(Math.abs(c),pw(x_,2)),EQ,cx(3*m,pw(x_,fr(1,2))),signed(c,pw(x_,-2)))],["The root term: the power goes up to 3/2, then divide by 3/2",M(cx(3*m,pw(x_,fr(1,2))),mo("→"),cx(2*m,pw(x_,fr(3,2))))],["The other term: the power goes up to −1, then divide by −1",M(cx(c,pw(x_,-2)),mo("→"),cx(-c,pw(x_,-1)))],["Put the terms together; add + c for the constant",Mfinx(cx(2*m,pw(x_,fr(3,2))),signed(-c,pw(x_,-1)))])};});
 addShape("calculus",3,"diffPower",()=>{const a=nz(-7,7),b=nz(-7,7);
   return{q:`Differentiate ${M(y_,EQ,par(poly([1,a])),par(poly([1,b])))}`,hint:`${EXH} for dy/dx`,e:polyStr([2,a+b]),mode:"expr",
-         w:W(`Expand first:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,poly([1,a+b,a*b])))};});
+         w:W(`Expand first:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,poly([1,a+b,a*b]))),
+         s:SOL(["Expand first",Mid(par(poly([1,a])),par(poly([1,b])),EQ,poly([1,a+b,a*b]))],["Differentiate each term",Mfinx(dydx,EQ,poly([2,a+b]))])};});
 addShape("surds",1,"surdSimplify",()=>{const b=pick(SQF_S),k=ri(2,9);
   return{q:`Simplify ${M(sq(k*k*b))}`,hint:EXH,e:`${k}√${b}`,mode:"expr",form:"surd",
-  w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`)};});
+  w:W(M(k*k*b,EQ,k*k,TM,b),`So √${k*k*b} = √${k*k} × √${b}.`),
+         s:SOL([`The largest square that divides ${k*k*b}`,M(k*k*b,EQ,k*k,TM,b)],["Split the root",M(sq(k*k*b),EQ,sq(k*k),TM,sq(b))],[`The square root of ${k*k} is ${k}`,Mfinx(sq(k*k*b),EQ,k,sq(b))])};});
 addShape("surds",2,"rationalise",()=>retry(()=>{const b=pick([2,3,5,6,7,10]),c=ri(2,15);const g=gcd(c,b),n=c/g,d=b/g;if(d===1)return null;
   return{q:`Rationalise the denominator of ${M(fr(c,sq(b)))}`,hint:EXH,e:`${n===1?"":n}√${b}/${d}`,mode:"expr",form:"noRootDen",
-  w:W(`Multiply top and bottom by √${b}:`,M(fr(c,sq(b)),EQ,fr(row(c,sq(b)),row(sq(b),TM,sq(b)))),`then cancel.`)};}));
+  w:W(`Multiply top and bottom by √${b}:`,M(fr(c,sq(b)),EQ,fr(row(c,sq(b)),row(sq(b),TM,sq(b)))),`then cancel.`),
+         s:SOL([`Multiply top and bottom by √${b}`,M(fr(c,sq(b)),EQ,fr(row(c,sq(b)),row(sq(b),TM,sq(b))),EQ,fr(row(c,sq(b)),b))],g>1?[`Cancel by ${g}`,Mfinx(fr(row(c,sq(b)),b),EQ,fr(row(n===1?"":mnum(n),sq(b)),d))]:["Nothing cancels, so that is the answer",Mfinx(fr(row(c,sq(b)),b))])};}));
 addShape("surds",2,"surdExpand",()=>{const b=pick(SQF_S),a=ri(2,7);
   return{q:`Expand ${M(pw(par(a,PL,sq(b)),2))}`,hint:`${EXH} in the form a + b√c`,e:`${a*a+b}+${2*a}√${b}`,mode:"expr",form:"surdExp",
-  w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`Collect the parts with and without √${b}.`)};});
+  w:W(M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2)),`Collect the parts with and without √${b}.`),
+         s:SOL(["Expand the square",M(pw(par(a,PL,sq(b)),2),EQ,pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2))],["Work out each part",M(pw(a,2),PL,2,TM,a,TM,sq(b),PL,pw(sq(b),2),EQ,a*a,PL,cx(2*a,sq(b)),PL,b)],[`Collect the parts without √${b}`,Mfinx(a*a+b,PL,cx(2*a,sq(b)))])};});
 addShape("surds",3,"rationaliseConj",()=>{if(coin()){const m=ri(1,4),n=m*m+1;
     return{q:`Rationalise the denominator of ${M(fr(1,row(sq(n),MI,m)))}`,hint:EXH,e:`√${n}+${m}`,mode:"expr",form:"surdExp",
-      w:W(`Multiply top and bottom by (√${n} + ${m}); the bottom becomes`,M(par(sq(n),MI,m),par(sq(n),PL,m),EQ,n,MI,m*m))};}
+      w:W(`Multiply top and bottom by (√${n} + ${m}); the bottom becomes`,M(par(sq(n),MI,m),par(sq(n),PL,m),EQ,n,MI,m*m)),
+         s:SOL([`Multiply top and bottom by √${n} + ${m}`,M(fr(1,row(sq(n),MI,m)),EQ,fr(par(sq(n),PL,m),row(par(sq(n),MI,m),par(sq(n),PL,m))))],["The bottom is a difference of two squares",M(par(sq(n),MI,m),par(sq(n),PL,m),EQ,n,MI,m*m,EQ,1)],["Over 1, the top is the answer",Mfinx(sq(n),PL,m)])};}
   let a,b;do{a=pick(SQF_S);b=pick(SQF_S);}while(a<=b||a-b>6);const k=ri(1,5);
   return{q:`Rationalise the denominator of ${M(fr(k*(a-b),row(sq(a),MI,sq(b))))}`,hint:EXH,
          e:`${k===1?"":k}√${a}+${k===1?"":k}√${b}`,mode:"expr",form:"surdExp",
-         w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b))};});
+         w:W(`Multiply top and bottom by (√${a} + √${b}); the bottom becomes`,M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b)),
+         s:SOL([`Multiply top and bottom by √${a} + √${b}`,M(fr(k*(a-b),row(sq(a),MI,sq(b))),EQ,fr(row(k*(a-b),par(sq(a),PL,sq(b))),row(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)))))],["The bottom is a difference of two squares",M(par(sq(a),MI,sq(b)),par(sq(a),PL,sq(b)),EQ,a,MI,b,EQ,a-b)],[`Divide the top by ${a-b}`,M(fr(row(k*(a-b),par(sq(a),PL,sq(b))),a-b),EQ,cx(k,par(sq(a),PL,sq(b))))],["Multiply out the bracket",Mfinx(cx(k,sq(a)),PL,cx(k,sq(b)))])};});
 addShape("indices",2,"indexLaws",()=>{const a=ri(1,5),kind=R(3);   // exponents in halves
   const n2=kind===0?2*a+1:kind===1?-(2*a+1):1-2*a;
   const q=kind===0?M(pw1(x_,a),sq(x_)):kind===1?M(fr(1,row(pw1(x_,a),sq(x_)))):M(fr(sq(x_),pw1(x_,a)));
   return{q:`Write ${q} as a single power of ${M(x_)}`,hint:`${EXH}, a single power of x`,e:`x^(${n2}/2)`,mode:"expr",form:"pow",
-  w:W(Mid(sq(x_),EQ,pw(x_,fr(1,2))),`Multiplying adds the powers; dividing subtracts them.`)};});
+  w:W(Mid(sq(x_),EQ,pw(x_,fr(1,2))),`Multiplying adds the powers; dividing subtracts them.`),
+         s:kind===0?SOL(["√x is x to the power ½",Mid(sq(x_),EQ,pw(x_,fr(1,2)))],["Multiplying: add the powers",M(a,PL,fr(1,2),EQ,fr(2*a+1,2))],["So",Mfinx(pw1(x_,a),sq(x_),EQ,pw(x_,fr(2*a+1,2)))]):kind===1?SOL(["√x is x to the power ½",Mid(sq(x_),EQ,pw(x_,fr(1,2)))],["The bottom: multiplying adds the powers",Mid(pw1(x_,a),sq(x_),EQ,pw(x_,fr(2*a+1,2)))],["One over a power makes the power negative",Mfinx(fr(1,row(pw1(x_,a),sq(x_))),EQ,pw(x_,fr(-(2*a+1),2)))]):SOL(["√x is x to the power ½",Mid(sq(x_),EQ,pw(x_,fr(1,2)))],["Dividing: subtract the powers",M(fr(1,2),MI,a,EQ,fr(1-2*a,2))],["So",Mfinx(fr(sq(x_),pw1(x_,a)),EQ,pw(x_,fr(1-2*a,2)))])};});
 addShape("quadratics",1,"expand",()=>{const a=nz(-9,9),b=nz(-9,9);
   return{q:`Expand ${M(par(poly([1,a])),par(poly([1,b])))}`,hint:EXH,e:polyStr([1,a+b,a*b]),mode:"expr",form:"expanded",
-  w:W(`Every term by every term:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,pw(x_,2),signed(b,x_),signed(a,x_),signed(a*b,"")),`then collect the x terms.`)};});
+  w:W(`Every term by every term:`,Mid(par(poly([1,a])),par(poly([1,b])),EQ,pw(x_,2),signed(b,x_),signed(a,x_),signed(a*b,"")),`then collect the x terms.`),
+         s:SOL(["Every term by every term",Mid(par(poly([1,a])),par(poly([1,b])),EQ,pw(x_,2),signed(b,x_),signed(a,x_),signed(a*b,""))],["Collect the x terms",Mfinx(poly([1,a+b,a*b]))])};});
 addShape("quadratics",2,"factorise",()=>retry(()=>{const r=nz(-9,9),s=nz(-9,9);if(r===s||r+s===0)return null;
   return{q:`Factorise ${M(poly([1,-(r+s),r*s]))}`,hint:`${EXH} like (x+2)(x-5)`,e:linStr(r)+linStr(s),mode:"expr",form:"factored",
-  w:W(`Find two numbers with product ${M(r*s)} and sum ${M(-(r+s))}.`)};}));
+  w:W(`Find two numbers with product ${M(r*s)} and sum ${M(-(r+s))}.`),
+         s:SOL([`Two numbers with product ${tn(r*s)} and sum ${tn(-(r+s))}`,`${M(pn(-r),TM,pn(-s),EQ,r*s)} and ${M(pn(-r),PL,pn(-s),EQ,-(r+s))}`],["So the brackets are",Mfinx(lin(r),lin(s))])};}));
 addShape("poly",2,"expand",()=>{const a=nz(-5,5),b=nz(-5,5),c=nz(-6,6);
   return{q:`Expand ${M(par(poly([1,a])),par(poly([1,b,c])))}`,hint:EXH,e:polyStr([1,a+b,a*b+c,a*c]),mode:"expr",form:"expanded",
-  w:W(`Multiply the whole second bracket by x, then by ${M(a)}:`,Mid(par(poly([1,a])),par(poly([1,b,c])),EQ,x_,par(poly([1,b,c])),a<0?MI:PL,Math.abs(a)===1?"":mnum(Math.abs(a)),par(poly([1,b,c]))),`then collect like terms.`)};});
+  w:W(`Multiply the whole second bracket by x, then by ${M(a)}:`,Mid(par(poly([1,a])),par(poly([1,b,c])),EQ,x_,par(poly([1,b,c])),a<0?MI:PL,Math.abs(a)===1?"":mnum(Math.abs(a)),par(poly([1,b,c]))),`then collect like terms.`),
+         s:SOL([`Multiply the whole second bracket by x, then by ${tn(a)}`,Mid(par(poly([1,a])),par(poly([1,b,c])),EQ,x_,par(poly([1,b,c])),a<0?MI:PL,Math.abs(a)===1?"":mnum(Math.abs(a)),par(poly([1,b,c])))],["The x part",Mid(x_,par(poly([1,b,c])),EQ,poly([1,b,c,0]))],[`The ${tn(a)} part`,Mid(cx(a,par(poly([1,b,c]))),EQ,poly([a,a*b,a*c]))],["Collect like terms",Mfinx(poly([1,a+b,a*b+c,a*c]))])};});
 
 const CATS=Object.keys(GEN);
 function make(cat,lv,avoid){const L=Math.min(3,Math.max(1,lv)),bank=GEN[cat].L[L-1];let idx=R(bank.length);
   if(bank.length>1&&idx===avoid)idx=(idx+1+R(bank.length-1))%bank.length;
   const o=bank[idx]();
-  return{cat,lv,idx,q:o.q,hint:o.hint||"",a:o.a,e:o.e,mode:o.mode,form:o.form,w:o.w,tip:TIPMAP[cat][L-1][idx]};}
+  return{cat,lv,idx,q:o.q,hint:o.hint||"",a:o.a,e:o.e,mode:o.mode,form:o.form,w:o.w,s:o.s,tip:TIPMAP[cat][L-1][idx]};}
 /*GEN-END*/
 
 /* ---------- quotes: one picked at random per visit. "(attributed)" marks the ones known only by report ---------- */
@@ -1260,6 +1554,7 @@ function show(q,tag,why){
   fixRadicals(el);
   $("hint").textContent=cur.hint||"Whole-number answer";
   $("tip").hidden=true;
+  $("sol").hidden=true;el.classList.remove("marked");
   const wk=$("worked");wk.hidden=!(cur.worked&&cur.w);
   if(!wk.hidden){wk.innerHTML=`<span class="label">Worked start</span>${cur.w}`;fixRadicals(wk);}
   setSecond(!!why,why==="skipped"?"skipped earlier — here is a start":"you got this wrong earlier");
@@ -1278,11 +1573,15 @@ function fixRadicals(root){
 function setSecond(on,text){$("card").classList.toggle("second",on);$("retryTag").hidden=!on;if(text)$("retryTag").textContent=text;}
 function say(text,kind,html){const v=$("verdict");if(html)v.innerHTML=html;else v.textContent=text;v.className="verdict "+(kind||"");
   if(html)fixRadicals(v);}
-function flash(kind){const c=$("card");c.classList.remove("flash-ok","flash-bad");void c.offsetWidth;c.classList.add(kind==="ok"?"flash-ok":"flash-bad");}
+/* a red-pen tick or cross, drawn in front of the verdict */
+const TICK='<svg class="pen" viewBox="0 0 60 50" aria-hidden="true"><path pathLength="100" d="M6 29 C12 33 17 38 21 44 C29 28 40 14 55 5"/></svg>';
+const CROSS='<svg class="pen" viewBox="0 0 50 50" aria-hidden="true"><path pathLength="100" d="M9 8 C20 20 32 32 43 44"/><path class="p2" pathLength="100" d="M42 7 C30 20 19 31 8 43"/></svg>';
+function flash(kind){$("verdict").insertAdjacentHTML("afterbegin",kind==="ok"?TICK:CROSS);}
 function updateBar(){
   if(!run)return;
   $("score").textContent=`${run.right} / ${run.n}`;
   $("qn").textContent=run.phase==="review"?`R${run.ri+1} / ${run.shelf.length}`:`Q${run.n+1}`;
+  $("q").parentElement.dataset.qn=run.phase==="review"?`R${run.ri+1}`:run.n+1;
   const parts=[];if(run.phase==="main"){if(run.later.length)parts.push(`${run.later.length} coming back`);
     if(run.shelf.length)parts.push(`${run.shelf.length} set aside`);}
   $("aside").textContent=parts.join(" · ");
@@ -1377,12 +1676,12 @@ function submit(){
   updateBar();renderStats();nextQ();
 }
 
-function reveal(){cur.revealed=true;setSecond(false);
+function reveal(){cur.revealed=true;setSecond(false);showSol(true);
   say("","bad",`The answer is ${answerML(cur)} — press Enter to continue`);$("ans").value="";updatePreview();$("ans").focus();}
 
 function skip(){
   if(!run||!cur)return;
-  if(run.phase==="review"){if(cur.revealed)advanceReview();else reveal();return;}
+  if(run.phase==="review"){if(cur.revealed)advanceReview();else if(!cur.pushed)push();else reveal();return;}
   if(cur.tries===0){record(cur,false,null);run.n++;}
   // first skip: back in a few questions with a worked start; skipped again: to the review, worked start and all
   if(!cur.back){run.later.push({q:{...cur,tries:1,worked:true,back:true,why:"skipped"},due:run.n+ri(3,5)});
@@ -1430,10 +1729,21 @@ function showReview(){
   show(q,`Review ${run.ri+1} of ${run.shelf.length} · ${GEN[q.cat].name}`);
   updateBar();
 }
+/* review: a wrong answer first gets a push; wrong again, the full worked solution */
 function reviewAnswer(ok){
   if(ok){run.fixed++;say("correct","ok");flash("ok");advanceReview();return;}
-  flash("bad");reveal();
+  if(!cur.pushed){push();flash("bad");return;}
+  reveal();flash("bad");
 }
+function push(){cur.pushed=true;
+  const wk=$("worked");
+  if(wk.hidden&&cur.w){wk.innerHTML=`<span class="label">A push</span>${cur.w}`;wk.hidden=false;fixRadicals(wk);}
+  else showSol(false);   // the worked start is already showing: most of the full solution instead
+  say("Not yet — here is a push. Try again.","bad");$("ans").value="";updatePreview();$("ans").focus();}
+function showSol(full){if(!cur.s)return;const el=$("sol");
+  el.innerHTML=`<span class="label">${full?"Full solution":"Most of the way"}</span>${cur.s}`;
+  if(!full){const ls=el.querySelectorAll(".sl");if(ls.length>1)ls[ls.length-1].remove();}
+  el.classList.toggle("full",full);el.hidden=false;$("worked").hidden=true;fixRadicals(el);}
 function advanceReview(){if(cur&&cur.revealed)say("");run.ri++;if(run.ri<run.shelf.length)showReview();else finish();}
 
 function commitSession(done){
@@ -1453,9 +1763,10 @@ function finish(){
   clearInterval(run.t);
   const done=run; run=null; cur=null;
   document.body.classList.remove("running");
-  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;
+  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;$("sol").hidden=true;
+  delete $("q").parentElement.dataset.qn;
   $("ans").disabled=true;$("ans").value="";renderLength();$("cat").hidden=true;setSecond(false);
-  $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;
+  $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;$("q").classList.add("marked");
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
   $("hint").textContent=h;

@@ -282,6 +282,41 @@ function checkW(o){
   }
   return null;}
 
+/* ---------- full solutions ----------
+   Every line needs a label in words and some maths. Plain lines and identities are checked as in worked starts.
+   The last line must hold the final maths: class="fin", whose sides agree and whose LAST side is the answer, or
+   class="finx" for typed answers, whose last side must equal the expected expression (up to a constant for integrals). */
+const sstats={lines:0,eq:0,id:0,fin:0,finx:0};
+const linT=(html)=>lin(parseXML(html)).replace(/\s+/g," ").trim().replace(/f ' '/g,"f''").replace(/f '/g,"f'");
+function checkS(o){
+  if(!o.s||typeof o.s!=="string")return "no full solution";
+  const lines=[...o.s.matchAll(/<div class="sl"><span class="sll">([\s\S]*?)<\/span><span class="slm">([\s\S]*?)<\/span><\/div>/g)];
+  if(lines.length<2&&!/class="fin"/.test(o.s))return "solution has under two lines";
+  if(o.s.split('class="sl"').length-1!==lines.length)return "solution line not parsed";
+  for(let li=0;li<lines.length;li++){const [,label,body]=lines[li],last=li===lines.length-1;
+    if(!label.replace(/<[^>]+>/g,"").trim())return `line ${li+1} has no words`;
+    const chunks=[...body.matchAll(/<math([^>]*)>[\s\S]*?<\/math>/g)];
+    if(!chunks.length)return `line ${li+1} has no maths`;
+    sstats.lines++;let sawFin=false;
+    for(const [html,attrs] of chunks){
+      const kind=(attrs.match(/class="(\w+)"/)||[])[1]||"",t=linT(html),sides=t.split(" = ");
+      if((kind==="fin"||kind==="finx")&&!last)return `final maths before the last line: ${t}`;
+      if(kind==="id"){for(const x of [0.7,1.9,3.2]){const vals=[];for(const sd of sides){try{vals.push(evalExpr(sd,{x}));}catch(e){}}
+          if(vals.length>=2&&!vals.every((v)=>close(v,vals[0],1e-9)))return `identity fails at x=${x}: ${t}`;if(vals.length>=2)sstats.id++;}continue;}
+      if(kind==="finx"){sawFin=true;const tail=sides[sides.length-1],E=(x)=>evalExpr(fromAns(o.e),{x}),G=(x)=>evalExpr(tail,{x});
+        try{if(o.mode==="anti"){const g0=G(PTS[0]),e0=E(PTS[0]);if(!PTS.slice(1).every((x)=>close(G(x)-g0,E(x)-e0,1e-9)))return "final expression wrong: "+t;}
+            else if(!PTS.every((x)=>close(G(x),E(x),1e-9)))return "final expression wrong: "+t;}
+        catch(e){return "final expression unreadable: "+t;}
+        sstats.finx++;continue;}
+      const vals=[];for(const sd of sides){try{vals.push(evalExpr(sd));}catch(e){}}
+      if(vals.length>=2){if(!vals.every((v)=>close(v,vals[0],1e-9)))return "line does not balance: "+t;sstats.eq++;}
+      if(kind==="fin"){sawFin=true;let v;try{v=evalExpr(sides[sides.length-1]);}catch(e){return "final value unreadable: "+t;}
+        if(o.a===undefined||!close(v,o.a,1e-9))return `final value ${v}, answer ${o.a}: ${t}`;sstats.fin++;}
+    }
+    if(last&&!sawFin)return "last line is not the answer";
+  }
+  return null;}
+
 /* ---------- run ---------- */
 let total=0,fails=0;const failBy={};const unchecked={},failures=[],shapes={},vals={};
 for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
@@ -294,6 +329,7 @@ for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
     if(/[+\-]\s+-\s*\d/.test(t.replace(/\^\(- /g,"^(")))bad.push("sign collision");
     if(/(^|[\s(\[])1 x\b/.test(t)||/[+\-] 0(\s|\]|$)/.test(t)&&!/[=<>] 0/.test(t.match(/[+\-] 0(\s|\]|$)/)[0]))bad.push("unsimplified 1x / +0");
     const wbad=checkW(o);if(wbad)bad.push("worked start: "+wbad);
+    const sbad=checkS(o);if(sbad)bad.push("solution: "+sbad);
     let r;try{r=o.e!==undefined?checkE(o):check(o);}catch(e){if(e.message==="UNCHECKED"){unchecked[key]=(unchecked[key]||0)+1;r=null;}else{r=false;bad.push("check error "+e.message);}}
     if(r===false&&!bad.length)bad.push("WRONG");
     if(r===true)shapes[key]++;
@@ -303,7 +339,7 @@ for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
 console.log(`questions ${total}, failures ${fails}`);
 const checked=Object.values(shapes).reduce((a,b)=>a+b,0);
 console.log(`independently recomputed: ${checked} / ${total} (${(100*checked/total).toFixed(1)}%)`);
-console.log("unchecked shapes:",unchecked);console.log("worked starts checked: equations",wstats.eq,"· identities",wstats.id,"· answer expressions",wstats.ans);console.log("bare number equal to the answer (review):",wstats.bare,wstats.samples);console.log("failures by shape:",failBy);
+console.log("unchecked shapes:",unchecked);console.log("worked starts checked: equations",wstats.eq,"· identities",wstats.id,"· answer expressions",wstats.ans);console.log("full solutions checked: lines",sstats.lines,"· equations",sstats.eq,"· identities",sstats.id,"· final values",sstats.fin,"· final expressions",sstats.finx);console.log("bare number equal to the answer (review):",wstats.bare,wstats.samples);console.log("failures by shape:",failBy);
 for(const f of failures)console.log(JSON.stringify(f));
 // variety: distinct questions per shape out of N
 const low=Object.entries(vals).map(([k,s])=>[k,s.size]).sort((a,b)=>a[1]-b[1]).slice(0,12);
