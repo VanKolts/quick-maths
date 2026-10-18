@@ -15,93 +15,96 @@
   --accent:#1C1B18; --accent-soft:#ECE6D7; --on-accent:#FCFAF4;
   --start-bg:#F2ECDD;   /* fill of the Start button */
   --ok:#1F6B45; --bad:#B3261E; --bad-soft:#F6E3DC; --mark:#B02218;
-  --grid:rgba(70,58,36,.075);   /* the faint squares on the sheet */
+  --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 .5H22M.5 0V22' fill='none' stroke='rgba(70,58,36,.085)'/%3E%3C/svg%3E");   /* the faint squares: one 22 px tile, no gradient */
   --font-text:"Figtree",system-ui,sans-serif;
+  /* the whole type scale: five steps and two display sizes; nothing else sets a size in rem */
+  --fs-xs:.72rem; --fs-s:.86rem; --fs-m:1rem; --fs-l:1.2rem; --fs-xl:1.6rem;
+  --fs-d:clamp(2.1rem,7vw,2.9rem); --fs-ds:clamp(1.4rem,5vw,2.1rem);
   --font-math:"Noto Sans Math","STIX Two Math","Cambria Math",math;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#171613; --surface:#22201C; --sunk:#1B1A17;   /* the same paper at night */
   --ink:#ECE7DC; --muted:#BDB5A6; --faint:#A39B8C; --line:#3A362F;
   --accent:#ECE7DC; --accent-soft:#2E2B25; --on-accent:#171613; --start-bg:#2A2722;
-  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:rgba(236,231,220,.05); color-scheme:dark;
+  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 .5H22M.5 0V22' fill='none' stroke='rgba(236,231,220,.06)'/%3E%3C/svg%3E"); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#171613; --surface:#22201C; --sunk:#1B1A17;   /* the same paper at night */
   --ink:#ECE7DC; --muted:#BDB5A6; --faint:#A39B8C; --line:#3A362F;
   --accent:#ECE7DC; --accent-soft:#2E2B25; --on-accent:#171613; --start-bg:#2A2722;
-  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:rgba(236,231,220,.05); color-scheme:dark;
+  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 .5H22M.5 0V22' fill='none' stroke='rgba(236,231,220,.06)'/%3E%3C/svg%3E"); color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}   /* else display:flex rules beat the hidden attribute */
 body{background:var(--bg);color:var(--ink);font-family:var(--font-text);margin:0;
   padding-inline:16px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
-.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column}
+/* rhythm, not one gap: the header sits off the sheet, Focus hangs just under it, stats and footer are their own sections */
+.wrap>header{margin-bottom:28px}.wrap>#focusRow{margin-top:12px}.wrap>section{margin-top:44px}.wrap>footer{margin-top:40px}
 .num,.bar,.verdict,table{font-variant-numeric:tabular-nums lining-nums}
-.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:500}
+.label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:500}
 
 /* ---- header: title and a quote ---- */
 header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:14px}
-h1{font-size:clamp(2.3rem,8vw,2.9rem);font-weight:700;margin:0;line-height:1.05;letter-spacing:-.015em;color:var(--accent)}
+h1{font-size:var(--fs-d);font-weight:700;margin:0;line-height:1.05;letter-spacing:-.015em;color:var(--accent)}
 .quote{margin:8px 0 0;max-width:52ch}
-.quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:1.15rem;line-height:1.45;text-wrap:pretty}
-.quote figcaption{margin-top:4px;font-size:.88rem;color:var(--faint)}
-.streak{font-size:.78rem;color:var(--muted);text-align:right;flex:none}
-.streak b{color:var(--accent);font-size:1.7rem;font-weight:600;display:block;line-height:1.1}
+.quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:var(--fs-l);line-height:1.45;text-wrap:pretty}
+.quote figcaption{margin-top:4px;font-size:var(--fs-s);color:var(--faint)}
+.streak{font-size:var(--fs-s);color:var(--muted);text-align:right;flex:none}
+.streak b{color:var(--accent);font-size:var(--fs-xl);font-weight:600;display:block;line-height:1.1}
 
 /* ---- drill card ---- */
 .card{background-color:var(--surface);border:0;border-radius:0;display:flex;flex-direction:column;min-height:320px;position:relative;
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-  background-size:22px 22px;background-position:-1px -1px;
-  box-shadow:0 1px 0 rgba(60,50,30,.06),0 14px 30px -14px rgba(60,50,30,.35)}
+  background-image:var(--grid);background-position:-1px -1px}
 .bar{display:flex;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--surface);
-  font-size:.85rem;color:var(--muted);flex-wrap:wrap}
-.bar .t{font-size:1.1rem;color:var(--ink);font-weight:700}
+  font-size:var(--fs-s);color:var(--muted);flex-wrap:wrap}
+.bar .t{font-size:var(--fs-l);color:var(--ink);font-weight:700}
 .bar .sp{margin-left:auto}
+body:not(.running) #score{visibility:hidden}   /* no 0 / 0 before a start, no second score after one */
 .bar .aside{color:var(--mark)}
 #qn{display:none}   /* the number sits in the margin instead */
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:16px;padding:26px 18px;text-align:center}
-.qtext{font-size:clamp(1.5rem,6vw,2.3rem);line-height:1.35;font-weight:400;text-wrap:balance;
+.qtext{font-size:var(--fs-ds);line-height:1.35;font-weight:400;text-wrap:balance;
   max-width:100%;overflow-wrap:anywhere}
-.qtext.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
+.qtext.long{font-size:var(--fs-xl)}
 .qtext math,.ansview math,.verdict math{font-family:var(--font-math)}
 /* one typeface: numbers and letters inside maths are Figtree too; the math font only draws roots, brackets and operators */
 math mn,math mi,math mtext{font-family:var(--font-text)}
 math msqrt>mrow{padding-top:.07em}   /* Figtree digits are tall: a little air under the root's bar */
-.qtext math{font-size:1.06em}
 .qtext math mfrac mfrac{font-size:.9em}
-.qhint{font-size:.9rem;color:var(--muted)}
-.tipbox{max-width:44rem;text-align:left;font-size:1rem;line-height:1.55;background:var(--accent-soft);
-  border-left:3px solid var(--accent);padding:10px 14px;border-radius:2px}
-.tipbox .label{display:block;margin-bottom:2px;color:var(--accent)}
-.tipbox.worked{background:var(--sunk);border-left-color:var(--ok);font-size:1.12rem;padding:12px 18px}
+.qhint{font-size:var(--fs-s);color:var(--muted)}
+.tipbox{max-width:44rem;width:100%;text-align:left;font-size:var(--fs-m);line-height:1.55}
+/* hint, worked start and solution are parts of the sheet, not boxes: a label with a rule running off it */
+.tipbox .label{display:flex;align-items:center;gap:10px;margin-bottom:4px;color:var(--ink)}
+.tipbox .label::after{content:"";flex:1;border-top:1px solid currentColor;opacity:.35}
+.tipbox.worked{}
 /* the full solution: every line labelled in words on the left, its maths on the right */
-.tipbox.sol{background:var(--surface);border-left-color:var(--mark);font-size:1.08rem;padding:12px 18px;width:min(44rem,100%)}
+.tipbox.sol{}
 .tipbox.sol .label{color:var(--mark)}
 .sol .sl{display:grid;grid-template-columns:minmax(9rem,15rem) 1fr;gap:4px 16px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
 .sol .sl:first-child{border-top:0}
-.sol .sll{font-size:.86rem;line-height:1.35;color:var(--muted)}
-.sol .slm{line-height:1.8;overflow-x:auto;overflow-y:hidden;padding-block:.1em}.sol .slm math{font-size:1.1em}
+.sol .sll{font-size:var(--fs-s);line-height:1.35;color:var(--muted)}
+.sol .slm{line-height:1.8;overflow-x:auto;overflow-y:hidden;padding-block:.1em}.sol .slm math{font-size:1.15em}
 .sol.full .sl:last-child .sll{color:var(--mark);font-weight:600}   /* the answer line */
 @media (max-width:560px){.sol .sl{grid-template-columns:1fr}}
 .tipbox .step{margin:6px 0;line-height:1.7}
-.tipbox .step math{font-size:1.12em}
+.tipbox .step math{font-size:1.15em}
 .tipbox.worked .label{color:var(--ok)}
 .tipbox math{font-family:var(--font-math)}
-.tipbox{border-radius:0}
 .ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
-input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-align:center;
+input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:9ch;text-align:center;
   padding:8px 10px;border:1.5px solid var(--ink);border-radius:0;background:var(--surface);
   color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
 /* typed answers: an invisible text field over a live maths view of what has been typed */
 .ansbox{position:relative}
 /* the iPhone number pad has no minus key: on touch screens a ± button flips the sign of a whole-number answer */
-.sign{display:none;font-size:1.3rem;min-width:44px;min-height:44px;padding:0 12px}
+.sign{display:none;font-size:var(--fs-l);min-width:44px;min-height:44px;padding:0 12px}
 @media (pointer:coarse){.ansrow:not(.exprmode) #sign{display:inline-block}.ansrow.exprmode #outBox{display:inline-block}}
 @media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
-  min-height:3.2rem;padding:10px 16px;font-size:1.6rem;border:1.5px solid var(--ink);border-radius:0;background:var(--surface);overflow-x:auto;overflow-y:hidden}
+  min-height:3.2rem;padding:10px 16px;font-size:var(--fs-xl);border:1.5px solid var(--ink);border-radius:0;background:var(--surface);overflow-x:auto;overflow-y:hidden}
 .ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
 .ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
 .card.second .ansview{border-color:var(--bad)}
@@ -112,14 +115,14 @@ input[type=text]{font-family:var(--font-text);font-size:1.5rem;width:9ch;text-al
 @keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.ansview .caret{animation:none}}
 input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.keys{font-size:.82rem;color:var(--faint)}
+.keys{font-size:var(--fs-s);color:var(--faint)}
 kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:2px;
   padding:0 .35em;background:var(--surface);color:var(--muted)}
 .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.tag{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+.tag{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted)}
 .tags .tag+.tag::before{content:"·";margin-right:6px;color:var(--faint)}
 .tag.retry{color:var(--mark)}
-.verdict{font-size:1.05rem;min-height:1.5em;text-wrap:balance;font-style:italic;font-weight:600}
+.verdict{font-size:var(--fs-m);min-height:1.5em;text-wrap:balance;font-style:italic;font-weight:600}
 .verdict.ok,.verdict.bad{color:var(--mark)}
 .verdict math{font-weight:600}
 .verdict svg.pen{width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
@@ -127,12 +130,12 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 .verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
 .verdict svg.pen path.p2{animation-delay:.18s}
 @keyframes draw{to{stroke-dashoffset:0}}
-#q.marked{position:relative;padding:.05em .4em;font-weight:700;font-size:3.2rem;color:var(--mark)}
+#q.marked{position:relative;padding:.05em .4em;font-weight:700;font-size:var(--fs-d);color:var(--mark)}
 #q.marked::after{content:"";position:absolute;inset:-.12em -.35em;border:3px solid var(--mark);
   border-radius:50% 46% 54% 48%;transform:rotate(-4deg);animation:ring .5s ease-out both}
 @keyframes ring{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @media (prefers-reduced-motion:reduce){.verdict svg.pen path{animation:none;stroke-dashoffset:0}#q.marked::after{animation:none}}
-.card.second{box-shadow:inset 0 0 0 2px var(--mark),0 14px 30px -14px rgba(60,50,30,.35)}
+.card.second{outline:2px solid var(--mark);outline-offset:-2px}
 .card.second input[type=text]{border-color:var(--bad)}
 .cardctl{display:flex;gap:8px;justify-content:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap;background:var(--surface)}
 
@@ -141,38 +144,35 @@ body.running header,body.running #focusRow,body.running #start,body.running sect
 body.running{padding-block:12px}
 body.running .wrap{max-width:960px}
 body.running .card{min-height:calc(100dvh - 24px)}
-body.running .qtext{font-size:clamp(1.8rem,7vw,3.1rem)}
-body.running .qtext.long{font-size:clamp(1.3rem,5vw,2.2rem)}
+body.running .qtext{font-size:var(--fs-d)}
+body.running .qtext.long{font-size:var(--fs-ds)}
 /* question number in the left margin, the mark on the right, question and answer box set left */
-.stage[data-qn]::before{content:attr(data-qn);position:absolute;left:24px;top:40px;font-weight:700;font-size:1.55rem;line-height:1;color:var(--ink)}
+.stage[data-qn]::before{content:attr(data-qn);position:absolute;left:24px;top:40px;font-weight:700;font-size:var(--fs-xl);line-height:1;color:var(--ink)}
 body.running .stage{position:relative;align-items:flex-start;justify-content:flex-start;text-align:left;gap:18px;padding:44px 72px 36px}
-body.running .stage::after{content:"[1]";position:absolute;right:24px;top:44px;font-size:1rem;line-height:1;color:var(--muted)}
+body.running .stage::after{content:"[1]";position:absolute;right:24px;top:44px;font-size:var(--fs-m);line-height:1;color:var(--muted)}
 body.running .tags,body.running .ansrow{justify-content:flex-start}
 body.running .ansbox::before{content:"Answer";display:block;text-align:left;margin-bottom:4px;
-  font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  font-size:var(--fs-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 body.running .ansbox.expr input{top:auto;height:calc(100% - 1.4rem)}
 @media (max-width:560px){body.running .stage{padding:40px 16px 28px 46px}.stage[data-qn]::before{left:14px}
   body.running .stage::after{right:14px;top:14px}}
 
 /* ---- controls ---- */
-button{font-family:var(--font-text);font-size:.92rem;padding:8px 16px;
+button{font-family:var(--font-text);font-size:var(--fs-m);padding:8px 16px;
   border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-/* Start: light blue with a dotted outline that runs clockwise — four dashed edges, each sliding along its side */
-button.primary{border:0;padding:18px 48px;font-size:1.45rem;font-weight:800;color:var(--accent);border-radius:3px;
-  background:
-    linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 0/9px 2px,
-    linear-gradient(90deg,var(--accent) 55%,transparent 0) repeat-x 0 100%/9px 2px,
-    linear-gradient(0deg,var(--accent) 55%,transparent 0) repeat-y 0 0/2px 9px,
-    linear-gradient(0deg,var(--accent) 55%,transparent 0) repeat-y 100% 0/2px 9px,
-    var(--start-bg);
-  animation:march .9s linear infinite}
-@keyframes march{to{background-position:9px 0,-9px 100%,0 -9px,100% 9px,0 0}}
-button.primary:hover{filter:brightness(1.04)}
-@media (prefers-reduced-motion:reduce){button.primary{animation:none}}
+/* Start: a dotted outline that runs clockwise — an SVG rectangle whose dashes slide along its own path */
+button.primary{position:relative;border:0;padding:18px 48px;font-size:var(--fs-xl);font-weight:800;color:var(--accent);
+  border-radius:0;background:var(--start-bg)}
+button.primary .ants{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+button.primary .ants rect{x:1px;y:1px;width:calc(100% - 2px);height:calc(100% - 2px);fill:none;stroke:var(--accent);
+  stroke-width:2;stroke-dasharray:5 4;animation:march .9s linear infinite}
+@keyframes march{to{stroke-dashoffset:-9}}
+button.primary:hover{background:var(--accent-soft)}
+@media (prefers-reduced-motion:reduce){button.primary .ants rect{animation:none}}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:.82rem;padding:4px 11px;border:1px solid var(--line);
+.chip{font-size:var(--fs-s);padding:4px 11px;border:1px solid var(--line);
   border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
 .chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--surface);font-weight:600}
 .focusbtn{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
@@ -180,32 +180,32 @@ button.primary:hover{filter:brightness(1.04)}
 dialog{border:1px solid var(--ink);border-radius:0;background:var(--surface);color:var(--ink);padding:18px 20px;
   width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
 dialog::backdrop{background:rgba(16,20,58,.35)}
-dialog h2{margin:0 0 4px;font-size:1.2rem}
+dialog h2{margin:0 0 4px;font-size:var(--fs-l)}
 dialog h3{margin:14px 0 6px}
 .dlgfoot{display:flex;justify-content:flex-end;margin-top:14px}
-.dlgfoot .chip{font-size:.92rem;padding:6px 16px}
+.dlgfoot .chip{font-size:var(--fs-m);padding:6px 16px}
 
 /* ---- stats ---- */
 section h2{margin:0 0 9px}
 .tblwrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:.92rem}
+table{border-collapse:collapse;width:100%;font-size:var(--fs-s)}
 th{text-align:left;padding:8px 12px;border-bottom:1.5px solid var(--ink);white-space:nowrap}
 td{padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 tr:last-child td{border-bottom:none}
 td.name{white-space:normal;min-width:11ch}
 td.few{color:var(--faint)}
 .lv{display:inline-block;width:1.6em;text-align:center;color:var(--accent);font-weight:600}
-.weak td.name::after{content:" ← slowest";color:var(--mark);font-size:.8rem;font-style:italic;font-weight:600}
-.legend{font-size:.85rem;color:var(--muted);margin:10px 2px 0;line-height:1.5}
+.weak td.name::after{content:" ← slowest";color:var(--mark);font-style:italic;font-weight:600}
+.legend{font-size:var(--fs-s);color:var(--muted);margin:10px 2px 0;line-height:1.5}
 .legend dt{font-weight:600;color:var(--ink);float:left;clear:left;width:5.6em}
 .legend dd{margin:0 0 4px 5.6em}
-.empty{padding:2px 0;color:var(--muted);font-size:.95rem;text-align:left;white-space:normal;text-wrap:pretty;font-style:italic}
+.empty{padding:2px 0;color:var(--muted);font-size:var(--fs-s);text-align:left;white-space:normal;text-wrap:pretty;font-style:italic}
 .boxed{}
-footer{font-size:.92rem;color:var(--muted);border-top:1px solid var(--ink);padding-top:14px}
+footer{font-size:var(--fs-m);color:var(--muted);border-top:1px solid var(--ink);padding-top:14px}
 footer h2{margin:0 0 6px}
 footer ol{margin:0 0 12px;padding-left:1.3em}
 footer li{margin-bottom:5px}
-details.info summary{display:inline-block;cursor:pointer;list-style:none;font-size:.88rem;padding:4px 0;
+details.info summary{display:inline-block;cursor:pointer;list-style:none;font-size:var(--fs-s);padding:4px 0;
   color:var(--muted)}
 details.info summary::-webkit-details-marker{display:none}
 details.info summary::after{content:" ▾";color:var(--muted)}
@@ -214,7 +214,7 @@ details.info summary:hover{color:var(--accent);text-decoration:underline;text-un
 details.info summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 details.info[open] summary{margin-bottom:14px}
 details.info h2{margin:14px 0 6px}
-.note{font-size:.82rem;color:var(--faint)}
+.note{font-size:var(--fs-s);color:var(--faint)}
 </style>
 
 <div class="wrap">
@@ -238,7 +238,7 @@ details.info h2{margin:14px 0 6px}
       <div class="tags"><span class="tag" id="cat" hidden></span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
       <div class="qtext" id="q" hidden></div>
       <div class="qhint" id="hint" hidden></div>
-      <button class="primary" id="start">Start 5:00</button>
+      <button class="primary" id="start"><span id="startLbl">Start</span><svg class="ants" aria-hidden="true"><rect/></svg></button>
       <div class="tipbox" id="tip" hidden></div>
       <div class="tipbox worked" id="worked" hidden></div>
       <div class="tipbox sol" id="sol" hidden></div>
@@ -1771,7 +1771,7 @@ function finish(){
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
   $("hint").textContent=h;
   say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q${done.n}`;
-  $("start").textContent=`Again · ${runMin?clockText(runMin*60000):"endless"}`;
+  $("startLbl").textContent="Again";
 }
 
 function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
@@ -1806,11 +1806,10 @@ function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[.
 function renderFocusBtn(){
   const t=focus.size===CATS.length?"All topics":focus.size===1?GEN[[...focus][0]].name:`${focus.size} topics`;
   const l=lvFilter.size?`level ${[...lvFilter].sort().join(", ")}`:"adaptive levels";
-  $("focusBtn").textContent=`Focus: ${t} · ${l} · ${runMin?runMin+" min":"endless"}`;}
-function renderLength(){   // the Start button and the idle clock both show the chosen length
-  const t=runMin?clockText(runMin*60000):"∞";
-  $("start").textContent=runMin?`Start ${t}`:"Start · endless";
-  if(!run)$("clock").textContent=t;}
+  $("focusBtn").textContent=`Focus: ${t} · ${l}`;}
+function renderLength(){   // the length is said once, by the clock; Start is just Start
+  $("startLbl").textContent="Start";
+  if(!run)$("clock").textContent=runMin?clockText(runMin*60000):"∞";}
 function renderChips(){
   $("chips").innerHTML=CATS.map(c=>
     `<button class="chip" data-c="${c}" aria-pressed="${focus.has(c)}">${GEN[c].name}</button>`).join("")
