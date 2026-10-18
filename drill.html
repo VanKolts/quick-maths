@@ -51,7 +51,10 @@ h1{font-size:var(--fs-d);font-weight:700;margin:0;line-height:1.05;letter-spacin
 .quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:var(--fs-l);line-height:1.45;text-wrap:pretty}
 .quote figcaption{margin-top:4px;font-size:var(--fs-s);color:var(--faint)}
 .streak{font-size:var(--fs-s);color:var(--muted);text-align:right;flex:none}
-.streak b{color:var(--accent);font-size:var(--fs-xl);font-weight:600;display:block;line-height:1.1}
+.streak .days{display:grid;grid-template-columns:repeat(14,9px);gap:3px;justify-content:end;margin:6px 0 6px}
+.streak .days i{width:9px;height:9px;border:1px solid var(--line)}
+.streak .days i.on{background:var(--ink);border-color:var(--ink)}
+.streak .days i.today{outline:1px solid var(--mark);outline-offset:1px}
 
 /* ---- drill card ---- */
 .card{background-color:var(--surface);border:0;border-radius:0;display:flex;flex-direction:column;min-height:320px;position:relative;
@@ -89,7 +92,7 @@ math msqrt>mrow{padding-top:.07em}   /* Figtree digits are tall: a little air un
 @media (max-width:560px){.sol .sl{grid-template-columns:1fr}}
 .tipbox .step{margin:6px 0;line-height:1.7}
 .tipbox .step math{font-size:1.15em}
-.tipbox.worked .label{color:var(--ok)}
+.tipbox.worked .label{color:var(--ink)}   /* two inks only: black, and red for marking */
 .tipbox math{font-family:var(--font-math)}
 .ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
 input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:9ch;text-align:center;
@@ -121,9 +124,8 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 .tag{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted)}
 .tags .tag+.tag::before{content:"·";margin-right:6px;color:var(--faint)}
 .tag.retry{color:var(--mark)}
-.verdict{font-size:var(--fs-m);min-height:1.5em;text-wrap:balance;font-style:italic;font-weight:600}
+.verdict{font-size:var(--fs-m);min-height:1.5em;text-wrap:balance;font-style:italic}
 .verdict.ok,.verdict.bad{color:var(--mark)}
-.verdict math{font-weight:600}
 .verdict svg.pen{width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
   stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
 .verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
@@ -142,7 +144,7 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 #resNote{font-size:var(--fs-s);color:var(--muted);max-width:32ch}
 
 /* ---- full-screen while a session runs: only the card is left ---- */
-body.running header,body.running #focusRow,body.running #start,body.running section,body.running footer{display:none}
+body.running header,body.running #focusRow,body.running #focusDlg,body.running #start,body.running section,body.running footer{display:none}
 body.running{padding-block:12px}
 body.running .wrap{max-width:960px}
 body.running .card{min-height:calc(100dvh - 24px)}
@@ -179,12 +181,10 @@ button.primary:hover{background:var(--accent-soft)}
 .chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--surface);font-weight:600}
 .focusbtn{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
 .focusbtn:hover{border-color:var(--accent);color:var(--accent)}
-dialog{border:1px solid var(--ink);border-radius:0;background:var(--surface);color:var(--ink);padding:18px 20px;
-  width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
-dialog::backdrop{background:rgba(16,20,58,.35)}
-dialog h2{margin:0 0 4px;font-size:var(--fs-l)}
-dialog h3{margin:14px 0 6px}
-.dlgfoot{display:flex;justify-content:flex-end;margin-top:14px}
+/* Focus opens in place, under its button, instead of a pop-up over the page */
+.focuspanel{margin-top:12px;padding-top:4px;border-top:1px solid var(--line)}
+.focuspanel h3{margin:14px 0 6px}
+.dlgfoot{display:flex;margin-top:14px}
 .dlgfoot .chip{font-size:var(--fs-m);padding:6px 16px}
 
 /* ---- stats ---- */
@@ -197,7 +197,7 @@ tr:last-child td{border-bottom:none}
 td.name{white-space:normal;min-width:11ch}
 td.few{color:var(--faint)}
 .lv{display:inline-block;width:1.6em;text-align:center;color:var(--accent);font-weight:600}
-.weak td.name::after{content:" ← slowest";color:var(--mark);font-style:italic;font-weight:600}
+.weak td.name::after{content:" ← slowest";color:var(--mark);font-style:italic}
 .legend{font-size:var(--fs-s);color:var(--muted);margin:10px 2px 0;line-height:1.5}
 .legend dt{font-weight:600;color:var(--ink);float:left;clear:left;width:5.6em}
 .legend dd{margin:0 0 4px 5.6em}
@@ -225,7 +225,7 @@ details.info h2{margin:14px 0 6px}
       <h1>Quick Maths</h1>
       <figure class="quote"><blockquote id="quoteText"></blockquote><figcaption id="quoteBy"></figcaption></figure>
     </div>
-    <div class="streak"><b id="streakN" class="num">—</b><span id="streakL">no sessions yet</span></div>
+    <div class="streak"><div class="days" id="streakDays" aria-hidden="true"></div><span id="streakL">no sessions yet</span></div>
   </header>
 
   <div class="card" id="card">
@@ -264,10 +264,9 @@ details.info h2{margin:14px 0 6px}
     </div>
   </div>
 
-  <div id="focusRow"><button class="chip focusbtn" id="focusBtn" aria-haspopup="dialog">Focus</button></div>
+  <div id="focusRow"><button class="chip focusbtn" id="focusBtn" aria-expanded="false" aria-controls="focusDlg">Focus</button></div>
 
-  <dialog id="focusDlg" aria-labelledby="focusTitle">
-    <h2 id="focusTitle">Focus</h2>
+  <div class="focuspanel" id="focusDlg" hidden>
     <h3 class="label">Topics</h3>
     <div class="chips" id="chips"></div>
     <h3 class="label">Levels</h3>
@@ -276,7 +275,7 @@ details.info h2{margin:14px 0 6px}
     <h3 class="label">Length</h3>
     <div class="chips" id="lenChips"></div>
     <div class="dlgfoot"><button class="chip" id="focusDone">Done</button></div>
-  </dialog>
+  </div>
 
   <section>
     <h2 class="label">Per-operation</h2>
@@ -1555,7 +1554,7 @@ function show(q,tag,why){
   const el=$("q");el.innerHTML=cur.q;
   el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
   fixRadicals(el);
-  $("hint").textContent=cur.hint||"Whole-number answer";
+  $("hint").textContent=cur.hint||"";$("hint").hidden=!cur.hint;
   $("tip").hidden=true;
   $("sol").hidden=true;
   const wk=$("worked");wk.hidden=!(cur.worked&&cur.w);
@@ -1797,10 +1796,12 @@ function renderStats(){
 }
 function renderStreak(){
   const n=S.streak.count||0;
-  $("streakN").textContent=n||"—";
-  $("streakL").textContent=n?"day streak":"no sessions yet";
+  const done=new Set(S.sessions.map((x)=>x.d)),cells=[];   // the last 14 days, today on the right
+  for(let i=13;i>=0;i--){const d=ymd(new Date(Date.now()-i*86400000));cells.push(`<i class="${done.has(d)?"on":""}${i?"":" today"}" title="${d}"></i>`);}
+  $("streakDays").innerHTML=cells.join("");
+  $("streakL").textContent=n?`${n}-day streak`:"no sessions yet";
 }
-/* ---------- Focus: topics and levels, chosen in a dialog, remembered on this device ---------- */
+/* ---------- Focus: topics and levels, chosen in a panel under the Focus button, remembered on this device ---------- */
 function pickLevel(c){const s=S.cats[c];
   if(lvFilter.size)return pick([...lvFilter]);
   const top=Math.max(s.best||1,s.lv);if(top===1)return 1;
@@ -1873,9 +1874,9 @@ try{const f=JSON.parse(localStorage.getItem("qm-focus")||"null");
     lvFilter=new Set((f.levels||[]).filter((l)=>[1,2,3].includes(l)));
     if(LENGTHS.includes(f.min))runMin=f.min;}}catch(e){}
 renderChips(); renderStats(); renderStreak();
-$("focusBtn").onclick=()=>$("focusDlg").showModal();
-$("focusDone").onclick=()=>$("focusDlg").close();
-$("focusDlg").addEventListener("click",(e)=>{if(e.target===$("focusDlg"))$("focusDlg").close();});   // click outside closes
+function setFocusOpen(open){$("focusDlg").hidden=!open;$("focusBtn").setAttribute("aria-expanded",open);}
+$("focusBtn").onclick=()=>setFocusOpen($("focusDlg").hidden);
+$("focusDone").onclick=()=>{setFocusOpen(false);$("focusBtn").focus();};
 $("start").onclick=()=>start();
 $("stop").onclick=stopPressed;
 $("skip").onclick=()=>skip();
@@ -1924,7 +1925,7 @@ $("ans").addEventListener("input",(e)=>{const a=e.target;
 // the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
 for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
 document.addEventListener("keydown",e=>{
-  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&!$("focusDlg").open){e.preventDefault();start();}
+  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&$("focusDlg").hidden){e.preventDefault();start();}
 });
 
 (async()=>{
