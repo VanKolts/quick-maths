@@ -59,7 +59,6 @@ h1{font-size:var(--fs-d);font-weight:700;margin:0;line-height:1.05;letter-spacin
 .bar{display:flex;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--surface);
   font-size:var(--fs-s);color:var(--muted);flex-wrap:wrap}
 .bar .t{font-size:var(--fs-l);color:var(--ink);font-weight:700}
-.bar .sp{margin-left:auto}
 body:not(.running) #score{visibility:hidden}   /* no 0 / 0 before a start, no second score after one */
 .bar .aside{color:var(--mark)}
 #qn{display:none}   /* the number sits in the margin instead */
@@ -130,14 +129,16 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 .verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
 .verdict svg.pen path.p2{animation-delay:.18s}
 @keyframes draw{to{stroke-dashoffset:0}}
-#q.marked{position:relative;padding:.05em .4em;font-weight:700;font-size:var(--fs-d);color:var(--mark)}
-#q.marked::after{content:"";position:absolute;inset:-.12em -.35em;border:3px solid var(--mark);
-  border-radius:50% 46% 54% 48%;transform:rotate(-4deg);animation:ring .5s ease-out both}
-@keyframes ring{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@media (prefers-reduced-motion:reduce){.verdict svg.pen path{animation:none;stroke-dashoffset:0}#q.marked::after{animation:none}}
+#q.marked{font-weight:700;font-size:var(--fs-d);color:var(--mark)}
+@media (prefers-reduced-motion:reduce){.verdict svg.pen path{animation:none;stroke-dashoffset:0}}
 .card.second{outline:2px solid var(--mark);outline-offset:-2px}
 .card.second input[type=text]{border-color:var(--bad)}
-.cardctl{display:flex;gap:8px;justify-content:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap;background:var(--surface)}
+.cardctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface)}
+/* bottom strip of the sheet: Start (or Hint · Skip · Stop) on the left, the running score in the middle */
+.cardctl .ctlL{justify-self:start;display:flex;gap:8px;flex-wrap:wrap}
+#runctl{display:flex;gap:8px;flex-wrap:wrap}
+.cardctl .score{grid-column:2;font-size:var(--fs-l);font-weight:700;font-variant-numeric:tabular-nums lining-nums}
+@media (max-width:560px){.cardctl{grid-template-columns:1fr auto}.cardctl .score{grid-column:2}}
 
 /* ---- full-screen while a session runs: only the card is left ---- */
 body.running header,body.running #focusRow,body.running #start,body.running section,body.running footer{display:none}
@@ -163,7 +164,7 @@ button{font-family:var(--font-text);font-size:var(--fs-m);padding:8px 16px;
 button:hover{border-color:var(--accent)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 /* Start: a dotted outline that runs clockwise — an SVG rectangle whose dashes slide along its own path */
-button.primary{position:relative;border:0;padding:18px 48px;font-size:var(--fs-xl);font-weight:800;color:var(--accent);
+button.primary{position:relative;border:0;padding:12px 36px;font-size:var(--fs-xl);font-weight:800;color:var(--accent);
   border-radius:0;background:var(--start-bg)}
 button.primary .ants{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 button.primary .ants rect{x:1px;y:1px;width:calc(100% - 2px);height:calc(100% - 2px);fill:none;stroke:var(--accent);
@@ -232,13 +233,11 @@ details.info h2{margin:14px 0 6px}
       <span id="qn">Q0</span>
       <span class="aside" id="aside"></span>
       <span id="mode"></span>
-      <span class="sp" id="score">0 / 0</span>
     </div>
     <div class="stage">
       <div class="tags"><span class="tag" id="cat" hidden></span><span class="tag retry" id="retryTag" hidden>you got this wrong earlier</span></div>
       <div class="qtext" id="q" hidden></div>
       <div class="qhint" id="hint" hidden></div>
-      <button class="primary" id="start"><span id="startLbl">Start</span><svg class="ants" aria-hidden="true"><rect/></svg></button>
       <div class="tipbox" id="tip" hidden></div>
       <div class="tipbox worked" id="worked" hidden></div>
       <div class="tipbox sol" id="sol" hidden></div>
@@ -254,10 +253,14 @@ details.info h2{margin:14px 0 6px}
       <div class="keys" id="keys" hidden><kbd>/</kbd> fraction &nbsp;·&nbsp; <kbd>^</kbd> power &nbsp;·&nbsp; <kbd>r</kbd> √ &nbsp;·&nbsp; <kbd>Tab</kbd> or <kbd>→</kbd> out of a box</div>
       <div class="verdict" id="verdict" aria-live="polite"></div>
     </div>
-    <div class="cardctl" id="cardctl" hidden>
-      <button id="hintBtn">Hint <kbd>?</kbd></button>
-      <button id="skip">Skip <kbd>Esc</kbd></button>
-      <button id="stop">Stop</button>
+    <div class="cardctl" id="cardctl">
+      <div class="ctlL">
+        <button class="primary" id="start"><span id="startLbl">Start</span><svg class="ants" aria-hidden="true"><rect/></svg></button>
+        <span id="runctl" hidden><button id="hintBtn">Hint <kbd>?</kbd></button>
+          <button id="skip">Skip <kbd>Esc</kbd></button>
+          <button id="stop">Stop</button></span>
+      </div>
+      <span class="score" id="score">0 / 0</span>
     </div>
   </div>
 
@@ -1705,7 +1708,7 @@ function start(){
   run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
   document.body.classList.add("running");window.scrollTo(0,0);
   $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;
-  $("cardctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
+  $("runctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless":"";
   tick(); nextQ(); updateBar();
 }
@@ -1763,7 +1766,7 @@ function finish(){
   clearInterval(run.t);
   const done=run; run=null; cur=null;
   document.body.classList.remove("running");
-  $("cardctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;$("sol").hidden=true;
+  $("runctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;$("sol").hidden=true;
   delete $("q").parentElement.dataset.qn;
   $("ans").disabled=true;$("ans").value="";renderLength();$("cat").hidden=true;setSecond(false);
   $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;$("q").classList.add("marked");
