@@ -59,7 +59,7 @@ h1{font-size:var(--fs-d);font-weight:700;margin:0;line-height:1.05;letter-spacin
 .bar{display:flex;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--surface);
   font-size:var(--fs-s);color:var(--muted);flex-wrap:wrap}
 .bar .t{font-size:var(--fs-l);color:var(--ink);font-weight:700}
-body:not(.running) #score{visibility:hidden}   /* no 0 / 0 before a start, no second score after one */
+body:not(.running) #score{display:none}   /* no 0 / 0 before a start; after one the result says it */
 .bar .aside{color:var(--mark)}
 #qn{display:none}   /* the number sits in the margin instead */
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -129,16 +129,17 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 .verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
 .verdict svg.pen path.p2{animation-delay:.18s}
 @keyframes draw{to{stroke-dashoffset:0}}
-#q.marked{font-weight:700;font-size:var(--fs-d);color:var(--mark)}
 @media (prefers-reduced-motion:reduce){.verdict svg.pen path{animation:none;stroke-dashoffset:0}}
 .card.second{outline:2px solid var(--mark);outline-offset:-2px}
 .card.second input[type=text]{border-color:var(--bad)}
-.cardctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface)}
-/* bottom strip of the sheet: Start (or Hint · Skip · Stop) on the left, the running score in the middle */
-.cardctl .ctlL{justify-self:start;display:flex;gap:8px;flex-wrap:wrap}
-#runctl{display:flex;gap:8px;flex-wrap:wrap}
-.cardctl .score{grid-column:2;font-size:var(--fs-l);font-weight:700;font-variant-numeric:tabular-nums lining-nums}
-@media (max-width:560px){.cardctl{grid-template-columns:1fr auto}.cardctl .score{grid-column:2}}
+/* the plain patch in the sheet's bottom-left corner: it wraps whatever is in it — Start; or Hint · Skip · Stop and
+   the score; or Again and the result — with the same space around and between, and the squares start right after */
+.cardctl{--pad:16px;display:flex;flex-wrap:wrap;align-items:center;gap:var(--pad);padding:var(--pad);
+  align-self:flex-start;max-width:100%;background:var(--surface)}
+#runctl,#result{display:flex;align-items:center;gap:var(--pad);flex-wrap:wrap}
+.cardctl .score{font-size:var(--fs-l);font-weight:700;font-variant-numeric:tabular-nums lining-nums}
+#resScore{font-size:var(--fs-xl);font-weight:700;color:var(--mark);font-variant-numeric:tabular-nums lining-nums}
+#resNote{font-size:var(--fs-s);color:var(--muted);max-width:32ch}
 
 /* ---- full-screen while a session runs: only the card is left ---- */
 body.running header,body.running #focusRow,body.running #start,body.running section,body.running footer{display:none}
@@ -254,13 +255,12 @@ details.info h2{margin:14px 0 6px}
       <div class="verdict" id="verdict" aria-live="polite"></div>
     </div>
     <div class="cardctl" id="cardctl">
-      <div class="ctlL">
-        <button class="primary" id="start"><span id="startLbl">Start</span><svg class="ants" aria-hidden="true"><rect/></svg></button>
-        <span id="runctl" hidden><button id="hintBtn">Hint <kbd>?</kbd></button>
-          <button id="skip">Skip <kbd>Esc</kbd></button>
-          <button id="stop">Stop</button></span>
-      </div>
+      <button class="primary" id="start"><span id="startLbl">Start</span><svg class="ants" aria-hidden="true"><rect/></svg></button>
+      <span id="runctl" hidden><button id="hintBtn">Hint <kbd>?</kbd></button>
+        <button id="skip">Skip <kbd>Esc</kbd></button>
+        <button id="stop">Stop</button></span>
       <span class="score" id="score">0 / 0</span>
+      <span id="result" hidden><b id="resScore"></b><span id="resNote"></span></span>
     </div>
   </div>
 
@@ -1557,7 +1557,7 @@ function show(q,tag,why){
   fixRadicals(el);
   $("hint").textContent=cur.hint||"Whole-number answer";
   $("tip").hidden=true;
-  $("sol").hidden=true;el.classList.remove("marked");
+  $("sol").hidden=true;
   const wk=$("worked");wk.hidden=!(cur.worked&&cur.w);
   if(!wk.hidden){wk.innerHTML=`<span class="label">Worked start</span>${cur.w}`;fixRadicals(wk);}
   setSecond(!!why,why==="skipped"?"skipped earlier — here is a start":"you got this wrong earlier");
@@ -1707,7 +1707,7 @@ function start(){
   const endless=runMin===0;
   run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0};
   document.body.classList.add("running");window.scrollTo(0,0);
-  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;
+  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;$("result").hidden=true;
   $("runctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless":"";
   tick(); nextQ(); updateBar();
@@ -1769,10 +1769,11 @@ function finish(){
   $("runctl").hidden=true;$("ansrow").hidden=true;$("keys").hidden=true;$("tip").hidden=true;$("worked").hidden=true;$("sol").hidden=true;
   delete $("q").parentElement.dataset.qn;
   $("ans").disabled=true;$("ans").value="";renderLength();$("cat").hidden=true;setSecond(false);
-  $("q").classList.remove("long");$("q").textContent=`${done.right} / ${done.n}`;$("q").classList.add("marked");
+  $("q").classList.remove("long");$("q").textContent="";$("q").hidden=true;$("hint").hidden=true;
+  $("resScore").textContent=done.n?`${done.right} / ${done.n}`:"";$("resScore").hidden=!done.n;
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
-  $("hint").textContent=h;
+  $("resNote").textContent=h;$("result").hidden=false;
   say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q${done.n}`;
   $("startLbl").textContent="Again";
 }
