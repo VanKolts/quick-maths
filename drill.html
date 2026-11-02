@@ -2025,8 +2025,11 @@ function unpack(d){
       times:Array.isArray(o.times)?o.times.slice(-40).map(Number).filter(Number.isFinite):[],
       recent:Array.isArray(o.recent)?o.recent.slice(-6).map(Number):[],last:Number.isFinite(o.last)?o.last:null};});
 }
-let saving=false;
+let saving=false,local=false;
+const LOCAL_KEY="qm-progress";
 async function save(){
+  if(local){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(pack()));$("sync").textContent="saved on this device";}
+    catch(e){$("sync").textContent="could not save on this device";}return;}
   if(!db||!uid||saving)return;
   saving=true;
   try{await db.doc(`data/users/${uid}/drill`).set(pack());$("sync").textContent="saved";}
@@ -2166,7 +2169,12 @@ document.addEventListener("keydown",e=>{
 });
 
 (async()=>{
-  if(!window.claude||!window.claude.use){$("sync").textContent="opened outside claude.ai — progress is not saved";return;}
+  // off claude.ai (the GitHub page, or the file opened directly) progress is kept in this browser instead
+  if(!window.claude||!window.claude.use){local=true;
+    try{const d=JSON.parse(localStorage.getItem(LOCAL_KEY)||"null");if(d){unpack(d);renderStats();renderStreak();}
+      $("sync").textContent=d?"progress saved on this device":"progress is saved on this device";}
+    catch(e){local=false;$("sync").textContent="this browser blocks saving — progress is not kept";}
+    return;}
   try{
     const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);
     if(!d||!u){$("sync").textContent="not signed in, nothing saved";return;}
