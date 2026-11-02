@@ -103,7 +103,7 @@ input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:9ch;t
 /* the iPhone number pad has no minus key: on touch screens a ± button flips the sign of a whole-number answer */
 .sign{display:none;font-size:var(--fs-l);min-width:44px;min-height:44px;padding:0 12px}
 @media (pointer:coarse){.ansrow:not(.exprmode) #sign{display:inline-block}.ansrow.exprmode #outBox{display:inline-block}}
-@media (pointer:coarse){.cardctl kbd{display:none}}   /* no Esc or ? key on a phone */
+@media (pointer:coarse){.cardctl kbd,.rvbar kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
   min-height:3.2rem;padding:10px 16px;font-size:var(--fs-xl);border:1.5px solid var(--ink);border-radius:0;background:var(--surface);overflow-x:auto;overflow-y:hidden}
@@ -126,30 +126,8 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 .tag.retry{color:var(--mark)}
 .verdict{font-size:var(--fs-m);min-height:1.5em;text-wrap:balance;font-style:italic}
 .verdict.ok,.verdict.bad{color:var(--mark)}
-.verdict svg.pen,.ovr svg.pen{width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
+.verdict svg.pen,.rv svg.pen{width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
   stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
-/* the overview after a session: every question in the order it was shown; open one for its full working */
-.overview{align-self:stretch;text-align:left;width:100%;max-width:44rem;margin:0 auto}
-.overview>.label{display:flex;align-items:center;gap:10px;margin:0 0 6px;color:var(--ink)}
-.overview>.label::after{content:"";flex:1;border-top:1px solid currentColor;opacity:.35}
-.overview ol{list-style:none;margin:0;padding:0}
-.overview li{border-top:1px solid var(--line)}
-.overview li:first-child{border-top:0}
-.overview summary{display:grid;grid-template-columns:2.4em 1fr auto auto;gap:4px 14px;align-items:center;padding:10px 0;cursor:pointer;list-style:none}
-.overview summary::-webkit-details-marker{display:none}
-.overview summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.overview summary:hover .ovq{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
-.ovn{font-weight:700;font-size:var(--fs-l)}
-.ovq{font-size:var(--fs-l);line-height:1.4;min-width:0;overflow-x:auto;overflow-y:hidden}
-.ovq small{display:block;font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.ovr{font-size:var(--fs-s);font-style:italic;color:var(--mark);white-space:nowrap}
-.ovr.skipped,.ovr.none{color:var(--muted)}
-.overview summary::after{content:"Working ▾";grid-column:4;font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);justify-self:end}
-.overview details[open] summary::after{content:"Working ▴"}
-.ovbody{padding:0 0 14px calc(2.4em + 14px)}
-.ovbody .yours{font-size:var(--fs-m);margin:0 0 8px}
-.ovbody .yours b{font-weight:600}
-@media (max-width:560px){.overview summary{grid-template-columns:2em 1fr}.ovr{grid-column:2;justify-self:start}.overview summary::after{grid-column:2;justify-self:start}.ovbody{padding-left:0}}
 .verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
 .verdict svg.pen path.p2{animation-delay:.18s}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -203,6 +181,51 @@ button.primary:hover{background:var(--accent-soft)}
 .chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--surface);font-weight:600}
 .focusbtn{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
 .focusbtn:hover{border-color:var(--accent);color:var(--accent)}
+/* Review: the session's questions on a near-full-screen sheet — the list down the left, one question and its
+   full working on the right. Same paper, same two inks; square corners, no shadow. */
+dialog.rv{position:fixed;inset:16px;width:auto;height:auto;max-width:none;max-height:none;margin:0;padding:0;
+  border:1px solid var(--ink);border-radius:0;color:var(--ink);background-color:var(--surface);background-image:var(--grid);
+  background-position:-1px -1px;flex-direction:column;overflow:hidden}
+dialog.rv[open]{display:flex}
+dialog.rv::backdrop{background:rgba(28,27,24,.45)}
+.rvbar{display:flex;align-items:baseline;gap:16px;padding:14px 24px;border-bottom:1px solid var(--ink);background:var(--surface)}
+.rvbar h2{margin:0;font-size:var(--fs-l);font-weight:700}
+.rvcount{color:var(--muted);font-size:var(--fs-s)}
+.rvbar button{margin-left:auto}
+.rvbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(220px,300px) 1fr}
+.rvlist{list-style:none;margin:0;padding:8px 0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line)}
+.rvlist button{display:grid;grid-template-columns:2.2em 1fr auto;align-items:center;gap:10px;width:100%;text-align:left;
+  border:0;border-radius:0;background:transparent;padding:9px 20px;font-size:var(--fs-s);color:var(--ink)}
+.rvlist button:hover{background:var(--sunk)}
+.rvlist button[aria-current=true]{background:var(--accent-soft)}
+.rvlist .n{font-weight:700;font-size:var(--fs-m)}
+.rvlist .t{color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rvlist button[aria-current=true] .t{color:var(--ink)}
+.rv .mk{color:var(--mark);font-style:italic;white-space:nowrap}
+.rv .mk.none,.rv .mk.skipped{color:var(--muted)}
+.rvlist .mk svg.pen{margin:0}
+.rvpage{overflow-y:auto;padding:36px 48px 48px 96px;position:relative}
+.rvpage .rvn{position:absolute;left:32px;top:40px;font-weight:700;font-size:var(--fs-xl);line-height:1}
+.rvpage .meta{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.rvpage .meta .mk{text-transform:none;letter-spacing:0;font-size:var(--fs-s);margin-left:10px}
+.rvpage .rq{font-size:var(--fs-d);line-height:1.3;margin:0 0 22px;overflow-x:auto;overflow-y:hidden}
+.rvpage .rq.long{font-size:var(--fs-ds)}
+.rvpage .yours{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 26px;font-size:var(--fs-l)}
+.rvpage .yours dt{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);align-self:center}
+.rvpage .yours dd{margin:0}
+.rvpage .tipbox.sol{max-width:52rem;font-size:var(--fs-l)}
+.rvnav{display:flex;gap:16px;margin-top:28px}
+@media (max-width:700px){
+  dialog.rv{inset:0;border:0}
+  .rvbody{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .rvlist{display:flex;overflow-x:auto;overflow-y:hidden;padding:0;border-right:0;border-bottom:1px solid var(--line)}
+  .rvlist li{flex:none}
+  .rvlist button{grid-template-columns:auto auto;padding:10px 14px}
+  .rvlist .t,.rvlist .w{display:none}
+  .rvlist .mk.none::after,.rvlist .mk.skipped::after{content:"–"}
+  .rvpage{padding:24px 16px 32px 52px}.rvpage .rvn{left:16px;top:28px}
+  .rvpage .tipbox.sol{font-size:var(--fs-m)}}
+
 /* Focus opens in place, under its button, instead of a pop-up over the page */
 .focuspanel{margin-top:12px;padding-top:4px;border-top:1px solid var(--line)}
 .focuspanel h3{margin:14px 0 6px}
@@ -275,7 +298,6 @@ details.info h2{margin:14px 0 6px}
       </div>
       <div class="keys" id="keys" hidden><kbd>/</kbd> fraction &nbsp;·&nbsp; <kbd>^</kbd> power &nbsp;·&nbsp; <kbd>r</kbd> √ &nbsp;·&nbsp; <kbd>Tab</kbd> or <kbd>→</kbd> out of a box</div>
       <div class="verdict" id="verdict" aria-live="polite"></div>
-      <div class="overview" id="overview" hidden></div>
     </div>
     <div class="cardctl" id="cardctl">
       <button class="primary" id="start"><span id="startLbl">Start</span><svg class="ants" aria-hidden="true"><rect/></svg></button>
@@ -283,9 +305,19 @@ details.info h2{margin:14px 0 6px}
         <button id="skip">Skip <kbd>Esc</kbd></button>
         <button id="stop">Stop</button></span>
       <span class="score" id="score">0 / 0</span>
+      <button id="reviewBtn" hidden aria-haspopup="dialog">Review</button>
       <span id="result" hidden><b id="resScore"></b><span id="resNote"></span></span>
     </div>
   </div>
+
+  <dialog class="rv" id="rvDlg" aria-labelledby="rvTitle">
+    <div class="rvbar"><h2 id="rvTitle">Review</h2><span class="rvcount" id="rvCount"></span>
+      <button id="rvClose">Close <kbd>Esc</kbd></button></div>
+    <div class="rvbody">
+      <ol class="rvlist" id="rvList"></ol>
+      <div class="rvpage" id="rvPage"></div>
+    </div>
+  </dialog>
 
   <div id="focusRow"><button class="chip focusbtn" id="focusBtn" aria-expanded="false" aria-controls="focusDlg">Focus</button></div>
 
@@ -1734,7 +1766,7 @@ function start(){
   const endless=runMin===0;
   run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0,log:[]};
   document.body.classList.add("running");window.scrollTo(0,0);
-  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;$("result").hidden=true;$("overview").hidden=true;$("overview").innerHTML="";
+  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;$("result").hidden=true;$("reviewBtn").hidden=true;
   $("runctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless":"";
   tick(); nextQ(); updateBar();
@@ -1801,29 +1833,40 @@ function finish(){
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
   $("resNote").textContent=h;$("result").hidden=false;
-  renderOverview(done.log);
+  lastLog=done.log;$("reviewBtn").hidden=!lastLog.length;
   say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q${done.n}`;
   $("startLbl").textContent="Again";
 }
 
-/* every question of the session in the order it was shown; each opens to what you wrote, the answer and the full working */
-const OV_WORD={right:"right",hint:"right, with the hint",wrong:"wrong",shown:"answer shown",skipped:"skipped"};
+/* Review overlay: every question of the last session in the order it was shown. The list picks one; the page
+   shows it large with what you typed, the answer and the full working. ↑ ↓ (or ← →) move, Esc closes. */
+let lastLog=[],rvAt=0;
+const RV_WORD={right:"right",hint:"right, with the hint",wrong:"wrong",shown:"answer shown",skipped:"skipped"};
+const rvMark=(res)=>`<span class="mk ${res||"none"}">${res==="right"||res==="hint"?TICK:res==="wrong"||res==="shown"?CROSS:""}<span class="w">${RV_WORD[res]||"not answered"}</span></span>`;
 function typedML(raw,expr){const t=String(raw).trim();
   try{return expr?M(exprML(parseAns(t))):M(Number(t.replace(/^[−–]/,"-")));}catch(e){return t.replace(/[<&]/g,"");}}
-function renderOverview(log){
-  const el=$("overview");
-  if(!log.length){el.hidden=true;el.innerHTML="";return;}
-  el.innerHTML=`<h2 class="label">Every question, in the order it came</h2><ol>${log.map((e,i)=>{
-    const note=e.review?"in the review":e.why==="skipped"?"back after a skip":e.why?"back after a wrong answer":"";
-    const res=e.res||"none",mark=res==="right"||res==="hint"?TICK:res==="wrong"||res==="shown"?CROSS:"";
-    const yours=e.tries.length?`You wrote ${e.tries.map((t)=>typedML(t,e.expr)).join(", then ")}`:e.res==="skipped"?"You skipped it":"Not answered";
-    return`<li><details><summary><span class="ovn">${i+1}</span>`+
-      `<span class="ovq"><small>${e.name} · level ${e.lv}${note?` · ${note}`:""}</small>${e.q}</span>`+
-      `<span class="ovr ${res}">${mark}${OV_WORD[res]||"not answered"}</span></summary>`+
-      `<div class="ovbody"><p class="yours">${yours}. Answer: <b>${e.ans}</b></p>`+
-      `${e.s?`<div class="tipbox sol full"><span class="label">Full working</span>${e.s}</div>`:""}</div></details></li>`;}).join("")}</ol>`;
-  el.hidden=false;fixRadicals(el);
-  el.querySelectorAll("details").forEach((d)=>d.addEventListener("toggle",()=>{if(d.open)fixRadicals(d);}));
+function openReview(){
+  if(!lastLog.length)return;
+  $("rvCount").textContent=`${lastLog.length} question${lastLog.length>1?"s":""}, in the order they came`;
+  $("rvList").innerHTML=lastLog.map((e,i)=>`<li><button data-i="${i}"><span class="n">${i+1}</span><span class="t">${e.name}</span>${rvMark(e.res)}</button></li>`).join("");
+  $("rvList").querySelectorAll("button").forEach((b)=>b.onclick=()=>rvShow(+b.dataset.i));
+  $("rvDlg").showModal();rvShow(0);
+}
+function rvShow(i){
+  rvAt=Math.max(0,Math.min(lastLog.length-1,i));const e=lastLog[rvAt];
+  const note=e.review?"in the review":e.why==="skipped"?"back after a skip":e.why?"back after a wrong answer":"";
+  const typed=e.tries.length?e.tries.map((t)=>typedML(t,e.expr)).join(", then "):e.res==="skipped"?"skipped":"not answered";
+  const long=e.q.replace(/<[^>]+>/g,"").replace(/\s+/g," ").length>34;
+  const pg=$("rvPage");
+  pg.innerHTML=`<span class="rvn">${rvAt+1}</span>
+    <p class="meta">${e.name} · level ${e.lv}${note?` · ${note}`:""}${rvMark(e.res)}</p>
+    <div class="rq${long?" long":""}">${e.q}</div>
+    <dl class="yours"><dt>You wrote</dt><dd>${typed}</dd><dt>Answer</dt><dd>${e.ans}</dd></dl>
+    ${e.s?`<div class="tipbox sol full"><span class="label">Full working</span>${e.s}</div>`:""}
+    <div class="rvnav"><button id="rvPrev"${rvAt?"":" disabled"}>← Previous</button><button id="rvNext"${rvAt<lastLog.length-1?"":" disabled"}>Next →</button></div>`;
+  $("rvPrev").onclick=()=>rvShow(rvAt-1);$("rvNext").onclick=()=>rvShow(rvAt+1);
+  pg.scrollTop=0;fixRadicals(pg);
+  $("rvList").querySelectorAll("button").forEach((b)=>{const on=+b.dataset.i===rvAt;b.setAttribute("aria-current",on);if(on)b.scrollIntoView({block:"nearest",inline:"nearest"});});
 }
 
 function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
@@ -1925,6 +1968,11 @@ try{const f=JSON.parse(localStorage.getItem("qm-focus")||"null");
 renderChips(); renderStats(); renderStreak();
 function setFocusOpen(open){$("focusDlg").hidden=!open;$("focusBtn").setAttribute("aria-expanded",open);}
 $("focusBtn").onclick=()=>setFocusOpen($("focusDlg").hidden);
+$("reviewBtn").onclick=openReview;
+$("rvClose").onclick=()=>$("rvDlg").close();
+$("rvDlg").addEventListener("keydown",(e)=>{
+  if(e.key==="ArrowDown"||e.key==="ArrowRight"){e.preventDefault();rvShow(rvAt+1);}
+  else if(e.key==="ArrowUp"||e.key==="ArrowLeft"){e.preventDefault();rvShow(rvAt-1);}});
 $("focusDone").onclick=()=>{setFocusOpen(false);$("focusBtn").focus();};
 $("start").onclick=()=>start();
 $("stop").onclick=stopPressed;
@@ -1974,7 +2022,7 @@ $("ans").addEventListener("input",(e)=>{const a=e.target;
 // the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
 for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
 document.addEventListener("keydown",e=>{
-  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&$("focusDlg").hidden){e.preventDefault();start();}
+  if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&$("focusDlg").hidden&&!$("rvDlg").open){e.preventDefault();start();}
 });
 
 (async()=>{
