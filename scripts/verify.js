@@ -29,6 +29,7 @@ function lin(n){
   switch(n.tag){
     case"root":return n.kids.map(lin).join("");
     case"math":case"mrow":
+      if(/class="rad"/.test(n.attrs))return`sqrt(${K.map(lin).join(" ")})`;
       if(/class="mixed"/.test(n.attrs))return`(${lin(K[0])} + ${lin(K[1])})`;
       return K.map(lin).join(" ");
     case"mn":return txt(n).replace(/ /g,"").replace("°","");
@@ -242,6 +243,9 @@ function checkE(o){
   const t=render(o.q),e=o.e,E=(x)=>evalExpr(fromAns(e),{x});let m,orig=null,ok;
   // the page's own checker must accept the answer it expects and refuse a wrong one
   if(!checkExpr(e,o).ok)return false;
+  // typed with the boxes, √2 arrives as √(2) and x^2 as x^(2): that must pass the form check too (bug of 2026-11-02)
+  const boxed=e.replace(/√(\d+|x)/g,"√($1)").replace(/\^(-?\d+)/g,"^($1)");
+  if(boxed!==e&&!checkExpr(boxed,o).ok){boxFails.push(e+"  →  "+boxed);return false;}
   if(checkExpr(e+"+1",o).ok&&o.mode!=="anti")return false;
   if(o.mode==="anti"&&checkExpr(e+"+x",o).ok)return false;
   if((m=t.match(/^Differentiate \[y = (.+)\]$/))){const f=(x)=>evalExpr(m[1],{x});ok=PTS.every((x)=>close(deriv(f,x,1e-4),E(x),1e-6));}
@@ -286,6 +290,7 @@ function checkW(o){
    Every line needs a label in words and some maths. Plain lines and identities are checked as in worked starts.
    The last line must hold the final maths: class="fin", whose sides agree and whose LAST side is the answer, or
    class="finx" for typed answers, whose last side must equal the expected expression (up to a constant for integrals). */
+const boxFails=[];
 const sstats={lines:0,eq:0,id:0,fin:0,finx:0};
 const linT=(html)=>lin(parseXML(html)).replace(/\s+/g," ").trim().replace(/f ' '/g,"f''").replace(/f '/g,"f'");
 function checkS(o){
@@ -339,7 +344,7 @@ for(const c of CATS)GEN[c].L.forEach((bank,li)=>bank.forEach((g,gi)=>{
 console.log(`questions ${total}, failures ${fails}`);
 const checked=Object.values(shapes).reduce((a,b)=>a+b,0);
 console.log(`independently recomputed: ${checked} / ${total} (${(100*checked/total).toFixed(1)}%)`);
-console.log("unchecked shapes:",unchecked);console.log("worked starts checked: equations",wstats.eq,"· identities",wstats.id,"· answer expressions",wstats.ans);console.log("full solutions checked: lines",sstats.lines,"· equations",sstats.eq,"· identities",sstats.id,"· final values",sstats.fin,"· final expressions",sstats.finx);console.log("bare number equal to the answer (review):",wstats.bare,wstats.samples);console.log("failures by shape:",failBy);
+console.log("unchecked shapes:",unchecked);console.log("worked starts checked: equations",wstats.eq,"· identities",wstats.id,"· answer expressions",wstats.ans);console.log("boxed typing refused:",boxFails.length,boxFails.slice(0,5));console.log("full solutions checked: lines",sstats.lines,"· equations",sstats.eq,"· identities",sstats.id,"· final values",sstats.fin,"· final expressions",sstats.finx);console.log("bare number equal to the answer (review):",wstats.bare,wstats.samples);console.log("failures by shape:",failBy);
 for(const f of failures)console.log(JSON.stringify(f));
 // variety: distinct questions per shape out of N
 const low=Object.entries(vals).map(([k,s])=>[k,s.size]).sort((a,b)=>a[1]-b[1]).slice(0,12);

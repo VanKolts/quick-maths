@@ -15,100 +15,108 @@
   --accent:#1C1B18; --accent-soft:#ECE6D7; --on-accent:#FCFAF4;
   --start-bg:#F2ECDD;   /* fill of the Start button */
   --ok:#1F6B45; --bad:#B3261E; --bad-soft:#F6E3DC; --mark:#B02218;
-  --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 .5H22M.5 0V22' fill='none' stroke='rgba(70,58,36,.085)'/%3E%3C/svg%3E");   /* the faint squares: one 22 px tile, no gradient */
+  --pen-blend:multiply;   /* red pen marks sink into the paper like ink */
+  --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M0 .5H24M.5 0V24' fill='none' stroke='rgba(70,58,36,.085)'/%3E%3C/svg%3E");   /* the faint squares: one 24 px tile, no gradient */
   --font-text:"Figtree",system-ui,sans-serif;
-  /* the whole type scale: five steps and two display sizes; nothing else sets a size in rem */
-  --fs-xs:.72rem; --fs-s:.86rem; --fs-m:1rem; --fs-l:1.2rem; --fs-xl:1.6rem;
-  --fs-d:clamp(2.1rem,7vw,2.9rem); --fs-ds:clamp(1.4rem,5vw,2.1rem);
+  /* type: a major-third scale from 16 px (×1.25 each step) — 12.8 · 16 · 20 · 25 · 31 · 39 · 49 px; --fs-s is the
+     12.8 step too, kept as a name for small interface text. Spacing: multiples of 8 px, and the squares are 24 px */
+  --fs-xs:.8rem; --fs-s:.8rem; --fs-m:1rem; --fs-l:1.25rem; --fs-xl:1.5625rem;
+  --fs-d:clamp(1.953rem,7vw,3.052rem); --fs-ds:clamp(1.563rem,5vw,2.441rem);
   --font-math:"Noto Sans Math","STIX Two Math","Cambria Math",math;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#171613; --surface:#22201C; --sunk:#1B1A17;   /* the same paper at night */
   --ink:#ECE7DC; --muted:#BDB5A6; --faint:#A39B8C; --line:#3A362F;
   --accent:#ECE7DC; --accent-soft:#2E2B25; --on-accent:#171613; --start-bg:#2A2722;
-  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 .5H22M.5 0V22' fill='none' stroke='rgba(236,231,220,.06)'/%3E%3C/svg%3E"); color-scheme:dark;
+  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M0 .5H24M.5 0V24' fill='none' stroke='rgba(236,231,220,.06)'/%3E%3C/svg%3E"); --pen-blend:screen; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#171613; --surface:#22201C; --sunk:#1B1A17;   /* the same paper at night */
   --ink:#ECE7DC; --muted:#BDB5A6; --faint:#A39B8C; --line:#3A362F;
   --accent:#ECE7DC; --accent-soft:#2E2B25; --on-accent:#171613; --start-bg:#2A2722;
-  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 .5H22M.5 0V22' fill='none' stroke='rgba(236,231,220,.06)'/%3E%3C/svg%3E"); color-scheme:dark;
+  --ok:#7CC49A; --bad:#EE8B7E; --bad-soft:#3A2622; --mark:#EE8B7E; --grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M0 .5H24M.5 0V24' fill='none' stroke='rgba(236,231,220,.06)'/%3E%3C/svg%3E"); --pen-blend:screen; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}   /* else display:flex rules beat the hidden attribute */
 body{background:var(--bg);color:var(--ink);font-family:var(--font-text);margin:0;
-  padding-inline:16px;padding-block:22px 40px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  padding-inline:16px;padding-block:24px 48px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column}
 /* rhythm, not one gap: the header sits off the sheet, Focus hangs just under it, stats and footer are their own sections */
-.wrap>header{margin-bottom:28px}.wrap>#focusRow{margin-top:12px}.wrap>section{margin-top:44px}.wrap>footer{margin-top:40px}
+.wrap>header{margin-bottom:32px}.wrap>#focusRow{margin-top:16px}.wrap>section{margin-top:48px}.wrap>footer{margin-top:48px}
 .num,.bar,.verdict,table{font-variant-numeric:tabular-nums lining-nums}
 .label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:500}
 
 /* ---- header: title and a quote ---- */
-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:16px}
 h1{font-size:var(--fs-d);font-weight:700;margin:0;line-height:1.05;letter-spacing:-.015em;color:var(--accent)}
 .quote{margin:8px 0 0;max-width:52ch}
 .quote blockquote{margin:0;font-style:italic;color:var(--muted);font-size:var(--fs-l);line-height:1.45;text-wrap:pretty}
 .quote figcaption{margin-top:4px;font-size:var(--fs-s);color:var(--faint)}
 .streak{font-size:var(--fs-s);color:var(--muted);text-align:right;flex:none}
-.streak .days{display:grid;grid-template-columns:repeat(14,9px);gap:3px;justify-content:end;margin:6px 0 6px}
-.streak .days i{width:9px;height:9px;border:1px solid var(--line)}
+.streak .days{display:grid;grid-template-columns:repeat(14,8px);gap:4px;justify-content:end;margin:8px 0}
+.streak .days i{width:8px;height:8px;border:1px solid var(--line)}
 .streak .days i.on{background:var(--ink);border-color:var(--ink)}
 .streak .days i.today{outline:1px solid var(--mark);outline-offset:1px}
 
 /* ---- drill card ---- */
 .card{background-color:var(--surface);border:0;border-radius:0;display:flex;flex-direction:column;min-height:320px;position:relative;
   background-image:var(--grid);background-position:-1px -1px}
-.bar{display:flex;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--ink);background:var(--surface);
+.bar{display:flex;gap:16px;align-items:center;height:48px;padding:0 24px;border-bottom:1px solid var(--ink);background:var(--surface);
   font-size:var(--fs-s);color:var(--muted);flex-wrap:wrap}
-.bar .t{font-size:var(--fs-l);color:var(--ink);font-weight:700}
+.bar .t{font-size:var(--fs-l);color:var(--muted);font-weight:500}   /* the time is there, not shouting */
 body:not(.running) #score{display:none}   /* no 0 / 0 before a start; after one the result says it */
 .bar .aside{color:var(--mark)}
 #qn{display:none}   /* the number sits in the margin instead */
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;padding:26px 18px;text-align:center}
+  gap:16px;padding:24px 16px;text-align:center}
 .qtext{font-size:var(--fs-ds);line-height:1.35;font-weight:400;text-wrap:balance;
   max-width:100%;overflow-wrap:anywhere}
 .qtext.long{font-size:var(--fs-xl)}
 .qtext math,.ansview math,.verdict math{font-family:var(--font-math)}
 /* one typeface: numbers and letters inside maths are Figtree too; the math font only draws roots, brackets and operators */
 math mn,math mi,math mtext{font-family:var(--font-text)}
-math msqrt>mrow{padding-top:.07em}   /* Figtree digits are tall: a little air under the root's bar */
+math mo[stretchy="false"]{font-family:var(--font-text)}
+/* roots: the sign is an SVG drawn to fit each root (fixRadicals), the bar is the radicand's top border */
+.rad{padding-left:.56em;background-repeat:no-repeat;background-position:0 0;background-size:.56em 100%}
+.radin{border-top:2px solid currentColor;padding:.12em .06em 0 .08em}
 .qtext math mfrac mfrac{font-size:.9em}
-.qhint{font-size:var(--fs-s);color:var(--muted)}
-.tipbox{max-width:44rem;width:100%;text-align:left;font-size:var(--fs-m);line-height:1.55}
+.qhint{font-size:var(--fs-m);color:var(--muted)}
+.tipbox{max-width:68ch;width:100%;text-align:left;font-size:var(--fs-m);line-height:1.55}
 /* hint, worked start and solution are parts of the sheet, not boxes: a label with a rule running off it */
-.tipbox .label{display:flex;align-items:center;gap:10px;margin-bottom:4px;color:var(--ink)}
+.tipbox .label{display:flex;align-items:center;gap:8px;margin-bottom:4px;color:var(--ink)}
 .tipbox .label::after{content:"";flex:1;border-top:1px solid currentColor;opacity:.35}
 .tipbox.worked{}
 /* the full solution: every line labelled in words on the left, its maths on the right */
-.tipbox.sol{}
+.tipbox.sol{max-width:52rem}
 .tipbox.sol .label{color:var(--mark)}
-.sol .sl{display:grid;grid-template-columns:minmax(9rem,15rem) 1fr;gap:4px 16px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.sol .sl{display:grid;grid-template-columns:minmax(9rem,15rem) 1fr;gap:4px 16px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .sol .sl:first-child{border-top:0}
-.sol .sll{font-size:var(--fs-s);line-height:1.35;color:var(--muted)}
+.sol .sll{font-size:var(--fs-m);line-height:1.35;color:var(--muted)}
 .sol .slm{line-height:1.8;overflow-x:auto;overflow-y:hidden;padding-block:.1em}.sol .slm math{font-size:1.15em}
 .sol.full .sl:last-child .sll{color:var(--mark);font-weight:600}   /* the answer line */
 @media (max-width:560px){.sol .sl{grid-template-columns:1fr}}
-.tipbox .step{margin:6px 0;line-height:1.7}
+.tipbox .step{margin:8px 0;line-height:1.7}
 .tipbox .step math{font-size:1.15em}
 .tipbox.worked .label{color:var(--ink)}   /* two inks only: black, and red for marking */
 .tipbox math{font-family:var(--font-math)}
-.ansrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
-input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:9ch;text-align:center;
-  padding:8px 10px;border:1.5px solid var(--ink);border-radius:0;background:var(--surface);
+.ansrow{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;justify-content:center}
+.prompt{font-size:var(--fs-xl);padding-bottom:6px;white-space:nowrap}
+.prompt.word{font-size:var(--fs-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:12px}
+/* the answer goes on a dotted line, as on a paper; it turns solid while you are writing on it */
+input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:8ch;text-align:left;
+  padding:4px 8px;border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;
   color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
 /* typed answers: an invisible text field over a live maths view of what has been typed */
 .ansbox{position:relative}
 /* the iPhone number pad has no minus key: on touch screens a ± button flips the sign of a whole-number answer */
-.sign{display:none;font-size:var(--fs-l);min-width:44px;min-height:44px;padding:0 12px}
+.sign{display:none;font-size:var(--fs-l);min-width:48px;min-height:48px;padding:0 16px}
 @media (pointer:coarse){.ansrow:not(.exprmode) #sign{display:inline-block}.ansrow.exprmode #outBox{display:inline-block}}
 @media (pointer:coarse){.cardctl kbd,.rvbar kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
-  min-height:3.2rem;padding:10px 16px;font-size:var(--fs-xl);border:1.5px solid var(--ink);border-radius:0;background:var(--surface);overflow-x:auto;overflow-y:hidden}
+  min-height:3.2rem;padding:8px 8px;font-size:var(--fs-xl);border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;overflow-x:auto;overflow-y:hidden}
 .ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
-.ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
+.ansbox.expr:focus-within .ansview{border-bottom-style:solid}
 .card.second .ansview{border-color:var(--bad)}
 .ansview .ph{border:1px dashed var(--faint);border-radius:1px}
 .ansview .caret{background:var(--accent);animation:blink 1.05s steps(1) infinite}
@@ -116,17 +124,17 @@ input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:9ch;t
 .ansview .raw{font-size:.8em;color:var(--muted)}
 @keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.ansview .caret{animation:none}}
-input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input[type=text]:focus-visible{outline:none;border-bottom-style:solid}
 .keys{font-size:var(--fs-s);color:var(--faint)}
 kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:2px;
   padding:0 .35em;background:var(--surface);color:var(--muted)}
-.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .tag{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted)}
-.tags .tag+.tag::before{content:"·";margin-right:6px;color:var(--faint)}
+.tags .tag+.tag::before{content:"·";margin-right:8px;color:var(--faint)}
 .tag.retry{color:var(--mark)}
 .verdict{font-size:var(--fs-m);min-height:1.5em;text-wrap:balance;font-style:italic}
 .verdict.ok,.verdict.bad{color:var(--mark)}
-.verdict svg.pen,.rv svg.pen{width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
+.verdict svg.pen,.rv svg.pen{mix-blend-mode:var(--pen-blend);width:1.35em;height:1.15em;vertical-align:-.22em;margin-right:.3em;fill:none;stroke:currentColor;
   stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
 .verdict svg.pen path{stroke-dasharray:100;stroke-dashoffset:100;animation:draw .32s ease-out forwards}
 .verdict svg.pen path.p2{animation-delay:.18s}
@@ -141,33 +149,32 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 #runctl,#result{display:flex;align-items:center;gap:var(--pad);flex-wrap:wrap}
 .cardctl .score{font-size:var(--fs-l);font-weight:700;font-variant-numeric:tabular-nums lining-nums}
 #resScore{font-size:var(--fs-xl);font-weight:700;color:var(--mark);font-variant-numeric:tabular-nums lining-nums}
-#resNote{font-size:var(--fs-s);color:var(--muted);max-width:32ch}
+#resNote{font-size:var(--fs-m);color:var(--muted);max-width:32ch}
 
 /* ---- full-screen while a session runs: only the card is left ---- */
 body.running header,body.running #focusRow,body.running #focusDlg,body.running #start,body.running section,body.running footer{display:none}
-body.running{padding-block:12px}
+body.running{padding-block:16px}
 body.running .wrap{max-width:960px}
-body.running .card{min-height:calc(100dvh - 24px)}
+body.running .card{min-height:calc(100dvh - 32px)}
 body.running .qtext{font-size:var(--fs-d)}
 body.running .qtext.long{font-size:var(--fs-ds)}
 /* question number in the left margin, the mark on the right, question and answer box set left */
-.stage[data-qn]::before{content:attr(data-qn);position:absolute;left:24px;top:40px;font-weight:700;font-size:var(--fs-xl);line-height:1;color:var(--ink)}
-body.running .stage{position:relative;align-items:flex-start;justify-content:flex-start;text-align:left;gap:18px;padding:44px 72px 36px}
-body.running .stage::after{content:"[1]";position:absolute;right:24px;top:44px;font-size:var(--fs-m);line-height:1;color:var(--muted)}
+.stage[data-qn]::before{content:attr(data-qn);position:absolute;left:24px;top:48px;font-weight:700;font-size:var(--fs-xl);line-height:1;color:var(--ink)}
+body.running .stage{position:relative;align-items:flex-start;justify-content:flex-start;text-align:left;gap:16px;padding:48px 72px 48px}
+body.running .stage::after{content:"[1]";position:absolute;right:24px;top:48px;font-size:var(--fs-m);line-height:1;color:var(--muted)}
 body.running .tags,body.running .ansrow{justify-content:flex-start}
-body.running .ansbox::before{content:"Answer";display:block;text-align:left;margin-bottom:4px;
-  font-size:var(--fs-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
-body.running .ansbox.expr input{top:auto;height:calc(100% - 1.4rem)}
-@media (max-width:560px){body.running .stage{padding:40px 16px 28px 46px}.stage[data-qn]::before{left:14px}
-  body.running .stage::after{right:14px;top:14px}}
+@media (max-width:560px){body.running .stage{padding:48px 16px 32px 48px}.stage[data-qn]::before{left:16px}
+  body.running .stage::after{right:16px;top:16px}}
 
 /* ---- controls ---- */
 button{font-family:var(--font-text);font-size:var(--fs-m);padding:8px 16px;
   border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button:active:not(:disabled){transform:translateY(1px)}   /* every button presses in */
+button.primary:active{background:var(--accent-soft)}
 /* Start: a dotted outline that runs clockwise — an SVG rectangle whose dashes slide along its own path */
-button.primary{position:relative;border:0;padding:12px 36px;font-size:var(--fs-xl);font-weight:800;color:var(--accent);
+button.primary{position:relative;border:0;padding:8px 32px;font-size:var(--fs-xl);font-weight:800;color:var(--accent);
   border-radius:0;background:var(--start-bg)}
 button.primary .ants{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 button.primary .ants rect{x:1px;y:1px;width:calc(100% - 2px);height:calc(100% - 2px);fill:none;stroke:var(--accent);
@@ -175,8 +182,8 @@ button.primary .ants rect{x:1px;y:1px;width:calc(100% - 2px);height:calc(100% - 
 @keyframes march{to{stroke-dashoffset:-9}}
 button.primary:hover{background:var(--accent-soft)}
 @media (prefers-reduced-motion:reduce){button.primary .ants rect{animation:none}}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:var(--fs-s);padding:4px 11px;border:1px solid var(--line);
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:var(--fs-s);padding:4px 12px;border:1px solid var(--line);
   border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;min-height:24px}
 .chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--surface);font-weight:600}
 .focusbtn{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
@@ -188,14 +195,14 @@ dialog.rv{position:fixed;inset:16px;width:auto;height:auto;max-width:none;max-he
   background-position:-1px -1px;flex-direction:column;overflow:hidden}
 dialog.rv[open]{display:flex}
 dialog.rv::backdrop{background:rgba(28,27,24,.45)}
-.rvbar{display:flex;align-items:baseline;gap:16px;padding:14px 24px;border-bottom:1px solid var(--ink);background:var(--surface)}
+.rvbar{display:flex;align-items:baseline;gap:16px;padding:16px 24px;border-bottom:1px solid var(--ink);background:var(--surface)}
 .rvbar h2{margin:0;font-size:var(--fs-l);font-weight:700}
 .rvcount{color:var(--muted);font-size:var(--fs-s)}
 .rvbar button{margin-left:auto}
 .rvbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(220px,300px) 1fr}
 .rvlist{list-style:none;margin:0;padding:8px 0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line)}
-.rvlist button{display:grid;grid-template-columns:2.2em 1fr auto;align-items:center;gap:10px;width:100%;text-align:left;
-  border:0;border-radius:0;background:transparent;padding:9px 20px;font-size:var(--fs-s);color:var(--ink)}
+.rvlist button{display:grid;grid-template-columns:2.2em 1fr auto;align-items:center;gap:8px;width:100%;text-align:left;
+  border:0;border-radius:0;background:transparent;padding:8px 24px;font-size:var(--fs-m);color:var(--ink)}
 .rvlist button:hover{background:var(--sunk)}
 .rvlist button[aria-current=true]{background:var(--accent-soft)}
 .rvlist .n{font-weight:700;font-size:var(--fs-m)}
@@ -204,63 +211,67 @@ dialog.rv::backdrop{background:rgba(28,27,24,.45)}
 .rv .mk{color:var(--mark);font-style:italic;white-space:nowrap}
 .rv .mk.none,.rv .mk.skipped{color:var(--muted)}
 .rvlist .mk svg.pen{margin:0}
-.rvpage{overflow-y:auto;padding:36px 48px 48px 96px;position:relative}
+.rvpage{overflow-y:auto;padding:32px 48px 48px 96px;position:relative}
 .rvpage .rvn{position:absolute;left:32px;top:40px;font-weight:700;font-size:var(--fs-xl);line-height:1}
-.rvpage .meta{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
-.rvpage .meta .mk{text-transform:none;letter-spacing:0;font-size:var(--fs-s);margin-left:10px}
-.rvpage .rq{font-size:var(--fs-d);line-height:1.3;margin:0 0 22px;overflow-x:auto;overflow-y:hidden}
+.rvpage .meta{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.rvpage .meta .mk{text-transform:none;letter-spacing:0;font-size:var(--fs-m);margin-left:8px}
+.rvpage .rq{font-size:var(--fs-d);line-height:1.3;margin:0 0 24px;overflow-x:auto;overflow-y:hidden}
 .rvpage .rq.long{font-size:var(--fs-ds)}
-.rvpage .yours{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 26px;font-size:var(--fs-l)}
+.rvpage .yours{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0 0 24px;font-size:var(--fs-l)}
 .rvpage .yours dt{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);align-self:center}
 .rvpage .yours dd{margin:0}
 .rvpage .tipbox.sol{max-width:52rem;font-size:var(--fs-l)}
-.rvnav{display:flex;gap:16px;margin-top:28px}
+.rvnav{display:flex;gap:16px;margin-top:32px}
 @media (max-width:700px){
   dialog.rv{inset:0;border:0}
   .rvbody{grid-template-columns:1fr;grid-template-rows:auto 1fr}
   .rvlist{display:flex;overflow-x:auto;overflow-y:hidden;padding:0;border-right:0;border-bottom:1px solid var(--line)}
   .rvlist li{flex:none}
-  .rvlist button{grid-template-columns:auto auto;padding:10px 14px}
+  .rvlist button{grid-template-columns:auto auto;padding:8px 16px}
   .rvlist .t,.rvlist .w{display:none}
   .rvlist .mk.none::after,.rvlist .mk.skipped::after{content:"–"}
-  .rvpage{padding:24px 16px 32px 52px}.rvpage .rvn{left:16px;top:28px}
+  .rvpage{padding:24px 16px 32px 48px}.rvpage .rvn{left:16px;top:24px}
   .rvpage .tipbox.sol{font-size:var(--fs-m)}}
 
 /* Focus opens in place, under its button, instead of a pop-up over the page */
-.focuspanel{margin-top:12px;padding-top:4px;border-top:1px solid var(--line)}
-.focuspanel h3{margin:14px 0 6px}
-.dlgfoot{display:flex;margin-top:14px}
-.dlgfoot .chip{font-size:var(--fs-m);padding:6px 16px}
+.focuspanel{margin-top:16px;padding-top:4px;border-top:1px solid var(--line)}
+.focuspanel h3{margin:16px 0 8px}
+.dlgfoot{display:flex;margin-top:16px}
+.dlgfoot .chip{font-size:var(--fs-m);padding:8px 16px}
 
 /* ---- stats ---- */
-section h2{margin:0 0 9px}
+section h2{margin:0 0 8px}
 .tblwrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:var(--fs-s)}
-th{text-align:left;padding:8px 12px;border-bottom:1.5px solid var(--ink);white-space:nowrap}
-td{padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-size:var(--fs-m)}
+th{text-align:left;padding:8px 16px;border-bottom:1.5px solid var(--ink);white-space:nowrap}
+td{padding:8px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
 tr:last-child td{border-bottom:none}
 td.name{white-space:normal;min-width:11ch}
 td.few{color:var(--faint)}
-.lv{display:inline-block;width:1.6em;text-align:center;color:var(--accent);font-weight:600}
+.dots{display:inline-flex;gap:4px;vertical-align:middle}
+.dots i{width:8px;height:8px;border:1px solid var(--ink)}
+.dots i.on{background:var(--ink)}
+.spark{display:block}.spark polyline{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round}.spark circle{fill:var(--mark)}
+.lvup{color:var(--mark);margin-left:.5em}
 .weak td.name::after{content:" ← slowest";color:var(--mark);font-style:italic}
-.legend{font-size:var(--fs-s);color:var(--muted);margin:10px 2px 0;line-height:1.5}
+.legend{font-size:var(--fs-m);color:var(--muted);margin:8px 0 0;line-height:1.5}
 .legend dt{font-weight:600;color:var(--ink);float:left;clear:left;width:5.6em}
-.legend dd{margin:0 0 4px 5.6em}
-.empty{padding:2px 0;color:var(--muted);font-size:var(--fs-s);text-align:left;white-space:normal;text-wrap:pretty;font-style:italic}
+.legend dd{margin:0 0 4px 5.6em;max-width:68ch}
+.empty{padding:0;color:var(--muted);font-size:var(--fs-m);text-align:left;white-space:normal;text-wrap:pretty;font-style:italic}
 .boxed{}
-footer{font-size:var(--fs-m);color:var(--muted);border-top:1px solid var(--ink);padding-top:14px}
-footer h2{margin:0 0 6px}
-footer ol{margin:0 0 12px;padding-left:1.3em}
-footer li{margin-bottom:5px}
-details.info summary{display:inline-block;cursor:pointer;list-style:none;font-size:var(--fs-s);padding:4px 0;
+footer{font-size:var(--fs-m);color:var(--muted);border-top:1px solid var(--ink);padding-top:16px}
+footer h2{margin:0 0 8px}
+footer ol{margin:0 0 16px;padding-left:1.3em;max-width:68ch}   /* prose lines at most 68 characters */
+footer li{margin-bottom:8px}
+details.info summary{display:inline-block;cursor:pointer;list-style:none;font-size:var(--fs-m);padding:4px 0;
   color:var(--muted)}
 details.info summary::-webkit-details-marker{display:none}
 details.info summary::after{content:" ▾";color:var(--muted)}
 details.info[open] summary::after{content:" ▴"}
 details.info summary:hover{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 details.info summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-details.info[open] summary{margin-bottom:14px}
-details.info h2{margin:14px 0 6px}
+details.info[open] summary{margin-bottom:16px}
+details.info h2{margin:16px 0 8px}
 .note{font-size:var(--fs-s);color:var(--faint)}
 </style>
 
@@ -288,6 +299,7 @@ details.info h2{margin:14px 0 6px}
       <div class="tipbox worked" id="worked" hidden></div>
       <div class="tipbox sol" id="sol" hidden></div>
       <div class="ansrow" id="ansrow" hidden>
+        <span class="prompt" id="ansPrompt"></span>
         <div class="ansbox" id="ansbox">
           <div class="ansview" id="ansview" aria-hidden="true"></div>
           <input type="text" id="ans" inputmode="numeric" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false"
@@ -329,6 +341,8 @@ details.info h2{margin:14px 0 6px}
     <p class="note" id="levelNote"></p>
     <h3 class="label">Length</h3>
     <div class="chips" id="lenChips"></div>
+    <h3 class="label">Sound</h3>
+    <div class="chips" id="soundChips"></div>
     <div class="dlgfoot"><button class="chip" id="focusDone">Done</button></div>
   </div>
 
@@ -338,7 +352,7 @@ details.info h2{margin:14px 0 6px}
       level, accuracy and median time appear here.</div>
     <div class="tblwrap" id="tblwrap" hidden>
       <table>
-        <thead><tr><th class="label">Operation</th><th class="label">Level</th><th class="label">Seen</th><th class="label">Accuracy</th><th class="label">Median</th></tr></thead>
+        <thead><tr><th class="label">Operation</th><th class="label">Level</th><th class="label">Seen</th><th class="label">Accuracy</th><th class="label">Median</th><th class="label">Last 20</th></tr></thead>
         <tbody id="stats"></tbody>
       </table>
     </div>
@@ -357,7 +371,11 @@ details.info h2{margin:14px 0 6px}
         <kbd>^</kbd> opens a power, <kbd>r</kbd> a square root. You stay in a box until you press <kbd>Tab</kbd> or
         <kbd>→</kbd> (on a phone, the ⇥ button) — so <code>x^1/2</code> then Tab is x to the half. Each press steps out of
         one box, so a fraction inside a power takes two. A dashed box shows where
-        the next part goes; Backspace on an empty box removes it. For an integral, “+ c” is optional.</li>
+        the next part goes. The cursor goes straight into a box — it never stops between √ and the box. A number
+        typed before √ is its coefficient: <code>8r2</code> is 8√2. Backspace on an empty box removes it; at the start of a
+        root or power it removes the root or power and keeps what is inside. For an integral, “+ c” is optional.</li>
+      <li>You write the answer on the dotted line. Where the question asks for one letter, the line starts with it:
+        “k =”, “dy/dx =”.</li>
       <li><b>Hint</b> (<kbd>?</kbd>) shows the general method or formula for that kind of question. A hinted answer
         does not count as right first time.</li>
       <li><b>Skip</b> (<kbd>Esc</kbd>) when you cannot start a question: it comes back a few questions later with a
@@ -374,12 +392,15 @@ details.info h2{margin:14px 0 6px}
         have reached — half at your current level, the rest from the levels below (or above, if you have dropped back) —
         so the basics keep coming up. Only questions at your current level move it. After 5 answers at a level it rises if at least 80% of
         your recent answers were right <em>and</em> your median time is under 14 s (23 s for surds, polynomials and calculus);
-        it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.</dd>
+        it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.
+        A timed session warms up: in its first third, questions come from below your current level where they can.
+        Going up a level is noted in red next to the answer that did it.</dd>
       <dt>Seen</dt><dd>Questions answered (first attempts; skips count).</dd>
       <dt>Accuracy</dt><dd>Share right first time, without a hint, over everything you have answered.</dd>
       <dt>Median</dt><dd>Your middle time over your last 40 questions answered right first time — half were faster, half
         slower. Wrong answers, skips and second tries add no time. Greyed when there are fewer than 3 answers, and only
         those with 3 or more are ranked for “slowest”.</dd>
+      <dt>Last 20</dt><dd>Your last 20 right-first-time times as a line: lower is faster, the red dot is the latest.</dd>
     </dl>
     </details>
     <p class="note" id="sync"></p>
@@ -416,10 +437,13 @@ const X=(x)=>typeof x==="number"?mnum(x):x;
 const mi=(s)=>`<mi>${s}</mi>`, mo=(s)=>`<mo>${s}</mo>`, mn=(s)=>`<mn>${s}</mn>`;
 const row=(...a)=>`<mrow>${a.map(X).join("")}</mrow>`;
 const fr=(a,b)=>`<mfrac>${row(a)}${row(b)}</mfrac>`;
-const sq=(x)=>`<msqrt>${row(x)}</msqrt>`;
+/* a square root: our own sign and bar (see fixRadicals), so every root looks the same and stretches over fractions */
+const sq=(x)=>`<mrow class="rad"><mrow class="radin">${row(x)}</mrow></mrow>`;
 const pw=(b,e)=>`<msup>${row(b)}${row(e)}</msup>`;
 const sb=(b,s)=>`<msub>${row(b)}${row(s)}</msub>`;
-const par=(...a)=>row(mo("("),...a,mo(")"));
+/* brackets stretch only round something tall (a fraction); round a root or a power they stay text-sized, in Figtree */
+const FIXB=(c)=>`<mo stretchy="false">${c}</mo>`;
+const par=(...a)=>{const inner=a.map(X).join("");return /<mfrac|<munderover/.test(inner)?row(mo("("),inner,mo(")")):row(FIXB("("),inner,FIXB(")"));};
 const bn=(n,r)=>row(mo("("),`<mfrac linethickness="0">${row(n)}${row(r)}</mfrac>`,mo(")"));
 const fac=(n)=>row(n,mo("!"));
 const SP=`<mspace width="0.17em"></mspace>`;
@@ -1357,8 +1381,15 @@ function checkExpr(str,spec){
   if(spec.mode==="anti"){const g0=evalA(g,XS[0]),w0=evalA(want,XS[0]);eq=XS.slice(1).every((x)=>near(evalA(g,x)-g0,evalA(want,x)-w0));}
   else eq=XS.every((x)=>near(evalA(g,x),evalA(want,x)));
   if(!eq)return{ok:false};
-  if(spec.form&&!FORMS[spec.form](g))return{ok:false,form:spec.form};
+  if(spec.form&&!FORMS[spec.form](unbox(g)))return{ok:false,form:spec.form};
   return{ok:true};}
+/* the boxes typed with r, ^ and / are brackets in the text (√(2), x^(2), (1)/(2)); they are not part of the form */
+function unbox(n){if(!n||typeof n!=="object")return n;const o={...n};
+  if(o.a&&typeof o.a==="object")o.a=unbox(o.a);if(o.b&&typeof o.b==="object")o.b=unbox(o.b);
+  if(o.t==="sqrt")o.a=strip(o.a);
+  if(o.t==="pow")o.b=strip(o.b);
+  if(o.t==="div"){o.a=strip(o.a);o.b=strip(o.b);}
+  return o;}
 
 /* polynomial in typing syntax, highest power first */
 function polyStr(c){let s="";c.forEach((a,i)=>{const p=c.length-1-i;if(a===0)return;const m=Math.abs(a);
@@ -1592,6 +1623,7 @@ const BLANK=()=>({lv:1,best:1,seen:0,right:0,times:[],recent:[],last:null});
 let S={cats:Object.fromEntries(CATS.map(c=>[c,BLANK()])),sessions:[],streak:{last:null,count:0},total:0};
 const COVER=30;   // every operation in focus is shown at least once per this many questions
 const LEVEL_MS={surds:23000,poly:23000,calculus:23000};   // median needed to level up; 14 s otherwise
+let levelUp=null, sound=false, actx=null;
 let focus=new Set(CATS), lvFilter=new Set(), runMin=5, run=null, cur=null, shownAt=0, db=null, uid=null;
 let lastCat=null; const lastIdx={}, recentQ=[];
 
@@ -1612,6 +1644,7 @@ function show(q,tag,why){
   el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
   fixRadicals(el);
   $("hint").textContent=cur.hint||"";$("hint").hidden=!cur.hint;
+  setPrompt(cur);
   $("tip").hidden=true;
   $("sol").hidden=true;
   const wk=$("worked");wk.hidden=!(cur.worked&&cur.w);
@@ -1623,19 +1656,41 @@ function show(q,tag,why){
   a.value="";a.disabled=false;a.focus();updatePreview();
   shownAt=performance.now();
 }
-/* Chrome + STIX Two Math leave ~0.43em of empty box after every square root. Measure and trim it, rather
-   than hard-code a margin that would overlap on a device whose math font has no such gap. */
+/* the words written in front of the answer line, as on a paper: "k =", "dy/dx =", or just "Answer" */
+function setPrompt(q){const h=q.hint||"",el=$("ansPrompt");let ml=null,m;
+  if((m=h.match(/^Find ([A-Za-zθ])\b/)))ml=M(mi(m[1]),EQ);
+  else if(/^Find c²/.test(h))ml=M(pw(mi("c"),2),EQ);
+  else if(/find k$/.test(h))ml=M(k_,EQ);
+  else if(/dy\/dx/.test(h))ml=M(dydx,EQ);
+  el.className="prompt"+(ml?"":" word");el.innerHTML=ml||"Answer";}
+/* Draw every root sign to fit its own root: the stroke is as thick as the bar, in the text's own colour, and the
+   long stroke lands exactly on the bar. Done after layout, wherever maths is shown; skipped while hidden. */
+const radCache=new Map();
 function fixRadicals(root){
-  root.querySelectorAll("msqrt").forEach(s=>{s.style.marginInlineEnd="";
-    const c=s.firstElementChild;if(!c)return;const gap=s.getBoundingClientRect().right-c.getBoundingClientRect().right;
-    if(gap>1)s.style.marginInlineEnd=`${-(gap-1)}px`;});}
+  root.querySelectorAll(".rad").forEach((r)=>{const h=r.getBoundingClientRect().height;if(!h)return;
+    const cs=getComputedStyle(r),fs=parseFloat(cs.fontSize),w=Math.max(1.3,Math.round(fs*0.068*10)/10),col=cs.color;
+    const top=(w/2)/h*100,bot=100-(w/2)/h*100,key=`${w}|${col}|${top.toFixed(1)}`;
+    let url=radCache.get(key);
+    if(!url){const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'>`+
+        `<polyline points='4,${(66).toFixed(1)} 26,57 56,${bot.toFixed(2)} 101,${top.toFixed(2)}' fill='none' stroke='${col}' `+
+        `stroke-width='${w}' vector-effect='non-scaling-stroke' stroke-linejoin='round' stroke-linecap='butt'/></svg>`;
+      url=`url("data:image/svg+xml,${encodeURIComponent(svg)}")`;radCache.set(key,url);}
+    r.style.backgroundImage=url;r.firstElementChild.style.borderTopWidth=`${w}px`;});}
 function setSecond(on,text){$("card").classList.toggle("second",on);$("retryTag").hidden=!on;if(text)$("retryTag").textContent=text;}
 function say(text,kind,html){const v=$("verdict");if(html)v.innerHTML=html;else v.textContent=text;v.className="verdict "+(kind||"");
   if(html)fixRadicals(v);}
 /* a red-pen tick or cross, drawn in front of the verdict */
 const TICK='<svg class="pen" viewBox="0 0 60 50" aria-hidden="true"><path pathLength="100" d="M6 29 C12 33 17 38 21 44 C29 28 40 14 55 5"/></svg>';
 const CROSS='<svg class="pen" viewBox="0 0 50 50" aria-hidden="true"><path pathLength="100" d="M9 8 C20 20 32 32 43 44"/><path class="p2" pathLength="100" d="M42 7 C30 20 19 31 8 43"/></svg>';
-function flash(kind){$("verdict").insertAdjacentHTML("afterbegin",kind==="ok"?TICK:CROSS);}
+function flash(kind){$("verdict").insertAdjacentHTML("afterbegin",kind==="ok"?TICK:CROSS);pencil(kind==="ok");}
+/* off unless switched on under Focus: a short filtered noise burst, like a pencil mark; a wrong answer gets two lower ones */
+function pencil(ok){if(!sound)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const t0=actx.currentTime;for(const [dt,f] of ok?[[0,3200]]:[[0,1400],[0.09,1100]]){
+    const n=actx.createBuffer(1,Math.round(actx.sampleRate*0.04),actx.sampleRate),d=n.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length/5));
+    const src=actx.createBufferSource(),bp=actx.createBiquadFilter(),g=actx.createGain();
+    src.buffer=n;bp.type="bandpass";bp.frequency.value=f;bp.Q.value=1.2;g.gain.value=0.12;
+    src.connect(bp).connect(g).connect(actx.destination);src.start(t0+dt);}}catch(e){}}
 function updateBar(){
   if(!run)return;
   $("score").textContent=`${run.right} / ${run.n}`;
@@ -1699,7 +1754,7 @@ function record(q,ok,ms){
   s.recent.push(ok?1:0); if(s.recent.length>6)s.recent.shift();
   if(s.recent.length>=5){
     const hit=s.recent.reduce((a,b)=>a+b,0)/s.recent.length, m=med(s.times.slice(-6))||9999;
-    if(hit>=0.8&&m<(LEVEL_MS[q.cat]||14000)&&s.lv<3){s.lv++;s.best=Math.max(s.best||1,s.lv);s.recent=[];}
+    if(hit>=0.8&&m<(LEVEL_MS[q.cat]||14000)&&s.lv<3){s.lv++;s.best=Math.max(s.best||1,s.lv);s.recent=[];levelUp={cat:q.cat,lv:s.lv};}
     else if(hit<0.5&&s.lv>1){s.lv--;s.recent=[];}
   }
 }
@@ -1727,6 +1782,7 @@ function submit(){
   if(cur.tries===0){record(cur,clean,ms);run.n++;if(clean)run.right++;}
   cur.tries++;
   if(ok){say(cur.tries===1?(cur.hinted?`correct, with the hint · ${secs(ms)}`:`correct · ${secs(ms)}`):"correct this time","ok");flash("ok");
+    if(levelUp){$("verdict").insertAdjacentHTML("beforeend",`<span class="lvup">· ${GEN[levelUp.cat].name} → level ${levelUp.lv}</span>`);levelUp=null;}
     updateBar();renderStats();nextQ();return;}
   if(cur.tries===1){
     run.later.push({q:{...cur,why:"wrong",back:true},due:run.n+ri(3,5)});
@@ -1883,9 +1939,14 @@ function renderStats(){
   body.innerHTML=rows.map(({c,s})=>{
     const m=med(s.times), acc=Math.round(100*s.right/s.seen), few=s.seen<RANK_MIN;
     return `<tr class="${c===slow?"weak":""}"><td class="name">${GEN[c].name}</td>
-      <td><span class="lv">${s.lv}</span></td><td>${s.seen}</td><td>${acc}%</td>
-      <td class="${few?"few":""}" title="${few?"Too few answers to rank":""}">${m===null?"—":secs(m)}</td></tr>`;}).join("");
+      <td><span class="dots" role="img" aria-label="level ${s.lv} of 3">${[1,2,3].map((l)=>`<i class="${l<=s.lv?"on":""}"></i>`).join("")}</span></td><td>${s.seen}</td><td>${acc}%</td>
+      <td class="${few?"few":""}" title="${few?"Too few answers to rank":""}">${m===null?"—":secs(m)}</td><td>${spark(s.times.slice(-20))}</td></tr>`;}).join("");
 }
+/* a word-sized line of the last 20 right-first-time times: lower is faster; the latest one in red */
+function spark(t){if(t.length<2)return"";const W=80,H=18,mx=Math.max(...t),mn=Math.min(...t),span=mx-mn||1;
+  const pts=t.map((v,i)=>[2+i*(W-4)/(t.length-1),2+(H-4)*(v-mn)/span]),[lx,ly]=pts[pts.length-1];
+  return`<svg class="spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="last ${t.length} times, latest ${secs(t[t.length-1])}">`+
+    `<polyline points="${pts.map((p)=>p.map((x)=>x.toFixed(1)).join(",")).join(" ")}"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.5"/></svg>`;}
 function renderStreak(){
   const n=S.streak.count||0;
   const done=new Set(S.sessions.map((x)=>x.d)),cells=[];   // the last 14 days, today on the right
@@ -1897,9 +1958,11 @@ function renderStreak(){
 function pickLevel(c){const s=S.cats[c];
   if(lvFilter.size)return pick([...lvFilter]);
   const top=Math.max(s.best||1,s.lv);if(top===1)return 1;
+  // the first third of a timed session stays below your current level where it can, so it warms up like a paper
+  if(run&&!run.endless&&s.lv>1&&(Date.now()-(run.until-runMin*60000))<runMin*60000/3)return ri(1,s.lv-1);
   if(Math.random()<0.5)return s.lv;                       // half at the current level
   const others=[];for(let l=1;l<=top;l++)if(l!==s.lv)others.push(l);return pick(others);}
-function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[...focus],levels:[...lvFilter],min:runMin}));}catch(e){}}
+function saveFocus(){try{localStorage.setItem("qm-focus",JSON.stringify({cats:[...focus],levels:[...lvFilter],min:runMin,sound}));}catch(e){}}
 function renderFocusBtn(){
   const t=focus.size===CATS.length?"All topics":focus.size===1?GEN[[...focus][0]].name:`${focus.size} topics`;
   const l=lvFilter.size?`level ${[...lvFilter].sort().join(", ")}`:"adaptive levels";
@@ -1927,6 +1990,8 @@ function renderChips(){
   $("lenChips").innerHTML=LENGTHS.map(m=>
     `<button class="chip" data-m="${m}" aria-pressed="${runMin===m}">${m?m+" min":"Endless"}</button>`).join("");
   $("lenChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{runMin=+b.dataset.m;saveFocus();renderChips();});
+  $("soundChips").innerHTML=[[false,"Off"],[true,"Pencil marks"]].map(([v,t])=>`<button class="chip" data-s="${v}" aria-pressed="${sound===v}">${t}</button>`).join("");
+  $("soundChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{sound=b.dataset.s==="true";saveFocus();renderChips();pencil(true);});
   $("levelNote").textContent=lvFilter.size
     ?"Only the levels you picked, for every topic. Questions below or above your current level still count in your stats but do not move your level."
     :"Adaptive: each topic gives questions from level 1 up to the highest level you have reached, half of them at your current level.";
@@ -1964,7 +2029,7 @@ document.fonts.ready.then(()=>{fixRadicals($("q"));fixRadicals($("ansview"));});
 try{const f=JSON.parse(localStorage.getItem("qm-focus")||"null");
   if(f){const cs=(f.cats||[]).filter((c)=>CATS.includes(c));if(cs.length)focus=new Set(cs);
     lvFilter=new Set((f.levels||[]).filter((l)=>[1,2,3].includes(l)));
-    if(LENGTHS.includes(f.min))runMin=f.min;}}catch(e){}
+    if(LENGTHS.includes(f.min))runMin=f.min;sound=f.sound===true;}}catch(e){}
 renderChips(); renderStats(); renderStreak();
 function setFocusOpen(open){$("focusDlg").hidden=!open;$("focusBtn").setAttribute("aria-expanded",open);}
 $("focusBtn").onclick=()=>setFocusOpen($("focusDlg").hidden);
@@ -1986,13 +2051,31 @@ $("ans").addEventListener("keydown",e=>{
   if(e.key==="Escape"){e.preventDefault();skip();return;}
   if(e.key==="?"){e.preventDefault();showTip();return;}
   if(e.key==="Tab"&&cur&&isExpr(cur)){e.preventDefault();stepOut(e.target);return;}
-  if(e.key==="ArrowRight"&&cur&&isExpr(cur)&&e.target.value[e.target.selectionStart]===")"&&!e.shiftKey){e.preventDefault();stepOut(e.target);return;}
+  if((e.key==="ArrowRight"||e.key==="ArrowLeft")&&cur&&isExpr(cur)&&!e.shiftKey&&!e.altKey&&!e.metaKey&&!e.ctrlKey){
+    e.preventDefault();moveCaret(e.target,e.key==="ArrowRight"?1:-1);return;}
 });
 /* r types √ — done on the text, not the key, so it also works with phone keyboards and pasted input */
 /* Structured typing for expressions. /, ^ and √ open a box — a pair of brackets the display hides — with the
    cursor inside, and you stay in it until Tab or → takes you out. Applied after each character arrives (the
    input event), because phone keyboards do not reliably send key events or a cancellable beforeinput. */
 const FACTOR_END=/[0-9.x)]/;
+/* Cursor rules, after maths editors such as MathLive and Desmos: every place the cursor can stop must look
+   different. In the text a box is "√(…)", "^(…)" or "(…)/(…)"; the spots between √ or ^ or / and its "(", and
+   between a top's ")" and its "/", draw the same as a spot next to them, so the cursor never stops there. */
+const opBox=(v,i)=>"√^/".includes(v[i-1]||"")&&v[i]==="(";          // between an operator and its box
+const dead=(v,i)=>i>0&&i<v.length&&(opBox(v,i)||(v[i-1]===")"&&v[i]==="/"&&v[i+1]==="("));
+function moveCaret(a,dir){const v=a.value;let i=a.selectionStart;
+  if(a.selectionStart!==a.selectionEnd){i=dir>0?a.selectionEnd:a.selectionStart;}
+  else if(dir>0){if(v[i]===")"){stepOut(a);return;}
+    i=Math.min(v.length,i+1);if(opBox(v,i))i++;}                     // into a box: straight to its inside
+  else{i=Math.max(0,i-1);if(opBox(v,i))i--;}                          // out of a box start: to before √, ^ or /
+  while(dead(v,i))i+=dir;
+  a.setSelectionRange(i,i);updatePreview();}
+function snapCaret(a){const v=a.value,i=a.selectionStart;if(i!==a.selectionEnd||!dead(v,i))return;
+  const j=opBox(v,i)?i+1:i-1;a.setSelectionRange(j,j);}                 // a click there means "inside the box"
+/* the ")" that closes the "(" at k */
+function openOf(v,k){let d=0;for(let j=k;j>=0;j--){if(v[j]===")")d++;else if(v[j]==="("&&--d===0)return j;}return -1;}
+function closeOf(v,k){let d=0;for(let j=k;j<v.length;j++){if(v[j]==="(")d++;else if(v[j]===")"&&--d===0)return j;}return -1;}
 function stepOut(a){const v=a.value,i=a.selectionStart;const k=v.indexOf(")",i);
   // from the top of a fraction, the next box is its bottom; otherwise just past the box
   const c=k<0?v.length:v.slice(k+1,k+3)==="/("?k+3:k+1;a.setSelectionRange(c,c);updatePreview();}
@@ -2005,11 +2088,19 @@ function structure(a,ch){   // ch has just been typed and sits at selectionStart
   if(ch==="("){set(before+"()"+after,i);return;}
   if(ch===")"&&after[0]===")"){set(before+after,i);return;}   // typing ) over an auto-closed bracket just moves past it
 }
-$("ans").addEventListener("beforeinput",(e)=>{   // Backspace never breaks a box
+/* Backspace never breaks a box. In an empty box it removes the box. At the start of a full root or power it
+   takes the root or power away and keeps what was inside. At the start of a fraction's bottom it moves to the end
+   of the top. Just after a box it steps inside it. */
+$("ans").addEventListener("beforeinput",(e)=>{
   if(!cur||!isExpr(cur)||e.inputType!=="deleteContentBackward"||!e.cancelable)return;
   const a=e.target,v=a.value,i=a.selectionStart;if(i!==a.selectionEnd)return;const prev=v[i-1]||"",next=v[i]||"";
-  if(prev==="("&&next===")"){let k=i-1;if("/^√".includes(v[k-1]||""))k--;e.preventDefault();a.value=v.slice(0,k)+v.slice(i+1);a.setSelectionRange(k,k);updatePreview();return;}
-  if(prev===")"||prev==="("){e.preventDefault();a.setSelectionRange(i-1,i-1);updatePreview();}
+  const set=(text,c)=>{e.preventDefault();a.value=text;a.setSelectionRange(c,c);updatePreview();};
+  if(prev==="("&&next===")"){let k=i-1;if("/^√".includes(v[k-1]||""))k--;
+    if(v[k]==="/"&&v[k-1]===")"){const o=openOf(v,k-1);if(o>=0){set(v.slice(0,o)+v.slice(o+1,k-1)+v.slice(i+1),k-2);return;}}   // no bottom left: the top stops being a box
+    set(v.slice(0,k)+v.slice(i+1),k);return;}
+  if(prev==="("&&(v[i-2]==="√"||v[i-2]==="^")){const c=closeOf(v,i-1);if(c>0){set(v.slice(0,i-2)+v.slice(i,c)+v.slice(c+1),i-2);return;}}
+  if(prev==="("&&v[i-2]==="/"){let k=i-2;if(v[k-1]===")")k--;set(v,k);return;}
+  if(prev===")"||prev==="("){set(v,i-1);}
 });
 $("outBox").addEventListener("pointerdown",(e)=>e.preventDefault());   // keep the keyboard open
 $("outBox").onclick=()=>{const a=$("ans");a.focus();stepOut(a);};
@@ -2020,7 +2111,7 @@ $("ans").addEventListener("input",(e)=>{const a=e.target;
   }
   updatePreview();});
 // the cursor moves without typing too (arrow keys, clicks, Home/End): redraw so it is shown where it is
-for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,updatePreview);
+for(const ev of["keyup","click","focus","blur","select"])$("ans").addEventListener(ev,()=>{if(cur&&isExpr(cur))snapCaret($("ans"));updatePreview();});
 document.addEventListener("keydown",e=>{
   if(!run&&(e.key==="Enter")&&document.activeElement!==$("ans")&&!["SELECT","BUTTON","SUMMARY","DIALOG"].includes(e.target.tagName)&&$("focusDlg").hidden&&!$("rvDlg").open){e.preventDefault();start();}
 });
