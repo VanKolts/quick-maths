@@ -99,12 +99,9 @@ math mo[stretchy="false"]{font-family:var(--font-text)}
 .tipbox .step math{font-size:1.15em}
 .tipbox.worked .label{color:var(--ink)}   /* two inks only: black, and red for marking */
 .tipbox math{font-family:var(--font-math)}
-.ansrow{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;justify-content:center}
-.prompt{font-size:var(--fs-xl);padding-bottom:6px;white-space:nowrap}
-.prompt.word{font-size:var(--fs-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:12px}
-/* the answer goes on a dotted line, as on a paper; it turns solid while you are writing on it */
-input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:8ch;text-align:left;
-  padding:4px 8px;border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;
+.ansrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:9ch;text-align:center;
+  padding:8px;border:1.5px solid var(--ink);border-radius:0;background:var(--surface);
   color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
 /* typed answers: an invisible text field over a live maths view of what has been typed */
 .ansbox{position:relative}
@@ -114,9 +111,9 @@ input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:8ch;t
 @media (pointer:coarse){.cardctl kbd,.rvbar kbd{display:none}}   /* no Esc or ? key on a phone */
 .ansview{display:none}
 .ansbox.expr .ansview{display:flex;align-items:center;justify-content:center;min-width:min(16ch,80vw);max-width:min(36rem,90vw);
-  min-height:3.2rem;padding:8px 8px;font-size:var(--fs-xl);border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;overflow-x:auto;overflow-y:hidden}
+  min-height:3.2rem;padding:8px 16px;font-size:var(--fs-xl);border:1.5px solid var(--ink);border-radius:0;background:var(--surface);overflow-x:auto;overflow-y:hidden}
 .ansbox.expr input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text}
-.ansbox.expr:focus-within .ansview{border-bottom-style:solid}
+.ansbox.expr:focus-within .ansview{outline:2px solid var(--accent);outline-offset:1px}
 .card.second .ansview{border-color:var(--bad)}
 .ansview .ph{border:1px dashed var(--faint);border-radius:1px}
 .ansview .caret{background:var(--accent);animation:blink 1.05s steps(1) infinite}
@@ -124,7 +121,7 @@ input[type=text]{font-family:var(--font-text);font-size:var(--fs-xl);width:8ch;t
 .ansview .raw{font-size:.8em;color:var(--muted)}
 @keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.ansview .caret{animation:none}}
-input[type=text]:focus-visible{outline:none;border-bottom-style:solid}
+input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .keys{font-size:var(--fs-s);color:var(--faint)}
 kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:2px;
   padding:0 .35em;background:var(--surface);color:var(--muted)}
@@ -163,6 +160,9 @@ body.running .qtext.long{font-size:var(--fs-ds)}
 body.running .stage{position:relative;align-items:flex-start;justify-content:flex-start;text-align:left;gap:16px;padding:48px 72px 48px}
 body.running .stage::after{content:"[1]";position:absolute;right:24px;top:48px;font-size:var(--fs-m);line-height:1;color:var(--muted)}
 body.running .tags,body.running .ansrow{justify-content:flex-start}
+body.running .ansbox::before{content:"Answer";display:block;text-align:left;margin-bottom:4px;
+  font-size:var(--fs-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+body.running .ansbox.expr input{top:auto;height:calc(100% - 1.4rem)}
 @media (max-width:560px){body.running .stage{padding:48px 16px 32px 48px}.stage[data-qn]::before{left:16px}
   body.running .stage::after{right:16px;top:16px}}
 
@@ -299,7 +299,6 @@ details.info h2{margin:16px 0 8px}
       <div class="tipbox worked" id="worked" hidden></div>
       <div class="tipbox sol" id="sol" hidden></div>
       <div class="ansrow" id="ansrow" hidden>
-        <span class="prompt" id="ansPrompt"></span>
         <div class="ansbox" id="ansbox">
           <div class="ansview" id="ansview" aria-hidden="true"></div>
           <input type="text" id="ans" inputmode="numeric" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false"
@@ -374,8 +373,6 @@ details.info h2{margin:16px 0 8px}
         the next part goes. The cursor goes straight into a box — it never stops between √ and the box. A number
         typed before √ is its coefficient: <code>8r2</code> is 8√2. Backspace on an empty box removes it; at the start of a
         root or power it removes the root or power and keeps what is inside. For an integral, “+ c” is optional.</li>
-      <li>You write the answer on the dotted line. Where the question asks for one letter, the line starts with it:
-        “k =”, “dy/dx =”.</li>
       <li><b>Hint</b> (<kbd>?</kbd>) shows the general method or formula for that kind of question. A hinted answer
         does not count as right first time.</li>
       <li><b>Skip</b> (<kbd>Esc</kbd>) when you cannot start a question: it comes back a few questions later with a
@@ -1644,7 +1641,6 @@ function show(q,tag,why){
   el.classList.toggle("long",el.textContent.replace(/\s+/g," ").length>34);
   fixRadicals(el);
   $("hint").textContent=cur.hint||"";$("hint").hidden=!cur.hint;
-  setPrompt(cur);
   $("tip").hidden=true;
   $("sol").hidden=true;
   const wk=$("worked");wk.hidden=!(cur.worked&&cur.w);
@@ -1656,13 +1652,6 @@ function show(q,tag,why){
   a.value="";a.disabled=false;a.focus();updatePreview();
   shownAt=performance.now();
 }
-/* the words written in front of the answer line, as on a paper: "k =", "dy/dx =", or just "Answer" */
-function setPrompt(q){const h=q.hint||"",el=$("ansPrompt");let ml=null,m;
-  if((m=h.match(/^Find ([A-Za-zθ])\b/)))ml=M(mi(m[1]),EQ);
-  else if(/^Find c²/.test(h))ml=M(pw(mi("c"),2),EQ);
-  else if(/find k$/.test(h))ml=M(k_,EQ);
-  else if(/dy\/dx/.test(h))ml=M(dydx,EQ);
-  el.className="prompt"+(ml?"":" word");el.innerHTML=ml||"Answer";}
 /* Draw every root sign to fit its own root: the stroke is as thick as the bar, in the text's own colour, and the
    long stroke lands exactly on the bar. Done after layout, wherever maths is shown; skipped while hidden. */
 const radCache=new Map();
