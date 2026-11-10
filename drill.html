@@ -154,11 +154,12 @@ kbd{font-family:var(--font-text);font-size:.8em;border:1px solid var(--line);bor
 #result{flex-direction:column;align-items:flex-start;gap:0;flex-wrap:nowrap}   /* score over its line of summary, beside the pair */
 /* Last practice is Again's partner: the same height (so the bottoms line up) and type size, a still solid edge
    where Again's runs, and no fill — it reads as the second of a pair, not a stray small button */
-#reviewBtn{font-size:var(--fs-xl);font-weight:500;padding:8px 24px;border:1px solid var(--ink);background:transparent;color:var(--ink)}
-#reviewBtn:hover{background:var(--sunk)}
+#reviewBtn,#exportBtn{font-size:var(--fs-xl);font-weight:500;padding:8px 24px;border:1px solid var(--ink);background:transparent;color:var(--ink)}
+#reviewBtn:hover,#exportBtn:hover{background:var(--sunk)}
+#exportBtn{border-color:var(--muted)}   /* third of the row: same shape, a quieter edge */
 @media (max-width:560px){
   header{flex-direction:column;gap:8px}.streak{text-align:left}.streak .days{justify-content:start}   /* the streak under the quote */
-  button.primary,#reviewBtn{font-size:var(--fs-l);padding:8px 16px}}   /* Again and Last practice stay side by side */
+  button.primary,#reviewBtn,#exportBtn{font-size:var(--fs-l);padding:8px 16px}}   /* Again and Last practice stay side by side */
 .cardctl .score{font-size:var(--fs-l);font-weight:700;font-variant-numeric:tabular-nums lining-nums}
 #resScore{font-size:var(--fs-xl);font-weight:700;color:var(--mark);font-variant-numeric:tabular-nums lining-nums}
 #resNote{font-size:var(--fs-s);color:var(--muted);max-width:28ch;line-height:1.35}
@@ -333,6 +334,7 @@ details.info h2{margin:16px 0 8px}
         <button id="stop">Stop</button></span>
       <span class="score" id="score">0 / 0</span>
       <button id="reviewBtn" hidden aria-haspopup="dialog">Last practice</button>
+      <button id="exportBtn" hidden title="Save this session as a text file">Export</button>
       <span id="result" hidden><b id="resScore"></b><span id="resNote"></span></span>
     </div>
   </div>
@@ -1787,7 +1789,7 @@ function submit(){
   const j=judge($("ans").value);
   if(j.retype!==undefined){if(j.retype)say(j.retype,"");return;}
   const ok=j.ok, ms=performance.now()-shownAt;
-  if(cur.log){cur.log.tries.push($("ans").value);cur.log.res=ok?(cur.hinted?"hint":"right"):"wrong";}
+  if(cur.log){if(cur.log.ms==null)cur.log.ms=Math.round(ms);cur.log.tries.push($("ans").value);cur.log.res=ok?(cur.hinted?"hint":"right"):"wrong";}
   if(run.phase==="review"){reviewAnswer(ok);return;}
   const clean=ok&&!cur.hinted;
   if(cur.tries===0){record(cur,clean,ms);run.n++;if(clean)run.right++;}
@@ -1831,9 +1833,10 @@ const LENGTHS=[1,2,3,5,10,15,20,0];   // minutes; 0 = endless
 const clockText=(ms)=>`${Math.floor(ms/60000)}:${String(Math.floor(ms/1000)%60).padStart(2,"0")}`;
 function start(){
   const endless=runMin===0;
-  run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0,log:[]};
+  run={n:0,right:0,endless,until:Date.now()+runMin*60000,t:setInterval(tick,250),shelf:[],later:[],phase:"main",ri:0,fixed:0,log:[],
+    began:new Date(),mins:runMin,focus:[...focus],mainMs:null};
   document.body.classList.add("running");window.scrollTo(0,0);
-  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;$("result").hidden=true;$("reviewBtn").hidden=true;
+  $("q").hidden=false;$("hint").hidden=false;$("cat").hidden=false;$("result").hidden=true;$("reviewBtn").hidden=true;$("exportBtn").hidden=true;
   $("runctl").hidden=false;$("ansrow").hidden=false;$("hintBtn").hidden=false;$("stop").textContent="Stop";
   say("");$("mode").textContent=endless?"endless":"";
   tick(); nextQ(); updateBar();
@@ -1842,7 +1845,7 @@ function start(){
 /* timed part over: bank the session, then replay what was set aside */
 function endMain(){
   if(!run||run.phase!=="main")return;
-  clearInterval(run.t);
+  clearInterval(run.t);run.mainMs=Date.now()-run.began.getTime();
   if(cur&&cur.tries===1&&!run.shelf.includes(cur))run.shelf.push(cur);
   for(const x of run.later)run.shelf.push(x.q);   // missed once, never got their second go
   run.later=[];
@@ -1900,7 +1903,7 @@ function finish(){
   let h=done.n?`${Math.round(100*done.right/done.n)}% right first time`:"No questions answered";
   if(done.shelf.length)h+=` · ${done.fixed} of ${done.shelf.length} set-aside fixed in review`;
   $("resNote").textContent=h;$("result").hidden=false;
-  lastLog=done.log;$("reviewBtn").hidden=!lastLog.length;
+  lastLog=done.log;lastRun=done;$("reviewBtn").hidden=!lastLog.length;$("exportBtn").hidden=!lastLog.length;
   say("");$("mode").textContent="";$("aside").textContent="";$("qn").textContent=`Q${done.n}`;
   $("startLbl").textContent="Again";
 }
@@ -1934,6 +1937,72 @@ function rvShow(i){
   $("rvPrev").onclick=()=>rvShow(rvAt-1);$("rvNext").onclick=()=>rvShow(rvAt+1);
   pg.scrollTop=0;fixRadicals(pg);
   $("rvList").querySelectorAll("button").forEach((b)=>{const on=+b.dataset.i===rvAt;b.setAttribute("aria-current",on);if(on)b.scrollIntoView({block:"nearest",inline:"nearest"});});
+}
+
+/* Export: the last session as a plain-text file — every question in order, what was typed, the answer, the result
+   and the first-answer time, the working for anything missed, then the levels. Written to be read back by Claude. */
+let lastRun=null;
+function plainOf(html){const d=document.createElement("div");d.innerHTML=html;return plainNode(d).replace(/\s+/g," ").replace(/\( /g,"(").replace(/ \)/g,")").replace(/\(C\(([^()]*)\)\)/g,"C($1)").trim();}
+function plainNode(n){
+  if(n.nodeType===3)return n.nodeValue;
+  if(n.nodeType!==1)return"";
+  const K=[...n.children],all=()=>[...n.childNodes].map(plainNode).join(""),p=(e)=>e?plainNode(e).replace(/\s+/g," ").trim():"";
+  const g=(s)=>/^√?[\p{L}\p{N}.,°′″!]+$/u.test(s)||/^\(.*\)$/.test(s)&&!/\).*\(/.test(s)?s:`(${s})`;   // bracket anything compound
+  switch(n.localName){
+    case"mfrac":return n.getAttribute("linethickness")==="0"?`C(${p(K[0])}, ${p(K[1])})`:`${g(p(K[0]))}/${g(p(K[1]))}`;
+    case"msup":return`${g(p(K[0]))}^${g(p(K[1]))}`;
+    case"msub":return`${p(K[0])}_${g(p(K[1]))}`;
+    case"msubsup":case"munderover":return` ${p(K[0])}[from ${p(K[1])} to ${p(K[2])}] `;
+    case"mover":return p(K[0])+"̇";   // a recurring digit: dot above
+    case"mspace":return" ";
+    case"mo":{const s=n.textContent,prev=n.previousElementSibling;
+      if(s===",")return", ";
+      if((s==="−"||s==="+")&&(!prev||prev.localName==="mo"&&!/^[)\]!′″]$/.test(prev.textContent)))return s;   // a sign, not an operation
+      return /^[=+−×÷<>≤≥≡]$/.test(s)?` ${s} `:s;}
+    case"mrow":if(n.classList.contains("rad"))return`√${g(all().replace(/\s+/g," ").trim())}`;
+      if(n.classList.contains("mixed"))return` ${p(K[0])} ${p(K[1])} `;return all();
+    case"svg":case"style":case"script":return"";
+    default:return all();
+  }}
+function workingOf(html){const d=document.createElement("div");d.innerHTML=html;
+  return [...d.querySelectorAll(".sl")].map((l)=>{const a=l.querySelector(".sll"),b=l.querySelector(".slm");
+    return`${a?plainOf(a.innerHTML):""}: ${b?plainOf(b.innerHTML):""}`;});}
+function exportText(){
+  const r=lastRun,e=lastLog,pad=(v)=>String(v).padStart(2,"0"),b=r.began;
+  const when=`${ymd(b)} ${pad(b.getHours())}:${pad(b.getMinutes())}`;
+  const ops=r.focus.length===CATS.length?`all ${CATS.length} operations`:r.focus.map((c)=>GEN[c].name).join(", ");
+  const len=r.endless?`endless, ${clockText(r.mainMs||0)} played`:`${r.mins} min`;
+  const L=["Quick Maths · practice export",`${when} · ${len} · ${ops}`,
+    r.n?`Score: ${r.right}/${r.n} right first time (${Math.round(100*r.right/r.n)}%)`+(r.shelf.length?` · ${r.fixed} of ${r.shelf.length} set-aside fixed in review`:""):"No questions answered",
+    "","Result is the outcome of the last try at that showing. Time is the first answer at that showing.",""];
+  e.forEach((x,i)=>{
+    const note=x.review?"review, untimed":x.why==="skipped"?"back after a skip":x.why?"back after a wrong answer":"";
+    L.push(`${i+1}. ${x.name} · level ${x.lv}${note?` · ${note}`:""} · ${RV_WORD[x.res]||"not answered"}${x.hinted&&x.res!=="hint"?" · hint used":""}${x.ms!=null?` · ${secs(x.ms)}`:""}`);
+    L.push(`   Question: ${plainOf(x.q)}`);
+    L.push(`   You wrote: ${x.tries.length?x.tries.map((t)=>String(t).trim()).join(", then "):x.res==="skipped"?"(skipped)":"(nothing)"}`);
+    L.push(`   Answer: ${plainOf(x.ans)}`);
+    if(x.s&&x.res!=="right"){const w=workingOf(x.s);if(w.length){L.push("   Working:");w.forEach((l)=>L.push(`     ${l}`));}}
+    L.push("");});
+  L.push("Levels after this session (all sessions so far)","operation | level | answered | right first time | median time when right");
+  CATS.forEach((c)=>{const s=S.cats[c];if(!s.seen)return;const m=med(s.times);
+    L.push(`${GEN[c].name} | ${s.lv} | ${s.seen} | ${Math.round(100*s.right/s.seen)}% | ${m===null?"—":secs(m)}`);});
+  L.push("",`Streak: ${S.streak.count} day${S.streak.count===1?"":"s"} · questions answered in all: ${S.total}`);
+  return L.join("\n")+"\n";
+}
+async function exportSession(){
+  if(!lastRun||!lastLog.length)return;
+  const b=lastRun.began,name=`quick-maths-${ymd(b)}-${String(b.getHours()).padStart(2,"0")}${String(b.getMinutes()).padStart(2,"0")}.txt`;
+  const text=exportText(),btn=$("exportBtn"),was=btn.textContent;
+  const done=(msg)=>{btn.textContent=msg;setTimeout(()=>{btn.textContent=was;},2500);};
+  if(window.claude&&window.claude.use){   // on claude.ai a frame cannot download by itself: the host asks the viewer
+    const dl=await claude.use("downloads");
+    if(!dl){done("Can’t save here");return;}
+    try{await dl.save({filename:name,data:text});done("Saved");}
+    catch(err){done(err&&err.code==="declined"?was:"Not saved");}
+    return;}
+  const url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);done("Saved");
 }
 
 function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
@@ -2048,6 +2117,7 @@ renderChips(); renderStats(); renderStreak();
 function setFocusOpen(open){$("focusDlg").hidden=!open;$("focusBtn").setAttribute("aria-expanded",open);}
 $("focusBtn").onclick=()=>setFocusOpen($("focusDlg").hidden);
 $("reviewBtn").onclick=openReview;
+$("exportBtn").onclick=exportSession;
 $("rvClose").onclick=()=>$("rvDlg").close();
 $("rvDlg").addEventListener("keydown",(e)=>{
   if(e.key==="ArrowDown"||e.key==="ArrowRight"){e.preventDefault();rvShow(rvAt+1);}
