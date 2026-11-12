@@ -413,6 +413,8 @@ details.info h2{margin:16px 0 8px}
         your recent answers were right <em>and</em> your median time is under 14 s (23 s for surds, polynomials and calculus);
         it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.
         A timed session warms up: in its first third, questions come from below your current level where they can.
+        When the time runs out, the question on screen is still yours to finish: the session ends once you answer or skip it, or
+        when you press End. A question you never attempted is left out, not counted as a miss.
         Going up a level is noted in red next to the answer that did it.</dd>
       <dt>Seen</dt><dd>Questions answered (first attempts; skips count).</dd>
       <dt>Accuracy</dt><dd>Share right first time, without a hint, over everything you have answered.</dd>
@@ -1735,6 +1737,7 @@ function showTip(){
 
 function nextQ(){
   // a question missed once returns after a few new ones, flagged
+  if(run&&run.phase==="main"&&run.overtime){endMain(true);return;}
   if(run&&run.phase==="main"){const i=run.later.findIndex(x=>x.due<=run.n);
     if(i>=0){const [x]=run.later.splice(i,1);lastCat=x.q.cat;show(x.q,`${GEN[x.q.cat].name} · level ${x.q.lv}`,x.q.why||"wrong");
       const v=$("verdict");if(v.textContent)v.textContent="last one: "+v.textContent;   // not about this question
@@ -1826,7 +1829,8 @@ function tick(){
   if(run.endless){$("clock").textContent="∞";return;}
   const left=Math.max(0,run.until-Date.now());
   $("clock").textContent=clockText(left);
-  if(left<=0)endMain();
+  // time's up: the question on screen still gets finished; the session ends when it is answered or skipped, or on End
+  if(left<=0&&!run.overtime){run.overtime=true;$("mode").textContent="time’s up · finish this one";$("stop").textContent="End";}
 }
 
 const LENGTHS=[1,2,3,5,10,15,20,0];   // minutes; 0 = endless
@@ -1843,10 +1847,13 @@ function start(){
 }
 
 /* timed part over: bank the session, then replay what was set aside */
-function endMain(){
+function endMain(answered){
   if(!run||run.phase!=="main")return;
   clearInterval(run.t);run.mainMs=Date.now()-run.began.getTime();
-  if(cur&&cur.tries===1&&!run.shelf.includes(cur))run.shelf.push(cur);
+  // answered = the question on screen was just dealt with (it is already in later/shelf); otherwise End was pressed mid-question
+  if(!answered&&cur){
+    if(cur.tries===0&&cur.log){const i=run.log.indexOf(cur.log);if(i>=0)run.log.splice(i,1);}   // never attempted: not a miss
+    else if(cur.tries===1&&!run.shelf.includes(cur))run.shelf.push(cur);}
   for(const x of run.later)run.shelf.push(x.q);   // missed once, never got their second go
   run.later=[];
   commitSession(run);
@@ -1854,7 +1861,7 @@ function endMain(){
   run.phase="review";run.ri=0;
   $("clock").textContent="review";$("mode").textContent="untimed, not scored";
   $("stop").textContent="End review";
-  say("Time. Now the ones you set aside.","");showReview();
+  say(run.overtime?"Time. Now the ones you set aside.":"Ended. Now the ones you set aside.","");showReview();
 }
 function showReview(){
   const q=run.shelf[run.ri];
