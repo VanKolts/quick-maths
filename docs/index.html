@@ -421,8 +421,8 @@ details.info h2{margin:16px 0 8px}
         your recent answers were right <em>and</em> your median time is under 14 s (23 s for surds, polynomials and calculus);
         it drops if fewer than half were right. Every operation in your focus comes up at least once in every 30 questions.
         A timed session warms up: in its first third, questions come from below your current level where they can.
-        When the time runs out, the question on screen is still yours to finish: the session ends once you answer or skip it, or
-        when you press End. A question you never attempted is left out, not counted as a miss.
+        When the time runs out, the question on screen is still yours to finish, and it counts: answer it (or press End with your
+        answer typed) and you see whether it was right before the review starts. A question left blank is left out, not counted as a miss.
         Going up a level is noted in red next to the answer that did it.</dd>
       <dt>Seen</dt><dd>Questions answered (first attempts; skips count).</dd>
       <dt>Accuracy</dt><dd>Share right first time, without a hint, over everything you have answered.</dd>
@@ -1745,7 +1745,8 @@ function showTip(){
 
 function nextQ(){
   // a question missed once returns after a few new ones, flagged
-  if(run&&run.phase==="main"&&run.overtime){endMain(true);return;}
+  // time's up and the question on screen is done: leave its tick or cross showing for a moment, then review/results
+  if(run&&run.phase==="main"&&run.overtime){closeOut();return;}
   if(run&&run.phase==="main"){const i=run.later.findIndex(x=>x.due<=run.n);
     if(i>=0){const [x]=run.later.splice(i,1);lastCat=x.q.cat;show(x.q,`${GEN[x.q.cat].name} · level ${x.q.lv}`,x.q.why||"wrong");
       const v=$("verdict");if(v.textContent)v.textContent="last one: "+v.textContent;   // not about this question
@@ -1796,6 +1797,7 @@ function judge(raw){
 
 function submit(){
   if(!run||!cur)return;
+  if(run.closing){endMain(true);return;}   // Enter after the last verdict: go on now
   if(run.phase==="review"&&cur.revealed){advanceReview();return;}
   const j=judge($("ans").value);
   if(j.retype!==undefined){if(j.retype)say(j.retype,"");return;}
@@ -1810,7 +1812,7 @@ function submit(){
     updateBar();renderStats();nextQ();return;}
   if(cur.tries===1){
     run.later.push({q:{...cur,why:"wrong",back:true},due:run.n+ri(3,5)});
-    say("Not quite — it comes back in a few questions","bad");flash("bad");
+    say(run.overtime?"Not quite — it comes back in the review":"Not quite — it comes back in a few questions","bad");flash("bad");
     updateBar();renderStats();nextQ();return;}
   run.shelf.push(cur);
   say("Wrong again — set aside, it comes back at the end","bad");flash("bad");
@@ -1821,13 +1823,13 @@ function reveal(){cur.revealed=true;setSecond(false);showSol(true);if(cur.log)cu
   say("","bad",`The answer is ${answerML(cur)} — press Enter to continue`);$("ans").value="";updatePreview();$("ans").focus();}
 
 function skip(){
-  if(!run||!cur)return;
+  if(!run||!cur||run.closing)return;
   if(run.phase==="review"){if(cur.revealed)advanceReview();else if(!cur.pushed)push();else reveal();return;}
   if(cur.tries===0){record(cur,false,null);run.n++;}
   if(cur.log)cur.log.res="skipped";
   // first skip: back in a few questions with a worked start; skipped again: to the review, worked start and all
   if(!cur.back){run.later.push({q:{...cur,tries:1,worked:true,back:true,why:"skipped"},due:run.n+ri(3,5)});
-    say("Skipped — it comes back in a few questions with a worked start","");}
+    say(run.overtime?"Skipped — it comes back in the review with a worked start":"Skipped — it comes back in a few questions with a worked start","");}
   else{run.shelf.push({...cur,worked:true});say("Skipped again — it comes back at the end","");}
   updateBar();renderStats();nextQ();
 }
@@ -1854,10 +1856,24 @@ function start(){
   tick(); nextQ(); updateBar();
 }
 
+/* the question answered after time's up keeps its verdict on screen; review or results follow after a pause or on Enter */
+const CLOSE_MS=1800;
+function closeOut(){
+  run.closing=true;clearInterval(run.t);
+  const a=$("ans");a.disabled=true;$("hintBtn").disabled=true;$("skip").disabled=true;
+  $("mode").textContent="time’s up · Enter to go on";
+  run.closeT=setTimeout(()=>endMain(true),CLOSE_MS);
+  // added after this event: the Enter that submitted the answer must not also skip past its verdict
+  run.closeKey=(e)=>{if(e.key==="Enter"&&!e.repeat){e.preventDefault();endMain(true);}};
+  const r=run;setTimeout(()=>{if(r.closing)document.addEventListener("keydown",r.closeKey);},0);
+}
 /* timed part over: bank the session, then replay what was set aside */
 function endMain(answered){
   if(!run||run.phase!=="main")return;
-  clearInterval(run.t);run.mainMs=Date.now()-run.began.getTime();
+  clearInterval(run.t);
+  if(run.closing){clearTimeout(run.closeT);document.removeEventListener("keydown",run.closeKey);run.closing=false;
+    $("ans").disabled=false;$("hintBtn").disabled=false;$("skip").disabled=false;}
+  run.mainMs=Date.now()-run.began.getTime();
   // answered = the question on screen was just dealt with (it is already in later/shelf); otherwise End was pressed mid-question
   if(!answered&&cur){
     if(cur.tries===0&&cur.log){const i=run.log.indexOf(cur.log);if(i>=0)run.log.splice(i,1);}   // never attempted: not a miss
@@ -2020,7 +2036,12 @@ async function exportSession(){
   setTimeout(()=>URL.revokeObjectURL(url),10000);done("Saved");
 }
 
-function stopPressed(){if(!run)return;if(run.phase==="main")endMain();else finish();}
+function stopPressed(){if(!run)return;
+  if(run.phase!=="main"){finish();return;}
+  if(run.closing){endMain(true);return;}
+  // End after time's up with an answer typed: it is marked as if Enter were pressed, so it counts (empty or unreadable: dropped)
+  if(run.overtime&&cur&&cur.tries===0&&judge($("ans").value).retype===undefined){submit();return;}
+  endMain();}
 
 /* ---------- render ---------- */
 const RANK_MIN=3;   // fewer answers than this: the median is too noisy to call an operation "slowest"
